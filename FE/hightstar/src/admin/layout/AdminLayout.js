@@ -2,14 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { AppSidebar, AppFooter, AppHeader } from "../components/index";
-// import UserManagement from "../views/users/UserManagement";
-
-// import { Dashboard, Page404, UserManagement } from "../views/index";
-import Dashboard from "../views/dashboards/Dashboard";
-import UserManagement from "../views/users/UserManagement";
-import Page404 from "../views/pages/Page404";
-
-export { Dashboard, UserManagement, Page404 };
+import { Dashboard, Page404, UserManagement } from "../views/index";
 
 const AdminLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true); // Quản lý trạng thái ẩn/hiện sidebar

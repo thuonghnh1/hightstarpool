@@ -107,7 +107,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
               isActive ? "active-link" : "inactive-link"
             }
           >
-            <i className="me-2 fa fa-gift"></i> Ưu đãi
+            <i className="me-2 fa fa-gift"></i> Giảm giá
           </NavLink>
         </li>
 
