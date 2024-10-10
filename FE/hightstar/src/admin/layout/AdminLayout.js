@@ -1,4 +1,3 @@
-import React from "react";
 import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { AppSidebar, AppFooter, AppHeader } from "../components/index";
