@@ -1,0 +1,143 @@
+* {
+  box-sizing: border-box;
+}
+
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-image: url("../css/images/backgroud.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+.form-background {
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  width: 700px; /* Tăng chiều rộng form */
+}
+
+.form-title {
+  text-align: center;
+  margin-bottom: 20px; /* Tăng khoảng cách dưới tiêu đề */
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px; /* Tăng khoảng cách giữa các phần tử trong một hàng */
+}
+
+.form-group {
+  flex: 1;
+  margin-bottom: 25px; /*Tăng khoảng cách giữa các nhóm input */
+}
+
+.full-width {
+  width: 100%;
+}
+
+label {
+  left:auto;
+  display: flex;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* .gender-options {
+  display: flex;
+  gap: 15px; 
+  margin-top: 5px;
+  align-items: center; 
+  justify-content: center;
+} */
+.gender-options {
+  display: flex;
+  gap: 15px; /* Khoảng cách giữa các radio button */
+  margin-top: 5px; /* Khoảng cách từ phần tử phía trên */
+  align-items: center; /* Căn chỉnh các phần tử ở dưới cùng */
+  justify-content: center; /* Căn giữa theo chiều ngang */
+  height: 50px; /* Chiều cao cố định để có không gian căn chỉnh */
+ 
+}
+.gender-options .radioo {
+  margin: 0; /* Đặt margin của radio button về 0 */
+  width: auto;
+  height: auto;
+}
+
+
+
+
+
+input[type="radio"] {
+  margin-right: 5px;
+}
+
+input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Căn chỉnh checkbox và nhãn theo chiều ngang */
+}
+
+.register-btn {
+  background-color: #4a90e2;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px; /* Tạo khoảng cách trên nút đăng ký */
+}
+
+.register-btn:hover {
+  background-color: #357ab9;
+}
+
+.login-link {
+  color: #4a90e2;
+  text-decoration: none;
+  margin-top: 10px;
+}
+
+.login-link:hover {
+  text-decoration: underline;
+}
+
+/* Đưa phần CSS liên quan đến checkbox vào đây */
+.checkbox-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+input[type="checkbox"] {
+  margin: 0;
+  padding: 0;
+  width: auto;
+  height: auto;
+}
