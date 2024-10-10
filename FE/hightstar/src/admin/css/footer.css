@@ -1,0 +1,5 @@
+.footer {
+  padding: 15px 30px;
+  border-top: 1px solid rgba(0, 0, 0, 0.273);
+  z-index: 1000;
+}

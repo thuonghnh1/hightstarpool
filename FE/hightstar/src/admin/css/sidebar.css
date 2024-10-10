@@ -1,0 +1,77 @@
+.sidebar {
+  width: 250px; /* Chiều rộng sidebar */
+  color: white;
+  position: fixed; /* Đảm bảo sidebar được cố định */
+  top: 0;
+  left: 0;
+  height: 100vh;
+  background-color: #212631;
+  transition: transform 0.3s ease; /* Hiệu ứng chuyển động */
+  z-index: 999; /* Đảm bảo sidebar ở trên */
+}
+.sidebar .menu{
+  /* margin: 10px 0; */
+  height: 90vh;
+}
+
+.sidebar .menu li {
+  padding: 0 10px;
+  margin: 5px 0;
+}
+
+.sidebar .menu .sidebar__title {
+  font-size: 11px;
+  padding: 10px 20px;
+}
+
+.sidebar .menu li i {
+  font-size: large;
+}
+
+.inactive-link {
+  color: rgba(255, 255, 255, 0.771);
+  text-decoration: none;
+  padding: 12px 15px;
+  display: block;
+  transition: 0.3s;
+}
+
+.active-link {
+  color: white;
+  background-color: #2a303d;
+  text-decoration: none;
+  padding: 12px ;
+  display: block;
+  transition: 0.3s;
+  border-radius: 6px;
+}
+
+/* Optional: Hover effect */
+.inactive-link:hover {
+  background-color: #2a303d;
+  border-radius: 6px;
+}
+
+.inactive-link i{
+  opacity: 30%;
+}
+
+.sidebar.closed {
+  transform: translateX(-100%); /* Đẩy sidebar ra ngoài màn hình */
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+/* custom thanh cuộn */
+
+/* Tùy chỉnh thanh cuộn */
+.custom-scrollbar {
+  overflow-y: scroll; /* Chỉ hiển thị thanh cuộn dọc */
+  scrollbar-width: thin; /* Đối với Firefox */
+  scrollbar-color: #00000084 #1a1a1a00; /* Màu con lăn và màu nền của thanh cuộn */
+}
+
+
+

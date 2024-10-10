@@ -1,0 +1,28 @@
+@import url("./sidebar.css");
+@import url("./header.css");
+@import url("./footer.css");
+@import url("./page404.css");
+* {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+}
+
+.main{
+  margin-top: 66px;
+}
+
+.right__box {
+  position: relative;
+  flex-grow: 1; /* Phần right__box sẽ chiếm toàn bộ không gian còn lại */
+  transition: margin-left 0.3s ease; /* Hiệu ứng mượt mà cho right__box */
+  margin-left: 0; /* Giá trị mặc định */
+}
+
+.right__box.with-sidebar {
+  margin-left: 250px; /* Dịch chuyển sang phải khi sidebar mở */
+}
