@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { AppSidebar, AppFooter, AppHeader } from "../components/index";
-import { Dashboard, Page404, UserManagement } from "../views/index";
+import { Dashboard, Page404, UserManagement, CourseManagement } from "../views/index";
 
 const AdminLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true); // Quản lý trạng thái ẩn/hiện sidebar
@@ -51,6 +51,10 @@ const AdminLayout = () => {
               <Route
                 path="/admin/user-management"
                 element={<UserManagement />}
+              />
+              <Route
+                path="/admin/course-management"
+                element={<CourseManagement />}
               />
               <Route path="*" element={<Page404 />} />
             </Routes>
