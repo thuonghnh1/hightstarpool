@@ -44,7 +44,7 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
               <i className="bi bi-bell fs-5"></i>
               <span
                 className="position-absolute badge rounded-pill bg-danger d-flex justify-content-center"
-                style={{ top: "0", right: "-6px" }}
+                style={{ top: "4px", right: "-3px" }}
               >
                 5
               </span>
@@ -58,7 +58,7 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
               <i className="bi bi-envelope-open fs-5"></i>
               <span
                 className="position-absolute badge rounded-pill d-flex justify-content-center"
-                style={{ top: "0", right: "-6px", background: "#2D8CE2" }}
+                style={{ top: "4px", right: "-3px", background: "#2D8CE2" }}
               >
                 6
               </span>

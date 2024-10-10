@@ -6,7 +6,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px 20px;
+  /* padding: 10px 20px; */
   border-bottom: 1px solid #ddd; /* Đường viền dưới */
   z-index: 1000;
   transition: left 0.3s ease;
