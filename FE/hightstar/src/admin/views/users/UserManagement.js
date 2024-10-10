@@ -23,18 +23,103 @@ const UserManagement = () => {
     Username: "",
     Password: "",
     Email: "",
-    Role: "User", // Mặc định là User
+    Role: "User",
     RegisteredDate: new Date().toISOString().split("T")[0], // Ngày hiện tại
   });
+
+  // useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     try {
+  //       const response = await axios.get("http://localhost:3001/api/users");
+  //       setUsers(response.data);
+  //     } catch (error) {
+  //       console.error("Có lỗi khi lấy dữ liệu người dùng:", error);
+  //     }
+  //   };
+
+  //   fetchUsers();
+  // }, []);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get("http://localhost:3001/api/users");
-        setUsers(response.data);
+        setUsers(
+          response.data.length > 0 ? response.data : generateSampleUsers()
+        );
       } catch (error) {
         console.error("Có lỗi khi lấy dữ liệu người dùng:", error);
+        setUsers(generateSampleUsers()); // Nếu có lỗi, sử dụng dữ liệu mẫu
       }
+    };
+
+    const generateSampleUsers = () => {
+      return [
+        {
+          UserId: 1,
+          Username: "Nguyễn Thị A Ly",
+          Password: "pass1",
+          Email: "lynta@gmail.com",
+          Role: "Admin",
+          Status: true,
+        },
+        {
+          UserId: 2,
+          Username: "Trần Quang Hiệp",
+          Password: "pass2",
+          Email: "hieptq@gmail.com",
+          Role: "User",
+          Status: true,
+        },
+        {
+          UserId: 3,
+          Username: "Lê Minh Beo",
+          Password: "pass3",
+          Email: "beolm@gmail.com",
+          Role: "Admin",
+          Status: true,
+        },
+        {
+          UserId: 4,
+          Username: "Hải Âu",
+          Password: "pass4",
+          Email: "auh@gmail.com",
+          Role: "User",
+          Status: false,
+        },
+        {
+          UserId: 5,
+          Username: "Nguyễn Việt Kiều",
+          Password: "pass5",
+          Email: "kieunv@gmail.com",
+          Role: "User",
+          Status: true,
+        },
+        {
+          UserId: 6,
+          Username: "Đình Quang Trọng",
+          Password: "pass6",
+          Email: "trongdq@gmail.com",
+          Role: "User",
+          Status: false,
+        },
+        {
+          UserId: 7,
+          Username: "Pham Quang Linh",
+          Password: "pass7",
+          Email: "linhpq@gmail.com",
+          Role: "Admin",
+          Status: true,
+        },
+        {
+          UserId: 8,
+          Username: "Hoàng Thái Tam",
+          Password: "pass8",
+          Email: "tamht@gmail.com",
+          Role: "User",
+          Status: true,
+        },
+      ];
     };
 
     fetchUsers();
