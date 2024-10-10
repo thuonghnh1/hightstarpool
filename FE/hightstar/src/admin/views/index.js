@@ -1,6 +1,6 @@
 import Dashboard from "./dashboards/Dashboard";
-import UserManagement from "./courses/UserManagement";
-import CourseManagement from './users/CourseManagement';
+import UserManagement from "./users/UserManagement";
+import CourseManagement from './courses/CourseManagement';
 import Page404 from "./pages/Page404";
 
 export { Dashboard, UserManagement,CourseManagement, Page404 };
