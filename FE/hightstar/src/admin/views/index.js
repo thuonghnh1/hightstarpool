@@ -1,5 +1,5 @@
 import Dashboard from "./dashboards/Dashboard";
-import UserManagement from "./users/UserManagement";
+import UserManagement from "./courses/UserManagement";
 import CourseManagement from './users/CourseManagement';
 import Page404 from "./pages/Page404";
 
