@@ -1,0 +1,105 @@
+.user-management {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.user-management h1 {
+  text-align: center;
+  color: #343a40;
+}
+
+.action-buttons {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.action-buttons button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.action-buttons button:hover {
+  background-color: #0056b3;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table th,
+table td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #dee2e6;
+}
+
+table th {
+  background-color: #007bff;
+  color: white;
+}
+
+table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+table tr:hover {
+  background-color: #e9ecef;
+}
+
+table td button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-right: 5px;
+}
+
+table td button:hover {
+  background-color: #218838;
+}
+
+table td button:nth-child(2) {
+  /* Nút Sửa */
+  background-color: #ffc107;
+}
+
+table td button:nth-child(3) {
+  /* Nút Xóa */
+  background-color: #dc3545;
+}
+
+table td button:nth-child(2):hover {
+  /* Nút Sửa hover */
+  background-color: #e0a800;
+}
+
+table td button:nth-child(3):hover {
+  /* Nút Xóa hover */
+  background-color: #c82333;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
