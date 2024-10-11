@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { AppSidebar, AppFooter, AppHeader } from "../components/index";
-import { Dashboard, Page404, UserManagement, CourseManagement, StudentList } from "../views/index";
+import {
+  Dashboard,
+  Page404,
+  UserManagement,
+  CourseManagement,
+  StudentList,
+  DiscountManagement,
+} from "../views/index";
 
 const AdminLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true); // Quản lý trạng thái ẩn/hiện sidebar
@@ -36,8 +43,9 @@ const AdminLayout = () => {
     <div className="d-flex">
       <AppSidebar className="" isSidebarOpen={isSidebarOpen} />
       <div
-        className={`right__box d-flex flex-column ${isSidebarOpen ? "with-sidebar" : ""
-          }`}
+        className={`right__box d-flex flex-column ${
+          isSidebarOpen ? "with-sidebar" : ""
+        }`}
       >
         <AppHeader
           toggleSidebar={toggleSidebar}
@@ -55,7 +63,10 @@ const AdminLayout = () => {
                 path="/admin/course-management"
                 element={<CourseManagement />}
               />
-              <Route path="*" element={<Page404 />} />
+              <Route
+                path="/admin/discount-management"
+                element={<DiscountManagement />}
+              />
               <Route
                 path="/admin/student-management"
                 element={<StudentList />}
