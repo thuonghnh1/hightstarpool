@@ -32,10 +32,10 @@ function CourseManagement() {
     };
 
     return (
-        <div className="container">
+        <div className="container-fluid">
             <h4>Danh sách khóa học</h4>
 
-            <div className="d-flex justify-content-between ">
+            {/* <div className="d-flex justify-content-between ">
                 <form className="d-flex " role="search" >
                     <input className="form-control me-2 w-100" type="search" placeholder="nhập tên khóa học để tìm" aria-label="Search" />
                     <button className="btn btn-outline-success" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
@@ -47,15 +47,34 @@ function CourseManagement() {
                     <button className="btn btn-outline-success me-2" type="submit" onClick={handleShowModal}>
                         <i className="fa-solid fa-plus"></i> Thêm
                     </button>
-                    <button className="btn btn-outline-success me-2" type="submit">
-                        <i className="fa-solid fa-pen-to-square"></i> Sửa
+                   
+                </div>
+            </div> */}
+            <div className="row">
+                <div className="col-md-6 mb-2">
+                    {/* <form className="d-flex " role="search" >
+                    <input className="form-control me-2 w-100" type="search" placeholder="nhập tên khóa học để tìm" aria-label="Search" />
+                    <button className="btn btn-outline-success" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </form> */}
+                    <form className="d-flex w-100" role="search">
+                        <div className="input-group">
+                            <input className="form-control" type="search" placeholder="Tìm kiếm khóa học" aria-label="Search" />
+                            <button className="btn btn-outline-success" type="submit">
+                                <i className="fa-solid fa-magnifying-glass"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div className="col-md-6 d-flex justify-content-end">
+                    <button className="btn btn-outline-success me-2 " type="submit">
+                        <i className="fa-solid fa-filter"></i> Filter
                     </button>
-                    <button className="btn btn-outline-success" type="submit">
-                        <i className="fa-solid fa-trash-can"></i> Xóa
+                    <button className="btn btn-outline-success me-2" type="submit" onClick={handleShowModal}>
+                        <i className="fa-solid fa-plus"></i> Thêm
                     </button>
                 </div>
             </div>
-            <table class="table mt-3">
+            <table class="table table-responsive table-bordered mt-3">
                 <thead>
                     <tr>
                         <th scope="col">STT</th>
@@ -78,8 +97,8 @@ function CourseManagement() {
                         <td>15h-17h</td>
                         <td>3.000.000đ</td>
                         <td className="ps-3">
-                            <i className="fa-regular fa-eye m-2 "></i>
-                            <i className="fa-solid fa-pen"></i>
+                            <i className="fa-solid fa-pen m-2"></i>
+                            <i className="fa-solid fa-trash-can "></i>
                         </td>
 
 
@@ -93,8 +112,8 @@ function CourseManagement() {
                         <td>15h-17h</td>
                         <td>3.000.000đ</td>
                         <td className="ps-3">
-                            <i className="fa-regular fa-eye m-2 "></i>
-                            <i className="fa-solid fa-pen"></i>
+                            <i className="fa-solid fa-pen m-2"></i>
+                            <i className="fa-solid fa-trash-can "></i>
                         </td>
                     </tr>
                     <tr>
@@ -106,8 +125,8 @@ function CourseManagement() {
                         <td>15h-17h</td>
                         <td>2.000.000đ</td>
                         <td className="ps-3">
-                            <i className="fa-regular fa-eye m-2 "></i>
-                            <i className="fa-solid fa-pen"></i>
+                            <i className="fa-solid fa-pen m-2"></i>
+                            <i className="fa-solid fa-trash-can "></i>
                         </td>
                     </tr>
 
@@ -128,7 +147,7 @@ function CourseManagement() {
                 <Pagination.Next onClick={handleNextPage} disabled={currentPage === totalPages} />
             </Pagination>
 
-            
+
             {/* Modal thêm khóa học */}
             <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
