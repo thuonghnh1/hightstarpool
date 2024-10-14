@@ -3,22 +3,17 @@
 @import url("./footer.css");
 @import url("./page404.css");
 
-.container__admin { 
-  overflow: hidden;
-  /* background-color: #f3f4f7; */
-}
-
 .right__box {
   max-width: 100%;
   box-sizing: border-box; /* Bao gồm padding và border trong phép tính chiều rộng */
   position: relative;
-  flex-grow: 1; /* Phần right__box sẽ chiếm toàn bộ không gian còn lại */
-  transition: margin-left 0.3s ease; 
+  flex-grow: 1; /*  Phần right__box sẽ chiếm toàn bộ không gian còn lại */
+  transition: margin-left 0.3s ease;
   margin-left: 0; /* Giá trị mặc định */
 }
 
 .right__box.with-sidebar {
-  margin-left: 250px; /* Dịch chuyển sang phải khi sidebar mở */
+  margin-left: 250px; /*  Dịch chuyển sang phải khi sidebar mở */
 }
 
 .light__text {
@@ -27,7 +22,7 @@
 }
 
 .main {
-  max-width: 100vw;
+  min-height: 82vh;
   display: flex;
   justify-content: center;
   margin-top: 66px;

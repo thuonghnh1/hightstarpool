@@ -1,31 +1,30 @@
-.table-responsive {
+.table__management .table-responsive {
   -webkit-overflow-scrolling: touch; /* smooth scrolling on mobile */
 }
 
-table td,
-table th {
+.table__management table td,
+.table__management table th {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
 }
 
-table .btn__edit:hover{
+.table__management table .btn__edit:hover{
   color: #0026ff;
 }
 
-table .btn__delete{
+.table__management table .btn__delete{
   color: rgb(155, 39, 39);
 }
 
-table .btn__delete:hover{
+.table__management table .btn__delete:hover{
   color: red;
 }
 
-.pagination .page-link {
-  color: #595d6e; /* Màu chữ */
+.table__management .pagination .page-item .page-link{
+  padding: 4px 10px;
 }
 
-.pagination .page-item.active .page-link {
-  color: #ffffff; /* Màu nền cho item đang được chọn */
-  /* background-color: #252638; */
+.table__management .pagination .page-item.active .page-link {
+  color: #ffffff; 
 }

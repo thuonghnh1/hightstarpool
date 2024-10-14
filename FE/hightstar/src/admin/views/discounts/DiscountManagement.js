@@ -1,141 +1,40 @@
 import { useEffect, useState } from "react";
-import axios from "axios"; // Import axios
 import TableManagement from "../../components/common/TableManagement";
-import { Spinner, Form } from "react-bootstrap";
+import discountService from "../../services/discountService";
+import Page500 from "../pages/Page500";
 import { formatDateToISO, formatDateToDMY } from "../../utils/formatDate";
+import { Spinner, Form } from "react-bootstrap";
+import { Bounce, ToastContainer, toast } from "react-toastify";
 
 const DiscountManagement = () => {
   // State để lưu trữ dữ liệu giảm giá từ API
-  // const [discountData, setDiscountData] = useState([]);
-  const [formData, setFormData] = useState({}); // State quản lý dữ liệu hiện tại
-  const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
-  const [isEditing, setIsEditing] = useState(false); // Trạng thái để biết đang thêm mới hay chỉnh sửa
-
-  // // Mảng dữ liệu giảm giá (mock data)
-  const discountData = [
+  const [discountData, setDiscountData] = useState([
     {
-      id: "ABC",
+      id: 1,
       name: "Khuyến Mãi 10% Giảm Giá Sản Phẩm",
       percentage: 10,
-      startDate: "2024-01-01",
-      endDate: "2024-01-31",
+      startDate: "01/01/2024",
+      endDate: "31/01/2024",
       description: "Giảm giá 10% cho tất cả các sản phẩm trong tháng 1.",
     },
     {
-      id: "ABCD",
+      id: 2,
       name: "Giảm Giá 20% Mua Đơn Hàng Trên 1 Triệu",
       percentage: 20,
-      startDate: "2024-02-15",
-      endDate: "2024-03-15",
+      startDate: "15/02/2024",
+      endDate: "15/03/2024",
       description:
         "Giảm giá 20% cho các đơn hàng có giá trị trên 1 triệu đồng.",
     },
-    {
-      id: "BCD",
-      name: "Giảm Giá 30% Khi Mua 2 Sản Phẩm",
-      percentage: 30,
-      startDate: "2024-04-01",
-      endDate: "2024-04-30",
-      description: "Giảm giá 30% khi mua từ 2 sản phẩm trở lên.",
-    },
-    {
-      id: "GGKHM",
-      name: "Khuyến Mãi 10% Giảm Giá Sản Phẩm",
-      percentage: 10,
-      startDate: "2024-01-01",
-      endDate: "2024-01-31",
-      description: "Khuyến mãi giảm 10% cho tất cả các sản phẩm trong tháng 1.",
-    },
-    {
-      id: "GGDHTMT",
-      name: "Giảm Giá 20% Mua Đơn Hàng Trên 1 Triệu",
-      percentage: 20,
-      startDate: "2024-02-15",
-      endDate: "2024-03-15",
-      description: "Ưu đãi 20% cho đơn hàng từ 1 triệu đồng trở lên.",
-    },
-    {
-      id: "GGKMHSP",
-      name: "Giảm Giá 30% Khi Mua 2 Sản Phẩm",
-      percentage: 30,
-      startDate: "2024-04-01",
-      endDate: "2024-04-30",
-      description: "Mua từ 2 sản phẩm được giảm giá 30%.",
-    },
-    {
-      id: "KMGGSP",
-      name: "Khuyến Mãi 10% Giảm Giá Sản Phẩm",
-      percentage: 10,
-      startDate: "2024-01-01",
-      endDate: "2024-01-31",
-      description: "Giảm giá 10% cho sản phẩm trong tháng 1.",
-    },
-    {
-      id: "GG20HT1T",
-      name: "Giảm Giá 20% Mua Đơn Hàng Trên 1 Triệu",
-      percentage: 20,
-      startDate: "2024-02-15",
-      endDate: "2024-03-15",
-      description:
-        "Giảm giá 20% cho đơn hàng trên 1 triệu đồng từ ngày 15/02 đến 15/03.",
-    },
-    {
-      id: "GG30KMH2SP",
-      name: "Giảm Giá 30% Khi Mua 2 Sản Phẩm",
-      percentage: 30,
-      startDate: "2024-04-01",
-      endDate: "2024-04-30",
-      description: "Ưu đãi giảm 30% khi mua 2 sản phẩm trở lên.",
-    },
-    {
-      id: "UD010",
-      name: "Khuyến Mãi 10% Giảm Giá Sản Phẩm",
-      percentage: 10,
-      startDate: "2024-01-01",
-      endDate: "2024-01-31",
-      description: "Khuyến mãi giảm giá 10% cho sản phẩm trong tháng 1.",
-    },
-    {
-      id: "UD011",
-      name: "Giảm Giá 20% Mua Đơn Hàng Trên 1 Triệu",
-      percentage: 20,
-      startDate: "2024-02-15",
-      endDate: "2024-03-15",
-      description:
-        "Ưu đãi 20% cho các đơn hàng trên 1 triệu đồng từ ngày 15/02 đến 15/03.",
-    },
-    {
-      id: "UD012",
-      name: "Giảm Giá 30% Khi Mua 2 Sản Phẩm",
-      percentage: 30,
-      startDate: "2024-04-01",
-      endDate: "2024-04-30",
-      description:
-        "Giảm giá 30% cho khách hàng mua từ 2 sản phẩm trong tháng 4.",
-    },
-  ];
-
+  ]);
+  const [formData, setFormData] = useState({}); // State quản lý dữ liệu hiện tại
+  const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
+  const [isEditing, setIsEditing] = useState(false); // Trạng thái để biết đang thêm mới hay chỉnh sửa
   // State để xử lý trạng thái tải dữ liệu và lỗi
 
-  // const [loading, setLoading] = useState(true);
-  // const [errorServer, setErrorServer] = useState(null);
-
-  // // Hàm lấy dữ liệu từ API
-  // const fetchDiscountData = async () => {
-  //   try {
-  //     const response = await axios.get("https://your-api-endpoint/discounts"); // Thay URL bằng endpoint thực tế
-  //     setDiscountData(response.data); // Lưu dữ liệu vào state
-  //     setLoading(false); // Tắt trạng thái loading
-  //   } catch (err) {
-  //     setErrorServer(err.message); // Lưu lỗi vào state nếu có
-  //     setLoading(false);
-  //   }
-  // };
-
-  // // Gọi API khi component được render lần đầu tiên (sử dụng useEffect)
-  // useEffect(() => {
-  //   fetchDiscountData();
-  // }, []); // Mảng [] đảm bảo useEffect chỉ chạy một lần khi component được mount
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
+  const [errorServer, setErrorServer] = useState(null);
 
   // Mảng cột của bảng
   const discountColumns = [
@@ -152,29 +51,36 @@ const DiscountManagement = () => {
     (column) => column.key !== "description"
   );
 
-  // // Xử lý khi dữ liệu đang tải hoặc có lỗi
-  // if (loading) {
-  //   return <Spinner></Spinner>;
-  // }
+  // Gọi API để lấy dữ liệu từ server
+  const fetchDiscountData = async () => {
+    setLoadingPage(true);
+    try {
+      const data = await discountService.getDiscounts();
+      setDiscountData(data); // Lưu dữ liệu vào state
+    } catch (err) {
+      setErrorServer(err.message); // Lưu lỗi vào state nếu có
+    } finally {
+      setLoadingPage(false);
+    }
+  };
 
-  // if (errorServer) {
-  //   return <div>Đã xảy ra lỗi: {errorServer}</div>;
-  // }
+  // // Gọi API khi component mount
+  // useEffect(() => {
+  //   fetchDiscountData();
+  // }, []);
 
-  // Hàm validate cho từng trường input (ví dụ kiểm tra tên không được có số)
+  // Hàm validate cho từng trường input
   const validateField = (key, value) => {
     let error = "";
 
     switch (key) {
       case "name":
-        // Kiểm tra tên không được chứa số và không được để trống
         if (!value || value.trim() === "") {
           error = "Tên không được để trống.";
         }
         break;
 
       case "percentage":
-        // Kiểm tra tỷ lệ giảm giá phải là số từ 0 đến 100
         if (value === "" || value === null) {
           error = "Tỷ lệ giảm giá không được để trống.";
         } else if (isNaN(value) || value < 0 || value > 100) {
@@ -189,10 +95,9 @@ const DiscountManagement = () => {
         break;
 
       case "endDate":
-        // Kiểm tra ngày kết thúc không được để trống và phải sau ngày bắt đầu
         if (!value) {
           error = "Ngày kết thúc không được để trống.";
-        } else if (new Date(value) <= new Date(formData.startDate)) {
+        } else if (new Date(value) < new Date(formData.startDate)) {
           error = "Ngày kết thúc phải sau ngày bắt đầu.";
         }
         break;
@@ -211,7 +116,6 @@ const DiscountManagement = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Validate từng trường và lưu lỗi vào newErrors
     if (!formData.name || formData.name.trim() === "") {
       newErrors.name = "Tên không được để trống.";
     }
@@ -233,25 +137,22 @@ const DiscountManagement = () => {
 
     if (!formData.endDate) {
       newErrors.endDate = "Ngày kết thúc không được để trống.";
-    } else if (new Date(formData.endDate) <= new Date(formData.startDate)) {
+    } else if (new Date(formData.endDate) < new Date(formData.startDate)) {
       newErrors.endDate = "Ngày kết thúc phải sau ngày bắt đầu.";
     }
 
-    // Cập nhật state errorFields với các lỗi mới
     setErrorFields(newErrors);
-
-    // Trả về true nếu không có lỗi
     return Object.keys(newErrors).length === 0;
   };
 
-  // Hàm xử lý khi người dùng thay đổi giá trị input
+  // Hàm xử lý khi thay đổi giá trị input
   const handleInputChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
-    validateField(key, value); // Gọi validate cho từng input
+    validateField(key, value);
   };
 
-  // Hàm gọi khi nhấn "Thêm mới" để reset form
-  const handleAddNew = () => {
+  // Hàm reset form khi thêm mới
+  const handleReset = () => {
     setFormData({
       name: "",
       percentage: "",
@@ -259,90 +160,122 @@ const DiscountManagement = () => {
       endDate: "",
       description: "",
     });
-    setIsEditing(false); // Chuyển về chế độ thêm mới
+    setIsEditing(false);
     setErrorFields({});
   };
 
-  // Hàm gọi khi nhấn "Sửa" một hàng để đổ dữ liệu lên form
+  // Hàm gọi khi nhấn "Sửa" một hàng
   const handleEdit = (item) => {
     setFormData({
       ...item,
-      startDate: formatDateToISO(item.startDate), // vì input date chỉ nhận kiểu này
-      endDate: formatDateToISO(item.startDate),
+      startDate: formatDateToISO(item.startDate),
+      endDate: formatDateToISO(item.endDate),
     });
-    setIsEditing(true); // Chuyển về chế độ chỉnh sửa
+    setIsEditing(true);
     setErrorFields({});
   };
 
+  // Hàm lưu thông tin sau khi thêm hoặc sửa
   const handleSaveItem = () => {
-    // Nếu đang chỉnh sửa
+    if (!validateForm()) return false;
+
+    setIsLoading(true); // Bắt đầu quá trình tải
+
     if (isEditing) {
       // Tìm mục giảm giá đang chỉnh sửa dựa vào `id`
       const updatedDiscounts = discountData.map((discount) => {
         if (discount.id === formData.id) {
           return {
             ...formData,
-            startDate: formatDateToDMY(formData.startDate), // chuyển về lại định dạng cũ.
-            startDate: formatDateToDMY(formData.endDate),
+            startDate: formatDateToDMY(formData.startDate),
+            endDate: formatDateToDMY(formData.endDate),
           };
+        } else {
+          return discount;
         }
       });
 
       // Cập nhật mảng discountData
-      discountData = updatedDiscounts;
-      // setDiscountData(updatedDiscounts); // Nếu sử dụng state để lưu dữ liệu
+      setDiscountData(updatedDiscounts);
 
-      // Gọi API cập nhật (ví dụ sử dụng axios)
-      axios
-        .put(`https://your-api-endpoint/discounts/${formData.id}`, formData)
-        .then((response) => {
-          // Xử lý sau khi cập nhật thành công (nếu cần)
-          console.log("Cập nhật thành công", response.data);
+      // Gọi API cập nhật sử dụng discountService
+      discountService
+        .updateDiscount(formData.id, formData)
+        .then(() => {
+          // fetchDiscountData(); // Gọi lại để lấy dữ liệu mới nhất từ server
+          toast.success("Cập nhật thành công!");
+          handleReset();
         })
         .catch((error) => {
-          // Xử lý lỗi khi gọi API
           console.error("Lỗi khi cập nhật", error);
+          toast.error("Đã xảy ra lỗi khi cập nhật. Vui lòng thử lại sau.");
+        })
+        .finally(() => {
+          setIsLoading(false); // Kết thúc quá trình tải
         });
     } else {
       // Nếu đang ở trạng thái thêm mới
       const newDiscount = {
         ...formData,
-        id: Date.now().toString(), // Tạo id tạm thời cho mục mới
+        startDate: formatDateToDMY(formData.startDate),
+        endDate: formatDateToDMY(formData.endDate),
+        id: Date.now().toString(), // tạo id tạm thời để gửi lên server
       };
 
       // Cập nhật mảng discountData
-      // setDiscountData([...discountData, newDiscount]); // Nếu sử dụng state
+      setDiscountData([...discountData, newDiscount]);
 
-      // Gọi API thêm mới
-      axios
-        .post("https://your-api-endpoint/discounts", newDiscount)
+      // Gọi API thêm mới sử dụng discountService
+      discountService
+        .createDiscount(newDiscount)
         .then((response) => {
-          // Xử lý sau khi thêm thành công (nếu cần)
-          console.log("Thêm mới thành công", response.data);
+          fetchDiscountData(); // Gọi lại để lấy dữ liệu mới nhất từ server
+          toast.success("Thêm mới thành công!");
+          handleReset();
         })
         .catch((error) => {
-          // Xử lý lỗi khi gọi API
           console.error("Lỗi khi thêm mới", error);
+          toast.error("Đã xảy ra lỗi khi thêm mới. Vui lòng thử lại sau.");
+        })
+        .finally(() => {
+          setIsLoading(false); // Kết thúc quá trình tải
         });
     }
+  };
 
-    // Reset form sau khi lưu thành công
-    handleAddNew(); // Để làm sạch form và chuyển về trạng thái thêm mới
+  // Hàm xóa một discount
+  const handleDelete = (deleteId) => {
+    if (deleteId) {
+      setIsLoading(true);
+      discountService
+        .deleteDiscount(deleteId)
+        .then(() => {
+          setDiscountData(
+            discountData.filter((discount) => discount.id !== deleteId)
+          );
+          toast.success("Xóa thành công!");
+        })
+        .catch(() => {
+          toast.error("Đã xảy ra lỗi khi xóa.");
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
   };
 
   const modalContent = (
     <>
       <div className="row">
-        {/* Hàng 1 */}
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formName">
-            <Form.Label>Tên chương trình khuyến mãi</Form.Label>
+            <Form.Label>Tên giảm giá</Form.Label>
             <Form.Control
               type="text"
               name="name"
               value={formData.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
-              isInvalid={!!errorFields.name} // Kiểm tra lỗi để hiển thị thông báo
+              isInvalid={!!errorFields.name}
               required
             />
             <Form.Control.Feedback type="invalid">
@@ -369,8 +302,9 @@ const DiscountManagement = () => {
             </Form.Control.Feedback>
           </Form.Group>
         </div>
+      </div>
 
-        {/* Hàng 2 */}
+      <div className="row">
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formStartDate">
             <Form.Label>Ngày bắt đầu</Form.Label>
@@ -397,21 +331,23 @@ const DiscountManagement = () => {
               value={formData.endDate}
               onChange={(e) => handleInputChange("endDate", e.target.value)}
               isInvalid={!!errorFields.endDate}
+              required
             />
             <Form.Control.Feedback type="invalid">
               {errorFields.endDate}
             </Form.Control.Feedback>
           </Form.Group>
         </div>
+      </div>
 
-        {/* Hàng 3 - Mô tả */}
-        <div className="col-12 mb-3">
+      <div className="row">
+        <div className="col-md-12 mb-3">
           <Form.Group controlId="formDescription">
             <Form.Label>Mô tả</Form.Label>
             <Form.Control
               as="textarea"
-              name="description"
               rows={3}
+              name="description"
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
             />
@@ -422,18 +358,46 @@ const DiscountManagement = () => {
   );
 
   return (
-    <TableManagement
-      data={discountData}
-      columns={discountColumns}
-      title={"Quản lý giảm giá"}
-      defaultColumns={defaultColumns} // Truyền mảng cột đã lọc
-      modalContent={modalContent}
-      isEditing={isEditing}
-      validateForm={validateForm}
-      handleAddNew={handleAddNew}
-      handleEdit={handleEdit}
-      handleSaveItem={handleSaveItem}
-    />
+    <>
+      {/* Hiển thị loader khi đang tải trang */}
+      {loadingPage ? (
+        <div className="w-100 h-100 d-flex justify-content-center align-items-center">
+          <Spinner animation="border" variant="primary" className=""></Spinner>
+        </div>
+      ) : errorServer ? (
+        <Page500 message={errorServer} />
+      ) : (
+        <section className="row m-0 p-0 ">
+          <TableManagement
+            data={discountData}
+            columns={discountColumns}
+            title={"Quản lý giảm giá"}
+            defaultColumns={defaultColumns} // Truyền mảng cột đã lọc
+            modalContent={modalContent}
+            isEditing={isEditing}
+            handleReset={handleReset}
+            onEdit={handleEdit}
+            handleSaveItem={handleSaveItem}
+            onDelete={handleDelete}
+            isLoading={isLoading}
+          />
+
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+            transition={Bounce}
+          />
+        </section>
+      )}
+    </>
   );
 };
 

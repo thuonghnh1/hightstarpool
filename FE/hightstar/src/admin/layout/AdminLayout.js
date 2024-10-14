@@ -40,7 +40,7 @@ const AdminLayout = () => {
   }, []);
 
   return (
-    <div className="container__admin d-flex">
+    <div className="container__admin overflow-hidden">
       <AppSidebar className="" isSidebarOpen={isSidebarOpen} />
       <div
         className={`right__box d-flex flex-column ${
@@ -51,7 +51,7 @@ const AdminLayout = () => {
           toggleSidebar={toggleSidebar}
           isSidebarOpen={isSidebarOpen}
         />
-        <div className="main min-vh-100 p-0">
+        <div className="main p-0">
           <div className="container-fluid m-0 p-0 p-md-4">
             <Routes>
               <Route path="/admin/dashboard" element={<Dashboard />} />

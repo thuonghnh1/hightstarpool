@@ -1,6 +1,13 @@
 import { Modal, Button, Form } from "react-bootstrap";
 
-const CustomModal = ({ show, handleClose, title, children, onSubmit }) => {
+const CustomModal = ({
+  show,
+  handleClose,
+  title,
+  children,
+  onSubmit,
+  isLoading,
+}) => {
   return (
     <Modal
       show={show}
@@ -22,8 +29,16 @@ const CustomModal = ({ show, handleClose, title, children, onSubmit }) => {
         <Button variant="secondary" onClick={handleClose}>
           Đóng
         </Button>
-        <Button variant="primary" onClick={onSubmit}>
-          Lưu
+        <Button variant="primary" onClick={onSubmit} disabled={isLoading}>
+          {isLoading ? (
+            <span
+              className="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            ></span>
+          ) : (
+            "Lưu"
+          )}
         </Button>
       </Modal.Footer>
     </Modal>
