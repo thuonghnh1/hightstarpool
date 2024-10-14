@@ -67,12 +67,12 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
           <li className="d-flex justify-content-center align-items-center mx-2">
             <span className="fs-2 fw-lighter opacity-25 mb-2">|</span>
           </li>
-          <li className="nav-item d-flex justify-content-center align-items-center">
+          <li className="nav-item d-flex justify-content-center align-items-center d-none d-sm-flex">
             <NavLink className="nav-link icon-badge" to="/brightness-settings">
               <i className="bi bi-brightness-high fs-5"></i>
             </NavLink>
           </li>
-          <li className="d-flex justify-content-center align-items-center mx-2">
+          <li className="d-flex justify-content-center align-items-center mx-2 d-none d-sm-flex">
             <span className="fs-2 fw-lighter opacity-25 mb-2">|</span>
           </li>
           {/* <!-- User profile --> */}

@@ -10,7 +10,7 @@
 
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-// import "../../css/user-management.css";
+// import "../../css/users/user-management.css";
 import axios from "axios";
 
 const UserManagement = () => {

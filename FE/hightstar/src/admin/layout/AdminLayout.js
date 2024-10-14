@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { AppSidebar, AppFooter, AppHeader } from "../components/index";
 import {
@@ -21,7 +21,7 @@ const AdminLayout = () => {
   // Ẩn sidebar khi màn hình nhỏ hơn 768px
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) {
+      if (window.innerWidth < 992) { // 992 là kích thước dưới của lg
         setSidebarOpen(false); // Thu nhỏ thì ẩn sidebar
       } else {
         setSidebarOpen(true); // Mở rộng thì hiển thị sidebar
@@ -40,7 +40,7 @@ const AdminLayout = () => {
   }, []);
 
   return (
-    <div className="d-flex">
+    <div className="container__admin d-flex">
       <AppSidebar className="" isSidebarOpen={isSidebarOpen} />
       <div
         className={`right__box d-flex flex-column ${
@@ -51,8 +51,8 @@ const AdminLayout = () => {
           toggleSidebar={toggleSidebar}
           isSidebarOpen={isSidebarOpen}
         />
-        <div className="main min-vh-100 flex-grow-1 ">
-          <div className="px-4 py-3">
+        <div className="main min-vh-100 p-0">
+          <div className="container-fluid m-0 p-0 p-md-4">
             <Routes>
               <Route path="/admin/dashboard" element={<Dashboard />} />
               <Route

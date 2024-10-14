@@ -1,0 +1,31 @@
+.table-responsive {
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on mobile */
+}
+
+table td,
+table th {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+table .btn__edit:hover{
+  color: #0026ff;
+}
+
+table .btn__delete{
+  color: rgb(155, 39, 39);
+}
+
+table .btn__delete:hover{
+  color: red;
+}
+
+.pagination .page-link {
+  color: #595d6e; /* Màu chữ */
+}
+
+.pagination .page-item.active .page-link {
+  color: #ffffff; /* Màu nền cho item đang được chọn */
+  /* background-color: #252638; */
+}
