@@ -1,4 +1,4 @@
-package edu.poly.hightstar.model;
+package edu.poly.hightstar.domain;
 
 import jakarta.persistence.*;
 import lombok.*;

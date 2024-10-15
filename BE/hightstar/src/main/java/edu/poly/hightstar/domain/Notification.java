@@ -1,4 +1,4 @@
-package edu.poly.hightstar.model;
+package edu.poly.hightstar.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -6,18 +6,18 @@ import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "students")
-public class Student {
+@Table(name = "notifications")
+public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long studentId;
+    private Long notificationId;
 
-    private String fullName;
-    private String nickname;
-    private Integer age;
-    private String gender;
+    private String content;
+    private Boolean status;
+    private Date createdAt;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "userId", referencedColumnName = "userId")
     private User user;
 }
+

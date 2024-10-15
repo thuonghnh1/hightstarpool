@@ -1,23 +1,23 @@
-package edu.poly.hightstar.model;
+package edu.poly.hightstar.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Entity
-@Table(name = "notifications")
-public class Notification {
+@Table(name = "orders")
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long notificationId;
+    private Long orderId;
 
-    private String content;
-    private Boolean status;
-    private Date createdAt;
+    private Date orderDate;
+    private Float total;
+    private String paymentMethod;
 
     @ManyToOne
     @JoinColumn(name = "userId", referencedColumnName = "userId")
     private User user;
 }
-
