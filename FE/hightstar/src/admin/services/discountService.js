@@ -2,7 +2,7 @@
 import axios from "axios";
 
 // Cấu hình URL API chung
-const API_URL = "https://your-api-endpoint/discounts"; // Thay bằng URL thực tế của bạn
+const API_URL = "http://localhost:8080/api/discounts"; // Thay bằng URL thực tế của bạn
 
 // Hàm lấy tất cả giảm giá
 const getDiscounts = async () => {

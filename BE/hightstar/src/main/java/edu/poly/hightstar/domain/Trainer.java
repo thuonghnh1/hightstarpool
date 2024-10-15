@@ -5,22 +5,25 @@ import lombok.*;
 
 @Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "trainers")
 public class Trainer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Tên biến được rút gọn theo chuẩn
+    private Long trainerId;
 
+    @Column(length = 30)
     private String specialty;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 90)
     private Integer experienceYears;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String schedule;
 
-    @Column(nullable = false)
-    private Float rating;
+    @Column(nullable = false, length = 300)
+    private double rating;
 
     @OneToOne
     @JoinColumn(name = "userId", referencedColumnName = "userId")

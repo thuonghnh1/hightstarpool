@@ -8,25 +8,7 @@ import { Bounce, ToastContainer, toast } from "react-toastify";
 
 const DiscountManagement = () => {
   // State để lưu trữ dữ liệu giảm giá từ API
-  const [discountData, setDiscountData] = useState([
-    {
-      id: 1,
-      name: "Khuyến Mãi 10% Giảm Giá Sản Phẩm",
-      percentage: 10,
-      startDate: "01/01/2024",
-      endDate: "31/01/2024",
-      description: "Giảm giá 10% cho tất cả các sản phẩm trong tháng 1.",
-    },
-    {
-      id: 2,
-      name: "Giảm Giá 20% Mua Đơn Hàng Trên 1 Triệu",
-      percentage: 20,
-      startDate: "15/02/2024",
-      endDate: "15/03/2024",
-      description:
-        "Giảm giá 20% cho các đơn hàng có giá trị trên 1 triệu đồng.",
-    },
-  ]);
+  const [discountData, setDiscountData] = useState([]);
   const [formData, setFormData] = useState({}); // State quản lý dữ liệu hiện tại
   const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
   const [isEditing, setIsEditing] = useState(false); // Trạng thái để biết đang thêm mới hay chỉnh sửa
@@ -64,10 +46,10 @@ const DiscountManagement = () => {
     }
   };
 
-  // // Gọi API khi component mount
-  // useEffect(() => {
-  //   fetchDiscountData();
-  // }, []);
+  // Gọi API khi component mount
+  useEffect(() => {
+    fetchDiscountData();
+  }, []);
 
   // Hàm validate cho từng trường input
   const validateField = (key, value) => {
@@ -309,7 +291,7 @@ const DiscountManagement = () => {
           <Form.Group controlId="formStartDate">
             <Form.Label>Ngày bắt đầu</Form.Label>
             <Form.Control
-              type="date"
+              type="datetime-local"
               name="startDate"
               value={formData.startDate}
               onChange={(e) => handleInputChange("startDate", e.target.value)}

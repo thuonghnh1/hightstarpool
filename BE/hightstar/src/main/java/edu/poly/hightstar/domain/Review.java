@@ -4,21 +4,26 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
-@Entity
+import org.hibernate.annotations.CreationTimestamp;
+
 @Data
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Table(name = "reviews")
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reviewId;
 
+    @Column(length = 5, nullable = false)
     private int rating;
     private String comment;
     private String images;
+    
+    @CreationTimestamp
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @ManyToOne
