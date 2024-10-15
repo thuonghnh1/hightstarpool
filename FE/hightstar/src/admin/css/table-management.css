@@ -1,0 +1,30 @@
+.table__management .table-responsive {
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on mobile */
+}
+
+.table__management table td,
+.table__management table th {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.table__management table .btn__edit:hover{
+  color: #0026ff;
+}
+
+.table__management table .btn__delete{
+  color: rgb(155, 39, 39);
+}
+
+.table__management table .btn__delete:hover{
+  color: red;
+}
+
+.table__management .pagination .page-item .page-link{
+  padding: 4px 10px;
+}
+
+.table__management .pagination .page-item.active .page-link {
+  color: #ffffff; 
+}

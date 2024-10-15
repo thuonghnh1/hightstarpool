@@ -2,27 +2,29 @@
 @import url("./header.css");
 @import url("./footer.css");
 @import url("./page404.css");
-* {
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-}
-
-body {
-  padding: 0;
-  margin: 0;
-}
-
-.main{
-  margin-top: 66px;
-}
 
 .right__box {
+  max-width: 100%;
+  box-sizing: border-box; /* Bao gồm padding và border trong phép tính chiều rộng */
   position: relative;
-  flex-grow: 1; /* Phần right__box sẽ chiếm toàn bộ không gian còn lại */
-  transition: margin-left 0.3s ease; /* Hiệu ứng mượt mà cho right__box */
+  flex-grow: 1; /*  Phần right__box sẽ chiếm toàn bộ không gian còn lại */
+  transition: margin-left 0.3s ease;
   margin-left: 0; /* Giá trị mặc định */
 }
 
 .right__box.with-sidebar {
-  margin-left: 250px; /* Dịch chuyển sang phải khi sidebar mở */
+  margin-left: 250px; /*  Dịch chuyển sang phải khi sidebar mở */
+}
+
+.light__text {
+  color: #595d6e;
+  font-size: 14px;
+}
+
+.main {
+  min-height: 82vh;
+  display: flex;
+  justify-content: center;
+  margin-top: 66px;
+  box-sizing: border-box; /* Bao gồm padding và border trong phép tính chiều rộng */
 }

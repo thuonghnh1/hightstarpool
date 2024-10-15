@@ -5,7 +5,7 @@ import "./admin/css/style.css";
 
 function App() {
   return (
-    <div className="">
+    <div className="app w-100" style={{ backgroundColor: "#f3f4f7" }}>
       {/* <SiteLayout /> */}
       <AdminLayout />
     </div>

@@ -10,7 +10,7 @@
 
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../../css/UserManagement.css";
+// import "../../css/users/user-management.css";
 import axios from "axios";
 
 const UserManagement = () => {
@@ -470,16 +470,19 @@ const UserManagement = () => {
               <td>{user.Status ? "Kích hoạt" : "Không kích hoạt"}</td>
               <td>
                 <button
-                  className="btn btn-info me-2"
+                  className="btn btn-outline-info me-2"
                   onClick={() => handleViewUser(user)}
                 >
                   Xem
                 </button>
-                <button className="btn btn-warning me-2" onClick={() => {}}>
+                <button
+                  className="btn btn-outline-warning me-2"
+                  onClick={() => {}}
+                >
                   Sửa
                 </button>
                 <button
-                  className="btn btn-danger"
+                  className="btn btn-outline-danger"
                   onClick={() => handleDelete(user.UserId)}
                 >
                   Xóa

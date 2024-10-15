@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 const Page404 = () => {
   return (
-    <div id="notfound">
+    <div id="notfound" className="">
       <div className="notfound">
         <div className="notfound-404">
           <h1>

@@ -67,30 +67,6 @@ table td button {
   margin-right: 5px;
 }
 
-table td button:hover {
-  background-color: #218838;
-}
-
-table td button:nth-child(2) {
-  /* Nút Sửa */
-  background-color: #ffc107;
-}
-
-table td button:nth-child(3) {
-  /* Nút Xóa */
-  background-color: #dc3545;
-}
-
-table td button:nth-child(2):hover {
-  /* Nút Sửa hover */
-  background-color: #e0a800;
-}
-
-table td button:nth-child(3):hover {
-  /* Nút Xóa hover */
-  background-color: #c82333;
-}
-
 .overlay {
   position: fixed;
   top: 0;
