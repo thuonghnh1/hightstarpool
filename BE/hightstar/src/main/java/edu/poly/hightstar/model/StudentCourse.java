@@ -6,20 +6,21 @@ import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "attendance")
-public class Attendance {
+@Table(name = "student_courses")
+public class StudentCourse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long attendanceId;
-
-    private Date checkInTime;
-    private Date checkOutTime;
+    private Long studentCourseId;
 
     @ManyToOne
     @JoinColumn(name = "studentId", referencedColumnName = "studentId")
     private Student student;
 
     @ManyToOne
-    @JoinColumn(name = "ticketCode", referencedColumnName = "ticketCode")
-    private Ticket ticket;
+    @JoinColumn(name = "courseId", referencedColumnName = "courseId")
+    private Course course;
+
+    private Date startDate;
+    private Integer sessionsCompleted;
+    private String status;
 }
