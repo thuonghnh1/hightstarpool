@@ -2,10 +2,12 @@ package edu.poly.hightstar.controller;
 
 import edu.poly.hightstar.model.DiscountDto;
 import edu.poly.hightstar.service.DiscountService;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/discounts")
@@ -23,23 +25,31 @@ public class DiscountController {
         }
 
         @GetMapping("/{id}")
-        public Optional<DiscountDto> getDiscountById(@PathVariable Long id) {
-                return discountService.getDiscountById(id);
+        public ResponseEntity<DiscountDto> getDiscountById(@PathVariable Long id) {
+                DiscountDto discountDto = discountService.getDiscountById(id);
+                if (discountDto == null) {
+                        return ResponseEntity.notFound().build(); // 404 Not Found nếu không tìm thấy
+                }
+                return ResponseEntity.ok(discountDto); // 200 OK với discountDto
         }
 
         @PostMapping
-        public DiscountDto createDiscount(@RequestBody DiscountDto discountDto) {
-                System.out.println("Received discount data: " + discountDto);
-                return discountService.createDiscount(discountDto);
+        public ResponseEntity<DiscountDto> createDiscount(@RequestBody DiscountDto discountDto) {
+                DiscountDto createdDiscount = discountService.createDiscount(discountDto);
+                // trả về phản hồi với mã trạng thái(HTTP 201 created), body là phần thân p/hồi
+                return ResponseEntity.status(HttpStatus.CREATED).body(createdDiscount);
+
         }
 
         @PutMapping("/{id}")
-        public DiscountDto updateDiscount(@PathVariable Long id, @RequestBody DiscountDto discountDto) {
-                return discountService.updateDiscount(id, discountDto);
+        public ResponseEntity<DiscountDto> updateDiscount(@PathVariable Long id, @RequestBody DiscountDto discountDto) {
+                DiscountDto updatedDiscount = discountService.updateDiscount(id, discountDto);
+                return ResponseEntity.ok(updatedDiscount);
         }
 
         @DeleteMapping("/{id}")
-        public void deleteDiscount(@PathVariable Long id) {
+        public ResponseEntity<String> deleteDiscount(@PathVariable Long id) {
                 discountService.deleteDiscount(id);
+                return ResponseEntity.ok("Discount deleted successfully."); // 200 OK với thông điệp
         }
 }

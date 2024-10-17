@@ -9,6 +9,7 @@ import {
   StudentList,
   DiscountManagement,
 } from "../views/index";
+import { Bounce, ToastContainer } from "react-toastify";
 
 const AdminLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true); // Quản lý trạng thái ẩn/hiện sidebar
@@ -21,7 +22,8 @@ const AdminLayout = () => {
   // Ẩn sidebar khi màn hình nhỏ hơn 768px
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 992) { // 992 là kích thước dưới của lg
+      if (window.innerWidth < 992) {
+        // 992 là kích thước dưới của lg
         setSidebarOpen(false); // Thu nhỏ thì ẩn sidebar
       } else {
         setSidebarOpen(true); // Mở rộng thì hiển thị sidebar
@@ -77,6 +79,19 @@ const AdminLayout = () => {
         </div>
         <AppFooter />
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
     </div>
   );
 };

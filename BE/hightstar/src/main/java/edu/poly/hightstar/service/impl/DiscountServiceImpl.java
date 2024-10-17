@@ -30,14 +30,14 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public Optional<DiscountDto> getDiscountById(Long id) {
+    public DiscountDto getDiscountById(Long id) {
         Optional<Discount> discount = discountRepository.findById(id);
         if (discount.isPresent()) {
             DiscountDto discountDto = new DiscountDto();
             BeanUtils.copyProperties(discount.get(), discountDto);
-            return Optional.of(discountDto);
+            return discountDto;
         }
-        return Optional.empty();
+        return null;
     }
 
     @Override
