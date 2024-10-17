@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import TableManagement from "../../components/common/TableManagement";
 import discountService from "../../services/DiscountService";
 import Page500 from "../pages/Page500";
@@ -8,7 +9,6 @@ import {
   formatDateTimeLocal,
 } from "../../utils/FormatDate";
 import { Spinner, Form } from "react-bootstrap";
-import { Bounce, ToastContainer, toast } from "react-toastify";
 
 const DiscountManagement = () => {
   // State để lưu trữ dữ liệu giảm giá từ API
@@ -152,7 +152,6 @@ const DiscountManagement = () => {
 
   // Hàm gọi khi nhấn "Sửa" một hàng
   const handleEdit = (item) => {
-    console.log(item);
     setFormData({
       ...item,
       startDate: formatDateTimeToISO(item.startDate),
@@ -169,27 +168,25 @@ const DiscountManagement = () => {
     setIsLoading(true); // Bắt đầu quá trình tải
 
     if (isEditing) {
-      // Tìm mục giảm giá đang chỉnh sửa dựa vào `id`
-      const updatedDiscounts = discountData.map((discount) => {
-        if (discount.id === formData.id) {
-          return {
-            ...formData,
-            startDate: formatDateTimeToDMY(formData.startDate),
-            endDate: formatDateTimeToDMY(formData.endDate),
-          };
-        } else {
-          return discount;
-        }
-      });
-
-      // Cập nhật mảng discountData
-      setDiscountData(updatedDiscounts);
-
       // Gọi API cập nhật sử dụng discountService
       discountService
         .updateDiscount(formData.id, formData)
-        .then(() => {
-          // fetchDiscountData(); // Gọi lại để lấy dữ liệu mới nhất từ server
+        .then((response) => {
+          let updatedDiscount = response; // Lấy phản hồi từ server
+          console.log("Update: " + updatedDiscount);
+
+          updatedDiscount = {
+            // Đổi định dạng ngày giờ trước khi lưu vào mảng
+            ...updatedDiscount,
+            startDate: formatDateTimeToDMY(updatedDiscount.startDate),
+            endDate: formatDateTimeToDMY(updatedDiscount.endDate),
+          };
+
+          // Cập nhật state discountData với discount đã được sửa
+          const updatedDiscounts = discountData.map((discount) =>
+            discount.id === updatedDiscount.id ? updatedDiscount : discount
+          );
+          setDiscountData(updatedDiscounts);
           toast.success("Cập nhật thành công!");
           handleReset();
         })
@@ -204,14 +201,22 @@ const DiscountManagement = () => {
       // Nếu đang ở trạng thái thêm mới
       const newDiscount = {
         ...formData,
-        id: Date.now().toString(), // tạo id tạm thời để gửi lên server
       };
 
       // Gọi API thêm mới sử dụng discountService
       discountService
         .createDiscount(newDiscount)
         .then((response) => {
-          fetchDiscountData(); // Gọi lại để lấy dữ liệu mới nhất từ server
+          let createdDiscount = response; // Lấy phản hồi từ server (bao gồm ID)
+          createdDiscount = {
+            // đổi định dạng ngày giờ trước khi lưu vào mảng
+            ...createdDiscount,
+            startDate: formatDateTimeToDMY(createdDiscount.startDate),
+            endDate: formatDateTimeToDMY(createdDiscount.endDate),
+          };
+          // Cập nhật mảng discountData với item vừa được thêm
+          setDiscountData([...discountData, createdDiscount]);
+
           toast.success("Thêm mới thành công!");
           handleReset();
         })
@@ -365,20 +370,6 @@ const DiscountManagement = () => {
             handleSaveItem={handleSaveItem}
             onDelete={handleDelete}
             isLoading={isLoading}
-          />
-
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-            transition={Bounce}
           />
         </section>
       )}
