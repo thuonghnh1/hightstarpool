@@ -1,15 +1,34 @@
 export function formatDateToISO(inputDate) {
-  // Tách chuỗi ngày thành ngày, tháng, năm
   const [day, month, year] = inputDate.split("/");
-
-  // Trả về chuỗi ngày theo định dạng yyyy-MM-dd
   return `${year}-${month}-${day}`;
 }
 
 export function formatDateToDMY(inputDate) {
-  // Tách chuỗi ngày thành năm, tháng, ngày
   const [year, month, day] = inputDate.split("-");
-
-  // Trả về chuỗi ngày theo định dạng dd/MM/yyyy
   return `${day}/${month}/${year}`;
+}
+
+export function formatDateTimeToISO(inputDateTime) {
+  const [date, time] = inputDateTime.split(" ");
+  const [day, month, year] = date.split("/");
+  const [hours, minutes] = time.split(":");
+  return `${year}-${month}-${day}T${hours}:${minutes}`; // yyyy-MM-ddThh:mm
+}
+
+export function formatDateTimeToDMY(inputDateTime) {
+  const [date, time] = inputDateTime.split("T");
+  const [year, month, day] = date.split("-");
+  const [hours, minutes] = time.split(":");
+  return `${day}/${month}/${year} ${hours}:${minutes}`; //dd/MM/yyyy hh:mm
+}
+
+export function formatDateTimeLocal() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // getMonth() trả về từ 0-11 nên phải +1
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`; // trả về định dạng yyyy-MM-ddThh:mm
 }

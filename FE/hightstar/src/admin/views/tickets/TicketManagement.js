@@ -2,11 +2,7 @@ import { useEffect, useState } from "react";
 import TableManagement from "../../components/common/TableManagement";
 import discountService from "../../services/DiscountService";
 import Page500 from "../pages/Page500";
-import {
-  formatDateTimeToISO,
-  formatDateTimeToDMY,
-  formatDateTimeLocal,
-} from "../../utils/FormatDate";
+import { formatDateToISO, formatDateToDMY } from "../../utils/FormatDate";
 import { Spinner, Form } from "react-bootstrap";
 import { Bounce, ToastContainer, toast } from "react-toastify";
 
@@ -25,7 +21,7 @@ const DiscountManagement = () => {
   // Mảng cột của bảng
   const discountColumns = [
     { key: "id", label: "Mã giảm giá" },
-    { key: "discountName", label: "Tên giảm giá" },
+    { key: "name", label: "Tên giảm giá" },
     { key: "percentage", label: "Phần trăm giảm (%)" },
     { key: "startDate", label: "Ngày Bắt Đầu" },
     { key: "endDate", label: "Ngày Kết Thúc" },
@@ -60,7 +56,7 @@ const DiscountManagement = () => {
     let error = "";
 
     switch (key) {
-      case "discountName":
+      case "name":
         if (!value || value.trim() === "") {
           error = "Tên không được để trống.";
         }
@@ -102,8 +98,8 @@ const DiscountManagement = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.discountName || formData.discountName.trim() === "") {
-      newErrors.discountName = "Tên không được để trống.";
+    if (!formData.name || formData.name.trim() === "") {
+      newErrors.name = "Tên không được để trống.";
     }
 
     if (formData.percentage === "" || formData.percentage === null) {
@@ -140,9 +136,9 @@ const DiscountManagement = () => {
   // Hàm reset form khi thêm mới
   const handleReset = () => {
     setFormData({
-      discountName: "",
+      name: "",
       percentage: "",
-      startDate: formatDateTimeLocal(), // Ngày hiện tại
+      startDate: new Date().toISOString().split("T")[0], // Ngày hiện tại
       endDate: "",
       description: "",
     });
@@ -152,11 +148,10 @@ const DiscountManagement = () => {
 
   // Hàm gọi khi nhấn "Sửa" một hàng
   const handleEdit = (item) => {
-    console.log(item);
     setFormData({
       ...item,
-      startDate: formatDateTimeToISO(item.startDate),
-      endDate: formatDateTimeToISO(item.endDate), //yyyy-MM-dd hh:mm:ss -> yyyy-DD-mmThh:mm
+      startDate: formatDateToISO(item.startDate),
+      endDate: formatDateToISO(item.endDate),
     });
     setIsEditing(true);
     setErrorFields({});
@@ -174,8 +169,8 @@ const DiscountManagement = () => {
         if (discount.id === formData.id) {
           return {
             ...formData,
-            startDate: formatDateTimeToDMY(formData.startDate),
-            endDate: formatDateTimeToDMY(formData.endDate),
+            startDate: formatDateToDMY(formData.startDate),
+            endDate: formatDateToDMY(formData.endDate),
           };
         } else {
           return discount;
@@ -204,8 +199,13 @@ const DiscountManagement = () => {
       // Nếu đang ở trạng thái thêm mới
       const newDiscount = {
         ...formData,
+        startDate: formatDateToDMY(formData.startDate),
+        endDate: formatDateToDMY(formData.endDate),
         id: Date.now().toString(), // tạo id tạm thời để gửi lên server
       };
+
+      // Cập nhật mảng discountData
+      setDiscountData([...discountData, newDiscount]);
 
       // Gọi API thêm mới sử dụng discountService
       discountService
@@ -223,7 +223,6 @@ const DiscountManagement = () => {
           setIsLoading(false); // Kết thúc quá trình tải
         });
     }
-    return true;
   };
 
   // Hàm xóa một discount
@@ -255,16 +254,14 @@ const DiscountManagement = () => {
             <Form.Label>Tên giảm giá</Form.Label>
             <Form.Control
               type="text"
-              name="discountName"
-              value={formData.discountName}
-              onChange={(e) =>
-                handleInputChange("discountName", e.target.value)
-              }
-              isInvalid={!!errorFields.discountName}
+              name="name"
+              value={formData.name}
+              onChange={(e) => handleInputChange("name", e.target.value)}
+              isInvalid={!!errorFields.name}
               required
             />
             <Form.Control.Feedback type="invalid">
-              {errorFields.discountName}
+              {errorFields.name}
             </Form.Control.Feedback>
           </Form.Group>
         </div>
@@ -311,7 +308,7 @@ const DiscountManagement = () => {
           <Form.Group controlId="formEndDate">
             <Form.Label>Ngày kết thúc</Form.Label>
             <Form.Control
-              type="datetime-local"
+              type="date"
               name="endDate"
               value={formData.endDate}
               onChange={(e) => handleInputChange("endDate", e.target.value)}

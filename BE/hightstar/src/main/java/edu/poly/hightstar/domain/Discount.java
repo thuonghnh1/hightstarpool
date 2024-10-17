@@ -19,8 +19,8 @@ public class Discount {
     @Column(nullable = false, length = 100)
     private int percentage;
     @Column(nullable = false)
-    private LocalDateTime validFrom;
+    private LocalDateTime startDate;
     @Column(nullable = false)
-    private LocalDateTime validTo;
+    private LocalDateTime endDate;
     private String description;
 }

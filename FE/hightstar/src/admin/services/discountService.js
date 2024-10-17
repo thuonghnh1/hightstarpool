@@ -1,6 +1,5 @@
-// src/services/discountService.js
 import axios from "axios";
-
+import { formatDateTimeToDMY } from "../utils/FormatDate";
 // Cấu hình URL API chung
 const API_URL = "http://localhost:8080/api/discounts"; // Thay bằng URL thực tế của bạn
 
@@ -8,7 +7,16 @@ const API_URL = "http://localhost:8080/api/discounts"; // Thay bằng URL thực
 const getDiscounts = async () => {
   try {
     const response = await axios.get(API_URL);
-    return response.data;
+    const discounts = response.data;
+
+    // Chuyển đổi định dạng ngày giờ cho từng phần tử
+    const formattedDiscounts = discounts.map((discount) => ({
+      ...discount,
+      startDate: formatDateTimeToDMY(discount.startDate), // Chuyển đổi ngày giờ bắt đầu
+      endDate: formatDateTimeToDMY(discount.endDate), // Chuyển đổi ngày giờ kết thúc
+    }));
+
+    return formattedDiscounts;
   } catch (error) {
     console.error("Lỗi khi lấy danh sách giảm giá:", error);
     throw error;
@@ -19,7 +27,16 @@ const getDiscounts = async () => {
 const getDiscountById = async (id) => {
   try {
     const response = await axios.get(`${API_URL}/${id}`);
-    return response.data;
+    const discount = response.data;
+
+    // Chuyển đổi định dạng ngày giờ
+    const formattedDiscount = {
+      ...discount,
+      startDate: formatDateTimeToDMY(discount.startDate), // Chuyển đổi ngày giờ bắt đầu
+      endDate: formatDateTimeToDMY(discount.endDate), // Chuyển đổi ngày giờ kết thúc
+    };
+
+    return formattedDiscount;
   } catch (error) {
     console.error(`Lỗi khi lấy giảm giá với ID: ${id}`, error);
     throw error;

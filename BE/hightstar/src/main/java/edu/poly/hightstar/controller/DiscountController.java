@@ -1,6 +1,6 @@
 package edu.poly.hightstar.controller;
 
-import edu.poly.hightstar.domain.Discount;
+import edu.poly.hightstar.model.DiscountDto;
 import edu.poly.hightstar.service.DiscountService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,23 +18,24 @@ public class DiscountController {
         }
 
         @GetMapping
-        public List<Discount> getAllDiscounts() {
+        public List<DiscountDto> getAllDiscounts() {
                 return discountService.getAllDiscounts();
         }
 
         @GetMapping("/{id}")
-        public Optional<Discount> getDiscountById(@PathVariable Long id) {
+        public Optional<DiscountDto> getDiscountById(@PathVariable Long id) {
                 return discountService.getDiscountById(id);
         }
 
         @PostMapping
-        public Discount createDiscount(@RequestBody Discount discount) {
-                return discountService.createDiscount(discount);
+        public DiscountDto createDiscount(@RequestBody DiscountDto discountDto) {
+                System.out.println("Received discount data: " + discountDto);
+                return discountService.createDiscount(discountDto);
         }
 
         @PutMapping("/{id}")
-        public Discount updateDiscount(@PathVariable Long id, @RequestBody Discount discountDetails) {
-                return discountService.updateDiscount(id, discountDetails);
+        public DiscountDto updateDiscount(@PathVariable Long id, @RequestBody DiscountDto discountDto) {
+                return discountService.updateDiscount(id, discountDto);
         }
 
         @DeleteMapping("/{id}")

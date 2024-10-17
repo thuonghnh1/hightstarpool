@@ -1,12 +1,15 @@
 package edu.poly.hightstar.service.impl;
 
 import edu.poly.hightstar.domain.Discount;
+import edu.poly.hightstar.model.DiscountDto;
 import edu.poly.hightstar.repository.DiscountRepository;
 import edu.poly.hightstar.service.DiscountService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DiscountServiceImpl implements DiscountService {
@@ -18,39 +21,53 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public List<Discount> getAllDiscounts() {
-        return discountRepository.findAll();
+    public List<DiscountDto> getAllDiscounts() {
+        return discountRepository.findAll().stream().map(discount -> {
+            DiscountDto dto = new DiscountDto();
+            BeanUtils.copyProperties(discount, dto); // Chuyển từ entity sang DTO
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Discount> getDiscountById(Long discountId) {
-        return discountRepository.findById(discountId);
-    }
-
-    @Override
-    public Discount createDiscount(Discount discount) {
-        return discountRepository.save(discount);
-    }
-
-    @Override
-    public Discount updateDiscount(Long discountId, Discount discountDetails) {
-        Optional<Discount> optionalDiscount = discountRepository.findById(discountId);
-
-        if (optionalDiscount.isPresent()) {
-            Discount discount = optionalDiscount.get();
-            discount.setDiscountName(discountDetails.getDiscountName());
-            discount.setPercentage(discountDetails.getPercentage());
-            discount.setValidFrom(discountDetails.getValidFrom());
-            discount.setValidTo(discountDetails.getValidTo());
-            discount.setDescription(discountDetails.getDescription());
-            return discountRepository.save(discount);
-        } else {
-            throw new RuntimeException("Discount not found with id " + discountId);
+    public Optional<DiscountDto> getDiscountById(Long id) {
+        Optional<Discount> discount = discountRepository.findById(id);
+        if (discount.isPresent()) {
+            DiscountDto discountDto = new DiscountDto();
+            BeanUtils.copyProperties(discount.get(), discountDto);
+            return Optional.of(discountDto);
         }
+        return Optional.empty();
     }
 
     @Override
-    public void deleteDiscount(Long discountId) {
-        discountRepository.deleteById(discountId);
+    public DiscountDto createDiscount(DiscountDto discountDto) {
+        Discount discount = new Discount();
+        BeanUtils.copyProperties(discountDto, discount); // Chuyển từ DTO sang entity
+        Discount createdDiscount = discountRepository.save(discount);
+
+        DiscountDto createdDiscountDto = new DiscountDto();
+        BeanUtils.copyProperties(createdDiscount, createdDiscountDto); // Trả về DTO sau khi tạo
+        return createdDiscountDto;
+    }
+
+    @Override
+    public DiscountDto updateDiscount(Long id, DiscountDto discountDto) {
+        Optional<Discount> discountOptional = discountRepository.findById(id);
+        if (discountOptional.isPresent()) {
+            Discount discountDetails = discountOptional.get();
+            BeanUtils.copyProperties(discountDto, discountDetails);
+            Discount updatedDiscount = discountRepository.save(discountDetails);
+
+            DiscountDto updatedDiscountDto = new DiscountDto();
+            BeanUtils.copyProperties(updatedDiscount, updatedDiscountDto);
+            return updatedDiscountDto;
+        }
+        return null; // Hoặc xử lý lỗi nếu không tìm thấy
+    }
+
+    @Override
+    public void deleteDiscount(Long id) {
+        discountRepository.deleteById(id);
     }
 }

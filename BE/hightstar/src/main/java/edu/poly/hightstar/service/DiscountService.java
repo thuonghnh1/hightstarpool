@@ -1,17 +1,19 @@
 package edu.poly.hightstar.service;
 
-import edu.poly.hightstar.domain.Discount;
+import edu.poly.hightstar.model.DiscountDto;
+
 import java.util.List;
 import java.util.Optional;
 
 public interface DiscountService {
-    List<Discount> getAllDiscounts();
 
-    Optional<Discount> getDiscountById(Long discountId);
+    List<DiscountDto> getAllDiscounts();
 
-    Discount createDiscount(Discount discount);
+    Optional<DiscountDto> getDiscountById(Long id);
 
-    Discount updateDiscount(Long discountId, Discount discountDetails);
+    DiscountDto createDiscount(DiscountDto discountDto);
 
-    void deleteDiscount(Long discountId);
+    DiscountDto updateDiscount(Long id, DiscountDto discountDto);
+
+    void deleteDiscount(Long id);
 }
