@@ -1,4 +1,4 @@
-package edu.poly.hightstar.controller;
+package edu.poly.hightstar.controller.admin;
 
 import edu.poly.hightstar.model.DiscountDto;
 import edu.poly.hightstar.service.DiscountService;

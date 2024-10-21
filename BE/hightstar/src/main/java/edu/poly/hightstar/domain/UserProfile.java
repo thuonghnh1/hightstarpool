@@ -13,7 +13,6 @@ import java.util.Date;
 @AllArgsConstructor
 @Table(name = "user_profiles")
 public class UserProfile {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long profileId;
@@ -35,10 +34,10 @@ public class UserProfile {
     @Column(length = 600) // Giới hạn chiều dài của bio là 600 ký tự
     private String bio;
 
-    @UpdateTimestamp
+    @UpdateTimestamp // Thời gian cập nhật cuối cùng, tự động cập nhật khi có thay đổi
     private LocalDateTime updatedAt;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "userId", referencedColumnName = "userId")
     private User user;
 }

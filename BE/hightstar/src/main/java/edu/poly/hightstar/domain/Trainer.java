@@ -25,7 +25,7 @@ public class Trainer {
     @Column(nullable = false, length = 300)
     private double rating;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY) // thông tin User sẽ luôn được lấy cùng lúc khi truy vấn trainer
     @JoinColumn(name = "userId", referencedColumnName = "userId")
     private User user;
 }

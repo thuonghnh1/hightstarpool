@@ -28,6 +28,14 @@ const TableManagement = ({
   const [showModal, setShowModal] = useState(false); // Hiển thị modal thêm/sửa
   const [deleteId, setDeleteId] = useState(null); // ID của item cần xóa
   const [showConfirmModal, setShowConfirmModal] = useState(false); // Hiển thị modal xác nhận xóa
+  const [expandedRows, setExpandedRows] = useState([]); // Theo dõi các hàng đang được mở
+
+  // Xử lý toggle mở rộng hàng
+  const handleRowToggle = (id) => {
+    setExpandedRows((prev) =>
+      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+    );
+  };
 
   // Tính toán tổng số trang
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -220,34 +228,66 @@ const TableManagement = ({
             </thead>
             <tbody>
               {currentData.map((item) => (
-                <tr key={item.id}>
-                  {columns
-                    .filter((col) => visibleColumns.includes(col.key))
-                    .map((column) => (
-                      <td key={column.key} className="align-middle">
-                        {item[column.key]}
+                <>
+                  <tr
+                    key={item.id}
+                    onClick={() => handleRowToggle(item.id)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {columns
+                      .filter((col) => visibleColumns.includes(col.key))
+                      .map((column) => (
+                        <td key={column.key} className="align-middle">
+                          {item[column.key]}
+                        </td>
+                      ))}
+                    <td>
+                      <button
+                        className="btn btn__edit me-3 p-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit(item);
+                          handleShowModal();
+                        }}
+                      >
+                        <i className="bi bi-pencil"></i>
+                      </button>
+                      <button
+                        className="btn btn__delete p-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShowConfirmModal(item.id);
+                        }}
+                      >
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  {expandedRows.includes(item.id) && (
+                    <tr key={item.id + "-expanded"}>
+                      <td colSpan={columns.length + 1}>
+                        <div className="collapse-content">
+                          <strong className="d-block py-2">
+                            Chi tiết:
+                          </strong>
+                          <ul className="px-2 list-unstyled">
+                            {columns
+                              .filter(
+                                (column) => !visibleColumns.includes(column.key)
+                              ) // Lọc các cột chưa được hiển thị
+                              .map((column) => (
+                                <li key={column.key}>
+                                  <strong className="text-secondary">{column.label}:</strong>
+                                  <span className="ps-2">{item[column.key]}</span>{" "}
+                                  {/* Hiển thị dữ liệu cho cột này */}
+                                </li>
+                              ))}
+                          </ul>
+                        </div>
                       </td>
-                    ))}
-                  <td>
-                    <button
-                      className="btn btn__edit me-3 p-1"
-                      onClick={() => {
-                        onEdit(item);
-                        handleShowModal();
-                      }}
-                    >
-                      <i className="bi bi-pencil"></i>
-                    </button>
-                    <button
-                      className="btn btn__delete p-1"
-                      onClick={() => {
-                        handleShowConfirmModal(item.id);
-                      }}
-                    >
-                      <i className="bi bi-trash"></i>
-                    </button>
-                  </td>
-                </tr>
+                    </tr>
+                  )}
+                </>
               ))}
             </tbody>
           </table>
