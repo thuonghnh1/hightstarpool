@@ -1,6 +1,6 @@
 package edu.poly.hightstar.controller.admin;
 
-import edu.poly.hightstar.model.TrainerDto;
+import edu.poly.hightstar.model.TrainerDTO;
 import edu.poly.hightstar.service.TrainerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +19,13 @@ public class TrainerController {
     }
 
     @GetMapping
-    public List<TrainerDto> getAllTrainers() {
+    public List<TrainerDTO> getAllTrainers() {
         return trainerService.getAllTrainers();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TrainerDto> getTrainerById(@PathVariable Long id) {
-        TrainerDto trainerDto = trainerService.getTrainerById(id);
+    public ResponseEntity<TrainerDTO> getTrainerById(@PathVariable Long id) {
+        TrainerDTO trainerDto = trainerService.getTrainerById(id);
         if (trainerDto == null) {
             return ResponseEntity.notFound().build();
         }
@@ -33,14 +33,14 @@ public class TrainerController {
     }
 
     @PostMapping
-    public ResponseEntity<TrainerDto> createTrainer(@RequestBody TrainerDto trainerDto) {
-        TrainerDto createdTrainer = trainerService.createTrainer(trainerDto);
+    public ResponseEntity<TrainerDTO> createTrainer(@RequestBody TrainerDTO trainerDto) {
+        TrainerDTO createdTrainer = trainerService.createTrainer(trainerDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTrainer);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TrainerDto> updateTrainer(@PathVariable Long id, @RequestBody TrainerDto trainerDto) {
-        TrainerDto updatedTrainer = trainerService.updateTrainer(id, trainerDto);
+    public ResponseEntity<TrainerDTO> updateTrainer(@PathVariable Long id, @RequestBody TrainerDTO trainerDto) {
+        TrainerDTO updatedTrainer = trainerService.updateTrainer(id, trainerDto);
         return ResponseEntity.ok(updatedTrainer);
     }
 

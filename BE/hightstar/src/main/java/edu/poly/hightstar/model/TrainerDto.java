@@ -8,7 +8,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TrainerDto {
+public class TrainerDTO {
     @JsonProperty("id")
     private Long trainerId;
     private String fullName; // Từ userProfile
