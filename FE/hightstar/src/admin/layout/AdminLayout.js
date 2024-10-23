@@ -6,8 +6,8 @@ import {
   Page404,
   UserManagement,
   CourseManagement,
-  StudentList,
   DiscountManagement,
+  StudentManagement,
 } from "../views/index";
 import { Bounce, ToastContainer } from "react-toastify";
 
@@ -45,9 +45,8 @@ const AdminLayout = () => {
     <div className="container__admin overflow-hidden">
       <AppSidebar className="" isSidebarOpen={isSidebarOpen} />
       <div
-        className={`right__box d-flex flex-column ${
-          isSidebarOpen ? "with-sidebar" : ""
-        }`}
+        className={`right__box d-flex flex-column ${isSidebarOpen ? "with-sidebar" : ""
+          }`}
       >
         <AppHeader
           toggleSidebar={toggleSidebar}
@@ -71,7 +70,7 @@ const AdminLayout = () => {
               />
               <Route
                 path="/admin/student-management"
-                element={<StudentList />}
+                element={<StudentManagement />}
               />
               <Route path="*" element={<Page404 />} />
             </Routes>

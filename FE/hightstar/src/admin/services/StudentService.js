@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Cấu hình URL API chung
-const API_URL = "http://localhost:8080/api/students"; // Thay bằng URL thực tế của bạn
+const API_URL = "http://localhost:8080/api/students";
 
 // Hàm lấy tất cả học viên
 const getStudents = async () => {

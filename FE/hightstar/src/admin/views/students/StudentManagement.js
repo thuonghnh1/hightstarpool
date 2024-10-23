@@ -2,11 +2,6 @@ import { useEffect, useState } from "react";
 import TableManagement from "../../components/common/TableManagement";
 import studentService from "../../services/StudentService.js";
 import Page500 from "../pages/Page500";
-import {
-    formatDateTimeToISO,
-    formatDateTimeToDMY,
-    formatDateTimeLocal,
-} from "../../utils/FormatDate";
 import { Spinner, Form } from "react-bootstrap";
 import { Bounce, ToastContainer, toast } from "react-toastify";
 
@@ -23,7 +18,7 @@ const StudentManagement = () => {
     const [errorServer, setErrorServer] = useState(null);
 
     // Mảng cột của bảng (cần đổi theo các trường có trong csdl. lưu ý giữ nguyên id là 'id' sau ni làm be r giải thích sau)
-    const discountColumns = [
+    const studentColumns = [
         { key: "id", label: "Mã Học Viên" },
         { key: "fullName", label: "Họ Tên Học Viên" },
         { key: "nickname", label: "Biệt Danh" },
@@ -35,7 +30,7 @@ const StudentManagement = () => {
     ];
 
     // Loại bỏ cột 'description' khỏi discountColumns (đoạn ni sẽ bỏ những cột k cần hiện mặc định lên bảng, như ở dưới mặc định sẽ k có cột 'mô tả' khi reder. mà chỉ khi tích chọn vào mới hiện)
-    const defaultColumns = discountColumns.filter(
+    const defaultColumns = studentColumns.filter(
         (column) => column.key !== "note"
     );
 
@@ -52,10 +47,10 @@ const StudentManagement = () => {
         }
     };
 
-    // Gọi API khi component mount
-    useEffect(() => {
-        fetchDiscountData();
-    }, []);
+    // // Gọi API khi component mount
+    // useEffect(() => {
+    //     fetchStudentData();
+    // }, []);
 
     // Hàm validate cho từng trường input
     // (cần đổi validate cho các trường input m nhập vô)
@@ -72,7 +67,7 @@ const StudentManagement = () => {
             case "age":
                 if (value === "" || value === null) {
                     error = "Tuổi không được để trống.";
-                } else if (isNaN(value)|| value < 1 || value >100) {
+                } else if (isNaN(value) || value < 1 || value > 100) {
                     error = "Tuổi phải lớn hơn 0 và nhỏ hơn 100."
                 }
                 break;
@@ -103,7 +98,7 @@ const StudentManagement = () => {
             formData.age < 1 ||
             formData.age > 100
         ) {
-            newErrors.age = 
+            newErrors.age =
                 "Tuổi phải lớn hơn 0 và nhỏ hơn 100.";
         }
 
@@ -133,9 +128,8 @@ const StudentManagement = () => {
 
     // Hàm gọi khi nhấn "Sửa" một hàng
     const handleEdit = (item) => {
-        console.log(item);
         setFormData({
-            ...item
+            ...item,
         });
         setIsEditing(true);
         setErrorFields({});
@@ -148,27 +142,23 @@ const StudentManagement = () => {
         setIsLoading(true); // Bắt đầu quá trình tải
 
         if (isEditing) {
-            // Tìm mục giảm giá đang chỉnh sửa dựa vào `id`
-            // (Cần đổi tên biến)
-            const updatedStudents = studentData.map((student) => {
-                if (student.id === formData.id) {
-                    return {
-                        ...formData
-                    };
-                } else {
-                    return discount;
-                }
-            });
-
-            // Cập nhật mảng discountData
-            setStudentData(updatedStudents);
-
             // Gọi API cập nhật sử dụng discountService
-            // discountService thành cái sv của m
             studentService
                 .updateStudent(formData.id, formData)
-                .then(() => {
-                    // fetchDiscountData(); // Gọi lại để lấy dữ liệu mới nhất từ server
+                .then((response) => {
+                    let updatedStudent = response; // Lấy phản hồi từ server
+                    console.log("Update: " + updatedStudent);
+
+                    updatedStudent = {
+                        // Đổi định dạng ngày giờ trước khi lưu vào mảng
+                        ...updatedStudent,
+                    };
+
+                    // Cập nhật state discountData với discount đã được sửa
+                    const updatedStudents = studentData.map((student) =>
+                        student.id === updatedStudent.id ? updatedStudent : student
+                    );
+                    setStudentData(updatedStudents);
                     toast.success("Cập nhật thành công!");
                     handleReset();
                 })
@@ -183,14 +173,20 @@ const StudentManagement = () => {
             // Nếu đang ở trạng thái thêm mới
             const newStudent = {
                 ...formData,
-                id: Date.now().toString(), // tạo id tạm thời để gửi lên server
             };
-            // (Tương tự cái trên)
+
             // Gọi API thêm mới sử dụng discountService
             studentService
                 .createStudent(newStudent)
                 .then((response) => {
-                    fetchStudentData(); // Gọi lại để lấy dữ liệu mới nhất từ server
+                    let createdStudent = response; // Lấy phản hồi từ server (bao gồm ID)
+                    createdStudent = {
+                        // đổi định dạng ngày giờ trước khi lưu vào mảng
+                        ...createdStudent,
+                    };
+                    // Cập nhật mảng discountData với item vừa được thêm
+                    setStudentData([...studentData, createdStudent]);
+
                     toast.success("Thêm mới thành công!");
                     handleReset();
                 })
@@ -207,7 +203,6 @@ const StudentManagement = () => {
 
     // Hàm xóa một discount
     const handleDelete = (deleteId) => {
-        //(cần đổi tương tự)
         if (deleteId) {
             setIsLoading(true);
             studentService
@@ -232,7 +227,7 @@ const StudentManagement = () => {
         <>
             <div className="row">
                 <div className="col-md-6 mb-3">
-                    <Form.Group controlId="formName">
+                    <Form.Group controlId="formFullName">
                         <Form.Label>Họ Tên Học Viên</Form.Label>
                         <Form.Control
                             type="text"
@@ -251,7 +246,7 @@ const StudentManagement = () => {
                 </div>
 
                 <div className="col-md-6 mb-3">
-                    <Form.Group controlId="formNickName">
+                    <Form.Group controlId="formNickname">
                         <Form.Label>Biệt Danh</Form.Label>
                         <Form.Control
                             type="text"
@@ -282,23 +277,62 @@ const StudentManagement = () => {
                             required
                         />
                         <Form.Control.Feedback type="invalid">
-                            {errorFields.percentage}
+                            {errorFields.age}
                         </Form.Control.Feedback>
                     </Form.Group>
                 </div>
-            </div>
 
-            <div className="row">
+                <div className="col-md-6 mb-3">
+                    <Form.Group controlId="formGender">
+                        <Form.Label>Giới Tính</Form.Label>
+                        <Form.Select
+                            name="gender"
+                            value={formData.gender}
+                            onChange={(e) => handleInputChange("gender", e.target.value)}
+                            isInvalid={!!errorFields.gender}
+                            required
+                        >
+                            <option value="">Chọn giới tính</option>
+                            <option value="male">Nam</option>
+                            <option value="female">Nữ</option>
+                        </Form.Select>
+                        <Form.Control.Feedback type="invalid">
+                            {errorFields.gender}
+                        </Form.Control.Feedback>
+                    </Form.Group>
+                </div>
+
                 <div className="col-md-12 mb-3">
-                    <Form.Group controlId="formDescription">
-                        <Form.Label>Mô tả</Form.Label>
+                    <Form.Group controlId="formNote">
+                        <Form.Label>Ghi Chú</Form.Label>
                         <Form.Control
                             as="textarea"
                             rows={3}
-                            name="description"
-                            value={formData.description}
-                            onChange={(e) => handleInputChange("description", e.target.value)}
+                            name="note"
+                            value={formData.note}
+                            onChange={(e) => handleInputChange("note", e.target.value)}
+                            isInvalid={!!errorFields.note}
                         />
+                        <Form.Control.Feedback type="invalid">
+                            {errorFields.note}
+                        </Form.Control.Feedback>
+                    </Form.Group>
+                </div>
+
+                <div className="col-md-6 mb-3">
+                    <Form.Group controlId="formUserId">
+                        <Form.Label>Mã Người Dùng</Form.Label>
+                        <Form.Control
+                            type="text"
+                            name="userId"
+                            value={formData.userId}
+                            onChange={(e) => handleInputChange("userId", e.target.value)}
+                            isInvalid={!!errorFields.userId}
+                            required
+                        />
+                        <Form.Control.Feedback type="invalid">
+                            {errorFields.userId}
+                        </Form.Control.Feedback>
                     </Form.Group>
                 </div>
             </div>
@@ -318,16 +352,17 @@ const StudentManagement = () => {
             ) : (
                 <section className="row m-0 p-0 ">
                     <TableManagement
-                        data={discountData}
-                        columns={discountColumns}
-                        title={"Quản lý giảm giá"}
-                        defaultColumns={defaultColumns} // Truyền mảng cột đã lọc
-                        modalContent={modalContent}
-                        isEditing={isEditing}
-                        handleReset={handleReset}
-                        onEdit={handleEdit}
+                        data={studentData}
+                        columns={studentColumns}
+                        title={"Quản lý học viên"}
+                        defaultColumns={defaultColumns}
                         handleSaveItem={handleSaveItem}
-                        onDelete={handleDelete}
+                        handleEdit={handleEdit}
+                        handleDelete={handleDelete}
+                        handleReset={handleReset}
+                        formData={formData}
+                        setFormData={setFormData}
+                        modalContent={modalContent}
                         isLoading={isLoading}
                     />
 
