@@ -21,9 +21,9 @@ const StudentManagement = () => {
     const studentColumns = [
         { key: "id", label: "Mã Học Viên" },
         { key: "fullName", label: "Họ Tên Học Viên" },
-        { key: "nickname", label: "Biệt Danh" },
         { key: "age", label: "Tuổi" },
-        { key: "avatar", label: "Tuổi" },
+        // { key: "avatar", label: "Ảnh" },
+        { key: "nickname", label: "Biệt Danh" },
         { key: "gender", label: "Giới Tính" },
         { key: "note", label: "Ghi Chú" },
         { key: "userId", label: "Mã Người Dùng" },
@@ -39,6 +39,7 @@ const StudentManagement = () => {
         setLoadingPage(true);
         try {
             const data = await studentService.getStudents(); // (cần đổi)
+            console.log("Dữ liệu từ API:", data);
             setStudentData(data); // Lưu dữ liệu vào state
         } catch (err) {
             setErrorServer(err.message); // Lưu lỗi vào state nếu có
@@ -48,9 +49,9 @@ const StudentManagement = () => {
     };
 
     // // Gọi API khi component mount
-    // useEffect(() => {
-    //     fetchStudentData();
-    // }, []);
+    useEffect(() => {
+        fetchStudentData();
+    }, []);
 
     // Hàm validate cho từng trường input
     // (cần đổi validate cho các trường input m nhập vô)
@@ -128,6 +129,7 @@ const StudentManagement = () => {
 
     // Hàm gọi khi nhấn "Sửa" một hàng
     const handleEdit = (item) => {
+        console.log("Dữ liệu học viên được chọn:", item); //ktra dữ liệu khi nhấn nút chỉnh sửa
         setFormData({
             ...item,
         });
@@ -233,6 +235,7 @@ const StudentManagement = () => {
                             type="text"
                             name="fullName"
                             value={formData.fullName}
+                            maxLength={200}
                             onChange={(e) =>
                                 handleInputChange("fullName", e.target.value)
                             }
@@ -252,6 +255,7 @@ const StudentManagement = () => {
                             type="text"
                             name="nickname"
                             value={formData.nickname}
+                            maxLength={100}
                             onChange={(e) =>
                                 handleInputChange("nickname", e.target.value)
                             }
@@ -325,7 +329,7 @@ const StudentManagement = () => {
                         <Form.Control
                             type="text"
                             name="userId"
-                            value={formData.userId}
+                            value={formData.userId || ""} //gán gtri từ formData
                             onChange={(e) => handleInputChange("userId", e.target.value)}
                             isInvalid={!!errorFields.userId}
                             required
@@ -357,8 +361,8 @@ const StudentManagement = () => {
                         title={"Quản lý học viên"}
                         defaultColumns={defaultColumns}
                         handleSaveItem={handleSaveItem}
-                        handleEdit={handleEdit}
-                        handleDelete={handleDelete}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
                         handleReset={handleReset}
                         formData={formData}
                         setFormData={setFormData}
