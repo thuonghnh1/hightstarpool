@@ -1,0 +1,56 @@
+.table__management .table-responsive {
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on mobile */
+}
+
+.table__management table td,
+.table__management table th {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.table__management table .btn__edit {
+  color: rgb(9, 170, 9);
+  transition: 0.3s;
+  border: none;
+}
+
+.table__management table .btn__edit:hover {
+  color: rgb(12, 94, 12);
+}
+
+.table__management table .btn__delete {
+  color: red;
+  transition: 0.3s;
+  border: none;
+}
+
+.table__management table .btn__delete:hover {
+  color: rgb(167, 40, 40);
+}
+
+.table__management table .btn__show {
+  color: blue;
+  transition: 0.3s;
+  border: none;
+}
+
+.table__management table .btn__show:hover {
+  color: rgb(25, 97, 25);
+}
+
+.table__management .pagination .page-item .page-link {
+  padding: 4px 10px;
+}
+
+.table__management .pagination .page-item.active .page-link {
+  color: #ffffff;
+}
+
+.table__management table .expand-row li {
+  border-bottom: 1px dashed rgba(128, 128, 128, 0.288);
+}
+
+.table__management table .expand-row li:last-child {
+  border-bottom: none;
+}

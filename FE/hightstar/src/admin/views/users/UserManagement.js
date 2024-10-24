@@ -10,7 +10,7 @@
 
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../../css/UserManagement.css";
+// import "../../css/users/user-management.css";
 import axios from "axios";
 
 const UserManagement = () => {
@@ -19,6 +19,9 @@ const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
   const [showAddUserForm, setShowAddUserForm] = useState(false);
+  const [showEditUserForm, setShowEditUserForm] = useState(false);
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [errors, setErrors] = useState({});
   const [newUser, setNewUser] = useState({
     Username: "",
     Password: "",
@@ -133,26 +136,58 @@ const UserManagement = () => {
     setShowAddUserForm(true);
   };
 
-  const handleSaveUser = () => {
-    // Tạo ID mới
-    const newUserId = users.length + 1;
+  const handleViewUser = (user) => {
+    setNewUser({
+      UserId: user.UserId,
+      Username: user.Username,
+      Password: user.Password,
+      Email: user.Email,
+      Role: user.Role,
+      RegisteredDate: user.RegisteredDate,
+    });
+    // setShowAddUserForm(true); // Mở modal để chỉnh sửa
+    setShowEditUserForm(true);
+    setEditingUserId(user.UserId);
+  };
 
+  const validate = () => {
+    const newErrors = {};
+    if (!newUser.Username)
+      newErrors.Username = "Tên đăng nhập không được để trống.";
+    if (!newUser.Password) newErrors.Password = "Mật khẩu không được để trống.";
+    if (!newUser.Email) newErrors.Email = "Email không được để trống.";
+    return newErrors;
+  };
+
+  const handleSaveUser = () => {
+    const validationErrors = validate();
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      return;
+    }
+
+    // Tạo ID mới
+    const newUserId = newUser.UserId || users.length + 1;
     const userToAdd = {
       UserId: newUserId,
       ...newUser,
-      Status: true, // Mặc định trạng thái là Kích hoạt
+      Status: true,
     };
 
-    setUsers([...users, userToAdd]); // Thêm người dùng vào danh sách
-    setShowAddUserForm(false); // Ẩn modal sau khi lưu
+    setUsers((prevUsers) =>
+      prevUsers.filter((user) => user.UserId !== newUserId).concat(userToAdd)
+    );
+    setShowAddUserForm(false);
+    setShowEditUserForm(false);
     setNewUser({
-      // Đặt lại giá trị mặc định cho user mới
+      UserId: null,
       Username: "",
       Password: "",
       Email: "",
       Role: "User",
       RegisteredDate: new Date().toISOString().split("T")[0],
     });
+    setEditingUserId(null);
   };
 
   const indexOfLastUser = currentPage * usersPerPage;
@@ -226,6 +261,9 @@ const UserManagement = () => {
                         }
                         required
                       />
+                      {errors.Username && (
+                        <small className="text-danger">{errors.Username}</small>
+                      )}
                     </div>
                     <div className="mb-3">
                       <label>Mật khẩu:</label>
@@ -238,6 +276,9 @@ const UserManagement = () => {
                         }
                         required
                       />
+                      {errors.Password && (
+                        <small className="text-danger">{errors.Password}</small>
+                      )}
                     </div>
                     <div className="mb-3">
                       <label>Email:</label>
@@ -250,6 +291,9 @@ const UserManagement = () => {
                         }
                         required
                       />
+                      {errors.Email && (
+                        <small className="text-danger">{errors.Email}</small>
+                      )}
                     </div>
                     <div className="mb-3">
                       <label>Vai trò:</label>
@@ -285,6 +329,125 @@ const UserManagement = () => {
           </div>
         </div>
       )}
+      {/* Overlay khi modal hiển thị */}
+
+      {/* Modal chỉnh sửa người dùng */}
+      {showEditUserForm && (
+        <div className="overlay" onClick={() => setShowEditUserForm(false)}>
+          <div
+            className={`modal ${showEditUserForm ? "show" : ""}`}
+            style={{ display: showEditUserForm ? "block" : "none" }}
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Chỉnh sửa người dùng</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowEditUserForm(false)}
+                  ></button>
+                </div>
+                <div
+                  className="modal-body"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <form>
+                    <div className="mb-3">
+                      <label>Tên đăng nhập:</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={newUser.Username}
+                        onChange={(e) =>
+                          setNewUser({ ...newUser, Username: e.target.value })
+                        }
+                        required
+                      />
+                      {errors.Username && (
+                        <small className="text-danger">{errors.Username}</small>
+                      )}
+                    </div>
+                    <div className="mb-3">
+                      <label>Mật khẩu:</label>
+                      <input
+                        type="password"
+                        className="form-control"
+                        value={newUser.Password}
+                        onChange={(e) =>
+                          setNewUser({ ...newUser, Password: e.target.value })
+                        }
+                        required
+                      />
+                      {errors.Password && (
+                        <small className="text-danger">{errors.Password}</small>
+                      )}
+                    </div>
+                    <div className="mb-3">
+                      <label>Email:</label>
+                      <input
+                        type="email"
+                        className="form-control"
+                        value={newUser.Email}
+                        onChange={(e) =>
+                          setNewUser({ ...newUser, Email: e.target.value })
+                        }
+                        required
+                      />
+                      {errors.Email && (
+                        <small className="text-danger">{errors.Email}</small>
+                      )}
+                    </div>
+                    <div className="mb-3">
+                      <label>Vai trò:</label>
+                      <select
+                        className="form-select"
+                        value={newUser.Role}
+                        onChange={(e) =>
+                          setNewUser({ ...newUser, Role: e.target.value })
+                        }
+                      >
+                        <option value="User">User</option>
+                        <option value="Admin">Admin</option>
+                      </select>
+                    </div>
+                    <div className="mb-3">
+                      <label>Ngày đăng ký:</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={newUser.RegisteredDate.split("T")[0]}
+                        onChange={(e) =>
+                          setNewUser({
+                            ...newUser,
+                            RegisteredDate: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </form>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowEditUserForm(false)}
+                  >
+                    Đóng
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSaveUser}
+                  >
+                    Lưu
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <table className="table table-bordered">
         <thead className="table-dark">
@@ -306,14 +469,20 @@ const UserManagement = () => {
               <td>{user.Role}</td>
               <td>{user.Status ? "Kích hoạt" : "Không kích hoạt"}</td>
               <td>
-                <button className="btn btn-info me-2" onClick={() => {}}>
+                <button
+                  className="btn btn-outline-info me-2"
+                  onClick={() => handleViewUser(user)}
+                >
                   Xem
                 </button>
-                <button className="btn btn-warning me-2" onClick={() => {}}>
+                <button
+                  className="btn btn-outline-warning me-2"
+                  onClick={() => {}}
+                >
                   Sửa
                 </button>
                 <button
-                  className="btn btn-danger"
+                  className="btn btn-outline-danger"
                   onClick={() => handleDelete(user.UserId)}
                 >
                   Xóa
