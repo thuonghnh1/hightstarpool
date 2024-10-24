@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Form, Pagination, Dropdown, DropdownButton } from "react-bootstrap";
 import CustomModal from "./CustomModal";
 import DeleteModal from "./DeleteModal";
@@ -28,6 +28,14 @@ const TableManagement = ({
   const [showModal, setShowModal] = useState(false); // Hiển thị modal thêm/sửa
   const [deleteId, setDeleteId] = useState(null); // ID của item cần xóa
   const [showConfirmModal, setShowConfirmModal] = useState(false); // Hiển thị modal xác nhận xóa
+  const [expandedRows, setExpandedRows] = useState([]); // Theo dõi các hàng đang được mở
+
+  // Xử lý toggle mở rộng hàng
+  const handleRowToggle = (id) => {
+    setExpandedRows((prev) =>
+      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+    );
+  };
 
   // Tính toán tổng số trang
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -131,6 +139,7 @@ const TableManagement = ({
     }
   };
 
+
   return (
     <div className="table__management col-12 p-4 bg-white rounded-3">
       <h5 className="mb-4 text-uppercase fw-bold">{title}</h5>
@@ -182,7 +191,7 @@ const TableManagement = ({
       </div>
 
       <div className="table__wrapper row m-0">
-        <div className="light__text col-12 p-0 table-responsive">
+        <div className="light__text col-12 p-0">
           <table className="table table-hover mb-2">
             <thead>
               <tr>
@@ -220,34 +229,75 @@ const TableManagement = ({
             </thead>
             <tbody>
               {currentData.map((item) => (
-                <tr key={item.id}>
-                  {columns
-                    .filter((col) => visibleColumns.includes(col.key))
-                    .map((column) => (
-                      <td key={column.key} className="align-middle">
-                        {item[column.key]}
+                <Fragment key={item.id}>
+                  <tr
+                    // onClick={() => handleRowToggle(item.id)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {columns
+                      .filter((col) => visibleColumns.includes(col.key))
+                      .map((column) => (
+                        <td key={column.key} className="align-middle">
+                          {item[column.key]}
+                        </td>
+                      ))}
+                    <td className="col-1">
+                      <button
+                        className="btn btn__edit me-md-3 me-2 p-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit(item);
+                          handleShowModal();
+                        }}
+                      >
+                        <i className="bi bi-pencil-square"></i>
+                      </button>
+                      <button
+                        className="btn btn__delete me-md-3 me-2 p-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShowConfirmModal(item.id);
+                        }}
+                      >
+                        <i className="bi bi-trash-fill"></i>
+                      </button>
+                      <button
+                        className="btn btn__show p-1"
+                        onClick={() => handleRowToggle(item.id)}
+                      >
+                        {expandedRows.includes(item.id) ? (
+                          <i className="bi bi-dash-circle"></i>
+                        ) : (
+                          <i className="bi bi-plus-circle"></i>
+                        )}
+                      </button>
+                    </td>
+                  </tr>
+                  {expandedRows.includes(item.id) && (
+                    <tr key={item.id + "-expanded"} className="expand-row">
+                      <td colSpan={columns.length + 1}>
+                        <div className="collapse-content">
+                          <ul className="py-2 m-0 list-unstyled">
+                            {columns
+                              .filter(
+                                (column) => !visibleColumns.includes(column.key)
+                              ) // Lọc các cột chưa được hiển thị
+                              .map((column) => (
+                                <li key={column.key} className="py-2 w-50 m-0">
+                                  <strong className="me-3 p-0">
+                                    {column.label}:
+                                  </strong>
+                                  <span className=" p-0 text-truncate">
+                                    {item[column.key]}
+                                  </span>
+                                </li>
+                              ))}
+                          </ul>
+                        </div>
                       </td>
-                    ))}
-                  <td>
-                    <button
-                      className="btn btn__edit me-3 p-1"
-                      onClick={() => {
-                        onEdit(item);
-                        handleShowModal();
-                      }}
-                    >
-                      <i className="bi bi-pencil"></i>
-                    </button>
-                    <button
-                      className="btn btn__delete p-1"
-                      onClick={() => {
-                        handleShowConfirmModal(item.id);
-                      }}
-                    >
-                      <i className="bi bi-trash"></i>
-                    </button>
-                  </td>
-                </tr>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
             </tbody>
           </table>
