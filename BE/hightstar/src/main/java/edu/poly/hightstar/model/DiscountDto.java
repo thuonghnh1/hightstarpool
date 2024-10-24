@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DiscountDTO {
-    @JsonProperty("id") // cấu hình thuộc tính giống với trong file json
+    @JsonProperty("id") // cấu hình thuộc tính giống với trong file json.
     private Long discountId;
     private String discountName;
     private int percentage;
