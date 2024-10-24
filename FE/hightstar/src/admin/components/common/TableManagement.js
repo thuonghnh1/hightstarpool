@@ -139,7 +139,6 @@ const TableManagement = ({
     }
   };
 
-
   return (
     <div className="table__management col-12 p-4 bg-white rounded-3">
       <h5 className="mb-4 text-uppercase fw-bold">{title}</h5>
@@ -191,7 +190,7 @@ const TableManagement = ({
       </div>
 
       <div className="table__wrapper row m-0">
-        <div className="light__text col-12 p-0">
+        <div className="light__text table-responsive col-12 p-0">
           <table className="table table-hover mb-2">
             <thead>
               <tr>
@@ -230,10 +229,7 @@ const TableManagement = ({
             <tbody>
               {currentData.map((item) => (
                 <Fragment key={item.id}>
-                  <tr
-                    // onClick={() => handleRowToggle(item.id)}
-                    style={{ cursor: "pointer" }}
-                  >
+                  <tr>
                     {columns
                       .filter((col) => visibleColumns.includes(col.key))
                       .map((column) => (
@@ -261,16 +257,18 @@ const TableManagement = ({
                       >
                         <i className="bi bi-trash-fill"></i>
                       </button>
-                      <button
-                        className="btn btn__show p-1"
-                        onClick={() => handleRowToggle(item.id)}
-                      >
-                        {expandedRows.includes(item.id) ? (
-                          <i className="bi bi-dash-circle"></i>
-                        ) : (
-                          <i className="bi bi-plus-circle"></i>
-                        )}
-                      </button>
+                      {visibleColumns.length === columns.length || (
+                        <button
+                          className="btn btn__show p-1"
+                          onClick={() => handleRowToggle(item.id)}
+                        >
+                          {expandedRows.includes(item.id) ? (
+                            <i className="bi bi-dash-circle"></i>
+                          ) : (
+                            <i className="bi bi-plus-circle"></i>
+                          )}
+                        </button>
+                      )}
                     </td>
                   </tr>
                   {expandedRows.includes(item.id) && (
@@ -283,11 +281,14 @@ const TableManagement = ({
                                 (column) => !visibleColumns.includes(column.key)
                               ) // Lọc các cột chưa được hiển thị
                               .map((column) => (
-                                <li key={column.key} className="py-2 w-50 m-0">
+                                <li
+                                  key={column.key}
+                                  className="py-2 w-75 m-0 text-truncate"
+                                >
                                   <strong className="me-3 p-0">
                                     {column.label}:
                                   </strong>
-                                  <span className=" p-0 text-truncate">
+                                  <span className=" p-0">
                                     {item[column.key]}
                                   </span>
                                 </li>

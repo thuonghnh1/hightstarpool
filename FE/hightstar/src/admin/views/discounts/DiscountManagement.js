@@ -104,7 +104,7 @@ const DiscountManagement = () => {
 
     if (!formData.discountName || formData.discountName.trim() === "") {
       newErrors.discountName = "Tên không được để trống.";
-    }
+    } 
 
     if (formData.percentage === "" || formData.percentage === null) {
       newErrors.percentage = "Tỷ lệ giảm giá không được để trống.";
@@ -262,6 +262,7 @@ const DiscountManagement = () => {
               type="text"
               name="discountName"
               value={formData.discountName}
+              maxLength={100}
               onChange={(e) =>
                 handleInputChange("discountName", e.target.value)
               }

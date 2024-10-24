@@ -4,6 +4,7 @@
 
 .table__management table td,
 .table__management table th {
+  max-width: 250px;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
