@@ -1,0 +1,90 @@
+.login-container {
+    background-image: url("../../../assets/images/backgroudLoginSignUp.jpg");
+    background-size: cover;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .login-form {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    width: 350px;
+    text-align: center;
+  }
+  
+  h2 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .input-group {
+    margin-bottom: 15px;
+    text-align: left;
+    width: 100%; /* Đảm bảo input-group chiếm hết chiều rộng */
+    box-sizing: border-box; /* Bao gồm padding và border trong tổng kích thước */
+  }
+  
+  .input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    text-align: left; /* Đảm bảo label căn về bên trái */
+  }
+  
+  .input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước của input */
+  }
+  
+  .remember-me {
+    display: flex;
+    align-items: center;
+    /* margin: 0 ; */
+    width: 300px;
+  }
+  
+   .remember-me input {
+    margin: 0;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+  }
+  
+   .remember-me label {
+    margin: 0; /* Xóa margin của label để đảm bảo nó căn đúng */
+  }
+  
+  .login-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #003366;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .login-button:hover {
+    background-color: #002244;
+  }
+  
+  .footer {
+    margin-top: 20px;
+  }
+  
+  .footer a {
+    color: #003366;
+    text-decoration: none;
+  }
+  
+  .footer p {
+    margin-top: 10px;
+  }
+  

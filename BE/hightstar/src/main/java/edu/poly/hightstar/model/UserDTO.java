@@ -9,7 +9,8 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto {
+public class UserDTO {
+
     @JsonProperty("id")
     private Long userId;
     private String username;

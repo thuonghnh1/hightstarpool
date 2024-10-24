@@ -100,8 +100,8 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
                 <Dropdown.Item as={NavLink} to="/settings">
                   Cài đặt
                 </Dropdown.Item>
-                <Dropdown.Item as={NavLink} to="/logout">
-                  Đăng xuất
+                <Dropdown.Item as={NavLink} to="/login">
+                  Đăng nhập
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>

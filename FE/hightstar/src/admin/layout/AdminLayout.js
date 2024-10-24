@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import { AppSidebar, AppFooter, AppHeader } from "../components/index";
 import {
   Dashboard,
   Page404,
   UserManagement,
   CourseManagement,
-  StudentList,
+  TicketManagement,
   DiscountManagement,
 } from "../views/index";
 import { Bounce, ToastContainer } from "react-toastify";
@@ -56,25 +56,30 @@ const AdminLayout = () => {
         <div className="main p-0">
           <div className="container-fluid m-0 p-0 p-md-4">
             <Routes>
-              <Route path="/admin/dashboard" element={<Dashboard />} />
+              <Route path="dashboard" element={<Dashboard />} />
               <Route
-                path="/admin/user-management"
+                path="user-management"
                 element={<UserManagement />}
               />
               <Route
-                path="/admin/course-management"
+                path="course-management"
                 element={<CourseManagement />}
               />
               <Route
-                path="/admin/discount-management"
+                path="discount-management"
                 element={<DiscountManagement />}
               />
-              <Route
-                path="/admin/student-management"
+              {/* <Route
+                path="student-management"
                 element={<StudentList />}
+              /> */}
+              <Route
+                path="ticket-management"
+                element={<TicketManagement />}
               />
               <Route path="*" element={<Page404 />} />
             </Routes>
+            <Outlet /> {/* Để hiển thị các component con */}
           </div>
         </div>
         <AppFooter />

@@ -1,6 +1,7 @@
 package edu.poly.hightstar.controller.admin;
 
-import edu.poly.hightstar.model.DiscountDto;
+import edu.poly.hightstar.model.DiscountDTO;
+
 import edu.poly.hightstar.service.DiscountService;
 
 import org.springframework.http.HttpStatus;
@@ -20,30 +21,35 @@ public class DiscountController {
         }
 
         @GetMapping
-        public List<DiscountDto> getAllDiscounts() {
+
+        public List<DiscountDTO> getAllDiscounts() {
+
                 return discountService.getAllDiscounts();
         }
 
         @GetMapping("/{id}")
-        public ResponseEntity<DiscountDto> getDiscountById(@PathVariable Long id) {
-                DiscountDto discountDto = discountService.getDiscountById(id);
-                if (discountDto == null) {
+
+        public ResponseEntity<DiscountDTO> getDiscountById(@PathVariable Long id) {
+                DiscountDTO discountDTO = discountService.getDiscountById(id);
+                if (discountDTO == null) {
                         return ResponseEntity.notFound().build(); // 404 Not Found nếu không tìm thấy
                 }
-                return ResponseEntity.ok(discountDto); // 200 OK với discountDto
+                return ResponseEntity.ok(discountDTO); // 200 OK với discountDto
         }
 
         @PostMapping
-        public ResponseEntity<DiscountDto> createDiscount(@RequestBody DiscountDto discountDto) {
-                DiscountDto createdDiscount = discountService.createDiscount(discountDto);
+        public ResponseEntity<DiscountDTO> createDiscount(@RequestBody DiscountDTO discountDTO) {
+                DiscountDTO createdDiscount = discountService.createDiscount(discountDTO);
+
                 // trả về phản hồi với mã trạng thái(HTTP 201 created), body là phần thân p/hồi
                 return ResponseEntity.status(HttpStatus.CREATED).body(createdDiscount);
 
         }
 
         @PutMapping("/{id}")
-        public ResponseEntity<DiscountDto> updateDiscount(@PathVariable Long id, @RequestBody DiscountDto discountDto) {
-                DiscountDto updatedDiscount = discountService.updateDiscount(id, discountDto);
+        public ResponseEntity<DiscountDTO> updateDiscount(@PathVariable Long id, @RequestBody DiscountDTO discountDTO) {
+                DiscountDTO updatedDiscount = discountService.updateDiscount(id, discountDTO);
+
                 return ResponseEntity.ok(updatedDiscount);
         }
 

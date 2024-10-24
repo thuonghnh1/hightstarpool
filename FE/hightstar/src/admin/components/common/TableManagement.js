@@ -237,19 +237,20 @@ const TableManagement = ({
                           {item[column.key]}
                         </td>
                       ))}
-                    <td className="col-1">
+
+                    <td>
                       <button
-                        className="btn btn__edit me-md-3 me-2 p-1"
+                        className="btn btn__edit me-3 p-1"
                         onClick={(e) => {
                           e.stopPropagation();
                           onEdit(item);
                           handleShowModal();
                         }}
                       >
-                        <i className="bi bi-pencil-square"></i>
+                        <i className="bi bi-pencil"></i>
                       </button>
                       <button
-                        className="btn btn__delete me-md-3 me-2 p-1"
+                        className="btn btn__delete p-1 me-3"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleShowConfirmModal(item.id);
@@ -272,10 +273,10 @@ const TableManagement = ({
                     </td>
                   </tr>
                   {expandedRows.includes(item.id) && (
-                    <tr key={item.id + "-expanded"} className="expand-row">
+                    <tr key={item.id + "-expanded"}>
                       <td colSpan={columns.length + 1}>
                         <div className="collapse-content">
-                          <ul className="py-2 m-0 list-unstyled">
+                          <ul className="px-2 list-unstyled">
                             {columns
                               .filter(
                                 (column) => !visibleColumns.includes(column.key)

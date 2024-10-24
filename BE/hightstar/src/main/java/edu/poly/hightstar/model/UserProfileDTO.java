@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserProfileDto {
+public class UserProfileDTO {
     @JsonProperty("id")
     private Long profileId;
     private String fullName;

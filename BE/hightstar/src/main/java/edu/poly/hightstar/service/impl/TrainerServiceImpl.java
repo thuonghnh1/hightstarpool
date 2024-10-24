@@ -5,7 +5,7 @@ import edu.poly.hightstar.domain.User;
 import edu.poly.hightstar.domain.UserProfile;
 import edu.poly.hightstar.enums.UserStatus;
 import edu.poly.hightstar.enums.Role;
-import edu.poly.hightstar.model.TrainerDto;
+import edu.poly.hightstar.model.TrainerDTO;
 import edu.poly.hightstar.repository.TrainerRepository;
 import edu.poly.hightstar.repository.UserRepository;
 import edu.poly.hightstar.repository.UserProfileRepository;
@@ -34,80 +34,84 @@ public class TrainerServiceImpl implements TrainerService {
         @Override
         @Transactional // Đảm bảo rằng tất cả các thao tác bên trong phương thức đó được thực hiện
                        // trong một giao dịch duy nhất
-        public TrainerDto createTrainer(TrainerDto trainerDto) {
+
+        public TrainerDTO createTrainer(TrainerDTO trainerDTO) {
                 // Tạo mới đối tượng User
                 User newUser = new User();
-                newUser.setUsername(trainerDto.getPhoneNumber()); // Sử dụng sđt làm username
+                newUser.setUsername(trainerDTO.getPhoneNumber()); // Sử dụng sđt làm username
                 // Tạo mật khẩu ngẫu nhiên có 6 chữ số
                 String defaultPassword = RandomStringUtils.randomAlphanumeric(6);
                 newUser.setPassword(passwordEncoder.encode(defaultPassword)); // Mã hóa mật khẩu
-                newUser.setEmail(trainerDto.getEmail());
+                newUser.setEmail(trainerDTO.getEmail());
                 newUser.setRole(Role.TRAINER); // Gán vai trò là huấn luyện viên
                 newUser.setStatus(UserStatus.ACTIVE); // Trạng thái hoạt động
                 User savedUser = userRepository.save(newUser);
 
                 // Tạo mới đối tượng UserProfile
                 UserProfile newUserProfile = new UserProfile();
-                newUserProfile.setFullName(trainerDto.getFullName());
-                newUserProfile.setPhoneNumber(trainerDto.getPhoneNumber());
-                newUserProfile.setGender(trainerDto.isGender());
+                newUserProfile.setFullName(trainerDTO.getFullName());
+                newUserProfile.setPhoneNumber(trainerDTO.getPhoneNumber());
+                newUserProfile.setGender(trainerDTO.isGender());
                 newUserProfile.setUser(savedUser);
                 userProfileRepository.save(newUserProfile);
 
                 // Tạo mới Trainer
                 Trainer newTrainer = new Trainer();
                 newTrainer.setUser(savedUser);
-                newTrainer.setSpecialty(trainerDto.getSpecialty());
-                newTrainer.setExperienceYears(trainerDto.getExperienceYears());
-                newTrainer.setSchedule(trainerDto.getSchedule());
-                newTrainer.setRating(trainerDto.getRating());
+                newTrainer.setSpecialty(trainerDTO.getSpecialty());
+                newTrainer.setExperienceYears(trainerDTO.getExperienceYears());
+                newTrainer.setSchedule(trainerDTO.getSchedule());
+                newTrainer.setRating(trainerDTO.getRating());
                 Trainer savedTrainer = trainerRepository.save(newTrainer);
 
                 // Gửi email chứa mật khẩu tới người dùng mới
-                SendEmail(trainerDto, defaultPassword);
-                // Chuyển đổi thành TrainerDto để trả về
+                SendEmail(trainerDTO, defaultPassword);
+                // Chuyển đổi thành trainerDTO để trả về
                 return convertToDto(savedTrainer, savedUser, newUserProfile);
         }
 
         @Override
         @Transactional
-        public TrainerDto updateTrainer(Long trainerId, TrainerDto trainerDto) {
+        public TrainerDTO updateTrainer(Long trainerId, TrainerDTO trainerDTO) {
+
                 // Tìm Trainer theo id
                 Trainer trainer = trainerRepository.findById(trainerId)
                                 .orElseThrow(() -> new RuntimeException("Trainer not found"));
 
                 // Cập nhật Trainer
-                trainer.setSpecialty(trainerDto.getSpecialty());
-                trainer.setExperienceYears(trainerDto.getExperienceYears());
-                trainer.setRating(trainerDto.getRating());
-                trainer.setSchedule(trainerDto.getSchedule());
+                trainer.setSpecialty(trainerDTO.getSpecialty());
+                trainer.setExperienceYears(trainerDTO.getExperienceYears());
+                trainer.setRating(trainerDTO.getRating());
+                trainer.setSchedule(trainerDTO.getSchedule());
                 trainerRepository.save(trainer);
 
                 // Cập nhật User và UserProfile liên quan
-                User user = userRepository.findById(trainerDto.getUserId())
+                User user = userRepository.findById(trainerDTO.getUserId())
                                 .orElseThrow(() -> new RuntimeException("User not found"));
-                user.setEmail(trainerDto.getEmail());
-                user.setStatus(trainerDto.getStatus());
+                user.setEmail(trainerDTO.getEmail());
+                user.setStatus(trainerDTO.getStatus());
                 userRepository.save(user);
 
-                UserProfile userProfile = userProfileRepository.findByUser_UserId(trainerDto.getUserId())
+                UserProfile userProfile = userProfileRepository.findByUser_UserId(trainerDTO.getUserId())
                                 .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-                userProfile.setFullName(trainerDto.getFullName());
-                userProfile.setPhoneNumber(trainerDto.getPhoneNumber());
-                userProfile.setGender(trainerDto.isGender());
+                userProfile.setFullName(trainerDTO.getFullName());
+                userProfile.setPhoneNumber(trainerDTO.getPhoneNumber());
+                userProfile.setGender(trainerDTO.isGender());
                 userProfileRepository.save(userProfile);
 
                 return convertToDto(trainer, user, userProfile);
         }
 
         @Override
-        public List<TrainerDto> getAllTrainers() {
+        public List<TrainerDTO> getAllTrainers() {
+
                 // Lấy tất cả các Trainer từ repository và chuyển đổi sang TrainerDto
                 List<Trainer> trainers = trainerRepository.findAll();
                 return trainers.stream()
                                 .map(trainer -> {
                                         User user = trainer.getUser();
-                                        UserProfile userProfile = userProfileRepository.findByUser_UserId(user.getUserId())
+                                        UserProfile userProfile = userProfileRepository
+                                                        .findByUser_UserId(user.getUserId())
                                                         .orElseThrow(() -> new RuntimeException(
                                                                         "UserProfile not found"));
                                         return convertToDto(trainer, user, userProfile);
@@ -116,7 +120,8 @@ public class TrainerServiceImpl implements TrainerService {
         }
 
         @Override
-        public TrainerDto getTrainerById(Long id) {
+        public TrainerDTO getTrainerById(Long id) {
+
                 // Tìm Trainer theo id và chuyển đổi sang TrainerDto
                 Trainer trainer = trainerRepository.findById(id)
                                 .orElseThrow(() -> new RuntimeException("Trainer not found"));
@@ -140,16 +145,17 @@ public class TrainerServiceImpl implements TrainerService {
         }
 
         // Chuyển đổi từ Trainer, User, UserProfile thành TrainerDto
-        private TrainerDto convertToDto(Trainer trainer, User user, UserProfile userProfile) {
-                TrainerDto trainerDto = new TrainerDto();
+        private TrainerDTO convertToDto(Trainer trainer, User user, UserProfile userProfile) {
+                TrainerDTO trainerDTO = new TrainerDTO();
                 // BeanUtils sẽ chỉ sao chép những thuộc tính có cùng tên và kiểu dl
-                BeanUtils.copyProperties(userProfile, trainerDto);
-                BeanUtils.copyProperties(user, trainerDto);
-                BeanUtils.copyProperties(trainer, trainerDto);
-                return trainerDto;
+                BeanUtils.copyProperties(userProfile, trainerDTO);
+                BeanUtils.copyProperties(user, trainerDTO);
+                BeanUtils.copyProperties(trainer, trainerDTO);
+                return trainerDTO;
         }
 
-        private void SendEmail(TrainerDto trainerDto, String defaultPassword) {
+        private void SendEmail(TrainerDTO trainerDTO, String defaultPassword) {
+
                 String emailSubject = "Tài khoản HLV của bạn đã được tạo thành công";
 
                 String emailBody = "<html>" +
@@ -166,12 +172,12 @@ public class TrainerServiceImpl implements TrainerService {
                                 "</head>" +
                                 "<body>" +
                                 "    <div class='container'>" +
-                                "        <h1>Kính gửi " + trainerDto.getFullName() + ",</h1>" +
+                                "        <h1>Kính gửi " + trainerDTO.getFullName() + ",</h1>" +
                                 "        <p>Chúng tôi vui mừng thông báo rằng tài khoản HLV của bạn đã được tạo thành công. "
                                 +
                                 "        Dưới đây là thông tin đăng nhập của bạn:</p>" +
                                 "        <div class='info'>" +
-                                "            <strong>Tên đăng nhập:</strong> " + trainerDto.getPhoneNumber() + "<br>" +
+                                "            <strong>Tên đăng nhập:</strong> " + trainerDTO.getPhoneNumber() + "<br>" +
                                 "            <strong>Mật khẩu:</strong> " + defaultPassword +
                                 "        </div>" +
                                 "        <p>Vui lòng đăng nhập và thay đổi mật khẩu ngay khi có thể để đảm bảo an toàn cho tài khoản của bạn.</p>"
@@ -184,6 +190,6 @@ public class TrainerServiceImpl implements TrainerService {
                                 "</body>" +
                                 "</html>";
 
-                emailService.sendHtmlEmail(trainerDto.getEmail(), emailSubject, emailBody);
+                emailService.sendHtmlEmail(trainerDTO.getEmail(), emailSubject, emailBody);
         }
 }
