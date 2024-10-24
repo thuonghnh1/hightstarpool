@@ -5,6 +5,7 @@ import java.util.List;
 
 
 public interface TrainerService {
+
     List<TrainerDTO> getAllTrainers(); // Lấy danh sách tất cả HLV
 
     TrainerDTO getTrainerById(Long id); // Lấy thông tin HLV theo id

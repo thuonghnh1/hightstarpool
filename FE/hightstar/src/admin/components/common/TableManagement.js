@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Form, Pagination, Dropdown, DropdownButton } from "react-bootstrap";
 import CustomModal from "./CustomModal";
 import DeleteModal from "./DeleteModal";
@@ -139,6 +139,7 @@ const TableManagement = ({
     }
   };
 
+
   return (
     <div className="table__management col-12 p-4 bg-white rounded-3">
       <h5 className="mb-4 text-uppercase fw-bold">{title}</h5>
@@ -190,7 +191,7 @@ const TableManagement = ({
       </div>
 
       <div className="table__wrapper row m-0">
-        <div className="light__text col-12 p-0 table-responsive">
+        <div className="light__text col-12 p-0">
           <table className="table table-hover mb-2">
             <thead>
               <tr>
@@ -232,6 +233,7 @@ const TableManagement = ({
                   <tr
                     key={item.id}
                     onClick={() => handleRowToggle(item.id)}
+
                     style={{ cursor: "pointer" }}
                   >
                     {columns
@@ -241,24 +243,29 @@ const TableManagement = ({
                           {item[column.key]}
                         </td>
                       ))}
+
                     <td>
                       <button
                         className="btn btn__edit me-3 p-1"
+
                         onClick={(e) => {
                           e.stopPropagation();
                           onEdit(item);
                           handleShowModal();
                         }}
                       >
+
                         <i className="bi bi-pencil"></i>
                       </button>
                       <button
                         className="btn btn__delete p-1"
+
                         onClick={(e) => {
                           e.stopPropagation();
                           handleShowConfirmModal(item.id);
                         }}
                       >
+
                         <i className="bi bi-trash"></i>
                       </button>
                     </td>
@@ -271,15 +278,18 @@ const TableManagement = ({
                             Chi tiết:
                           </strong>
                           <ul className="px-2 list-unstyled">
+
                             {columns
                               .filter(
                                 (column) => !visibleColumns.includes(column.key)
                               ) // Lọc các cột chưa được hiển thị
                               .map((column) => (
+
                                 <li key={column.key}>
                                   <strong className="text-secondary">{column.label}:</strong>
                                   <span className="ps-2">{item[column.key]}</span>{" "}
                                   {/* Hiển thị dữ liệu cho cột này */}
+
                                 </li>
                               ))}
                           </ul>
@@ -287,7 +297,9 @@ const TableManagement = ({
                       </td>
                     </tr>
                   )}
+
                 </>
+
               ))}
             </tbody>
           </table>

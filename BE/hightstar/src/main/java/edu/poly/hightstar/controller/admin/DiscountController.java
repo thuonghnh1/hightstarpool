@@ -1,6 +1,8 @@
 package edu.poly.hightstar.controller.admin;
 
+
 import edu.poly.hightstar.model.DiscountDTO;
+
 import edu.poly.hightstar.service.DiscountService;
 
 import org.springframework.http.HttpStatus;
@@ -20,11 +22,14 @@ public class DiscountController {
         }
 
         @GetMapping
+
         public List<DiscountDTO> getAllDiscounts() {
+
                 return discountService.getAllDiscounts();
         }
 
         @GetMapping("/{id}")
+
         public ResponseEntity<DiscountDTO> getDiscountById(@PathVariable Long id) {
                 DiscountDTO discountDto = discountService.getDiscountById(id);
                 if (discountDto == null) {
@@ -36,6 +41,7 @@ public class DiscountController {
         @PostMapping
         public ResponseEntity<DiscountDTO> createDiscount(@RequestBody DiscountDTO discountDto) {
                 DiscountDTO createdDiscount = discountService.createDiscount(discountDto);
+
                 // trả về phản hồi với mã trạng thái(HTTP 201 created), body là phần thân p/hồi
                 return ResponseEntity.status(HttpStatus.CREATED).body(createdDiscount);
 
@@ -44,6 +50,7 @@ public class DiscountController {
         @PutMapping("/{id}")
         public ResponseEntity<DiscountDTO> updateDiscount(@PathVariable Long id, @RequestBody DiscountDTO discountDto) {
                 DiscountDTO updatedDiscount = discountService.updateDiscount(id, discountDto);
+
                 return ResponseEntity.ok(updatedDiscount);
         }
 

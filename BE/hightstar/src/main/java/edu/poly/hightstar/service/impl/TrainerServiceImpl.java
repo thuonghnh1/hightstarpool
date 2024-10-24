@@ -34,6 +34,7 @@ public class TrainerServiceImpl implements TrainerService {
         @Override
         @Transactional // Đảm bảo rằng tất cả các thao tác bên trong phương thức đó được thực hiện
                        // trong một giao dịch duy nhất
+
         public TrainerDTO createTrainer(TrainerDTO trainerDto) {
                 // Tạo mới đối tượng User
                 User newUser = new User();
@@ -72,6 +73,7 @@ public class TrainerServiceImpl implements TrainerService {
         @Override
         @Transactional
         public TrainerDTO updateTrainer(Long trainerId, TrainerDTO trainerDto) {
+
                 // Tìm Trainer theo id
                 Trainer trainer = trainerRepository.findById(trainerId)
                                 .orElseThrow(() -> new RuntimeException("Trainer not found"));
@@ -102,6 +104,7 @@ public class TrainerServiceImpl implements TrainerService {
 
         @Override
         public List<TrainerDTO> getAllTrainers() {
+
                 // Lấy tất cả các Trainer từ repository và chuyển đổi sang TrainerDto
                 List<Trainer> trainers = trainerRepository.findAll();
                 return trainers.stream()
@@ -117,6 +120,7 @@ public class TrainerServiceImpl implements TrainerService {
 
         @Override
         public TrainerDTO getTrainerById(Long id) {
+
                 // Tìm Trainer theo id và chuyển đổi sang TrainerDto
                 Trainer trainer = trainerRepository.findById(id)
                                 .orElseThrow(() -> new RuntimeException("Trainer not found"));
@@ -150,6 +154,7 @@ public class TrainerServiceImpl implements TrainerService {
         }
 
         private void SendEmail(TrainerDTO trainerDto, String defaultPassword) {
+
                 String emailSubject = "Tài khoản HLV của bạn đã được tạo thành công";
 
                 String emailBody = "<html>" +

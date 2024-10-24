@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { AppSidebar, AppFooter, AppHeader } from "../components/index";
+ ticket-management
+import { Dashboard, Page404, UserManagement, CourseManagement, TicketManagement, StudentList } from "../views/index";
+
 import {
   Dashboard,
   Page404,
@@ -10,6 +13,7 @@ import {
   DiscountManagement,
 } from "../views/index";
 import { Bounce, ToastContainer } from "react-toastify";
+ master
 
 const AdminLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true); // Quản lý trạng thái ẩn/hiện sidebar
@@ -72,6 +76,10 @@ const AdminLayout = () => {
               <Route
                 path="/admin/student-management"
                 element={<StudentList />}
+              />
+              <Route
+                path="/admin/ticket-management"
+                element={<TicketManagement />}
               />
               <Route path="*" element={<Page404 />} />
             </Routes>

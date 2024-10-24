@@ -1,5 +1,6 @@
 package edu.poly.hightstar.controller.admin;
 
+
 import edu.poly.hightstar.model.TrainerDTO;
 import edu.poly.hightstar.service.TrainerService;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ public class TrainerController {
     }
 
     @GetMapping
+
     public List<TrainerDTO> getAllTrainers() {
         return trainerService.getAllTrainers();
     }
@@ -26,6 +28,7 @@ public class TrainerController {
     @GetMapping("/{id}")
     public ResponseEntity<TrainerDTO> getTrainerById(@PathVariable Long id) {
         TrainerDTO trainerDto = trainerService.getTrainerById(id);
+
         if (trainerDto == null) {
             return ResponseEntity.notFound().build();
         }
@@ -35,6 +38,7 @@ public class TrainerController {
     @PostMapping
     public ResponseEntity<TrainerDTO> createTrainer(@RequestBody TrainerDTO trainerDto) {
         TrainerDTO createdTrainer = trainerService.createTrainer(trainerDto);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTrainer);
     }
 
