@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-HightstarApplication<hightstar>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "edu.poly.hightstar.HightstarApplication",
+            "projectName": "hightstar",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
