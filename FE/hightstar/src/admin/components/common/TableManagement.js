@@ -229,9 +229,11 @@ const TableManagement = ({
             </thead>
             <tbody>
               {currentData.map((item) => (
-                <Fragment key={item.id}>
+                <>
                   <tr
-                    // onClick={() => handleRowToggle(item.id)}
+                    key={item.id}
+                    onClick={() => handleRowToggle(item.id)}
+
                     style={{ cursor: "pointer" }}
                   >
                     {columns
@@ -241,55 +243,53 @@ const TableManagement = ({
                           {item[column.key]}
                         </td>
                       ))}
-                    <td className="col-1">
+
+                    <td>
                       <button
-                        className="btn btn__edit me-md-3 me-2 p-1"
+                        className="btn btn__edit me-3 p-1"
+
                         onClick={(e) => {
                           e.stopPropagation();
                           onEdit(item);
                           handleShowModal();
                         }}
                       >
-                        <i className="bi bi-pencil-square"></i>
+
+                        <i className="bi bi-pencil"></i>
                       </button>
                       <button
-                        className="btn btn__delete me-md-3 me-2 p-1"
+                        className="btn btn__delete p-1"
+
                         onClick={(e) => {
                           e.stopPropagation();
                           handleShowConfirmModal(item.id);
                         }}
                       >
-                        <i className="bi bi-trash-fill"></i>
-                      </button>
-                      <button
-                        className="btn btn__show p-1"
-                        onClick={() => handleRowToggle(item.id)}
-                      >
-                        {expandedRows.includes(item.id) ? (
-                          <i className="bi bi-dash-circle"></i>
-                        ) : (
-                          <i className="bi bi-plus-circle"></i>
-                        )}
+
+                        <i className="bi bi-trash"></i>
                       </button>
                     </td>
                   </tr>
                   {expandedRows.includes(item.id) && (
-                    <tr key={item.id + "-expanded"} className="expand-row">
+                    <tr key={item.id + "-expanded"}>
                       <td colSpan={columns.length + 1}>
                         <div className="collapse-content">
-                          <ul className="py-2 m-0 list-unstyled">
+                          <strong className="d-block py-2">
+                            Chi tiết:
+                          </strong>
+                          <ul className="px-2 list-unstyled">
+
                             {columns
                               .filter(
                                 (column) => !visibleColumns.includes(column.key)
                               ) // Lọc các cột chưa được hiển thị
                               .map((column) => (
-                                <li key={column.key} className="py-2 w-50 m-0">
-                                  <strong className="me-3 p-0">
-                                    {column.label}:
-                                  </strong>
-                                  <span className=" p-0 text-truncate">
-                                    {item[column.key]}
-                                  </span>
+
+                                <li key={column.key}>
+                                  <strong className="text-secondary">{column.label}:</strong>
+                                  <span className="ps-2">{item[column.key]}</span>{" "}
+                                  {/* Hiển thị dữ liệu cho cột này */}
+
                                 </li>
                               ))}
                           </ul>
@@ -297,7 +297,9 @@ const TableManagement = ({
                       </td>
                     </tr>
                   )}
-                </Fragment>
+
+                </>
+
               ))}
             </tbody>
           </table>

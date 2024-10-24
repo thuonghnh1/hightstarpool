@@ -1,17 +1,18 @@
 package edu.poly.hightstar.service;
 
-import edu.poly.hightstar.model.TrainerDto;
+import edu.poly.hightstar.model.TrainerDTO;
 import java.util.List;
 
 
 public interface TrainerService {
-    List<TrainerDto> getAllTrainers(); // Lấy danh sách tất cả HLV
 
-    TrainerDto getTrainerById(Long id); // Lấy thông tin HLV theo id
+    List<TrainerDTO> getAllTrainers(); // Lấy danh sách tất cả HLV
 
-    TrainerDto createTrainer(TrainerDto trainerDto); // Tạo HLV mới
+    TrainerDTO getTrainerById(Long id); // Lấy thông tin HLV theo id
 
-    TrainerDto updateTrainer(Long id, TrainerDto trainerDto); // Cập nhật thông tin HLV
+    TrainerDTO createTrainer(TrainerDTO trainerDto); // Tạo HLV mới
+
+    TrainerDTO updateTrainer(Long id, TrainerDTO trainerDto); // Cập nhật thông tin HLV
 
     void deleteTrainer(Long id); // Xóa HLV
 }
