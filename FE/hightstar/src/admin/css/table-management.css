@@ -14,7 +14,7 @@
   color: rgb(9, 170, 9);
   transition: 0.3s;
   border: none;
-}
+} 
 
 .table__management table .btn__edit:hover {
   color: rgb(12, 94, 12);

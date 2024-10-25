@@ -11,7 +11,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/admin/*" element={<AdminLayout />} />
-          {/* <Route path="/*" element={<SiteLayout />} /> */}
+          <Route path="/*" element={<SiteLayout />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Routes>

@@ -237,7 +237,6 @@ const TableManagement = ({
                           {item[column.key]}
                         </td>
                       ))}
-
                     <td>
                       <button
                         className="btn btn__edit me-3 p-1"
@@ -273,10 +272,10 @@ const TableManagement = ({
                     </td>
                   </tr>
                   {expandedRows.includes(item.id) && (
-                    <tr key={item.id + "-expanded"}>
+                    <tr key={item.id + "-expanded"} className="expand-row">
                       <td colSpan={columns.length + 1}>
                         <div className="collapse-content">
-                          <ul className="px-2 list-unstyled">
+                          <ul className="px-2 m-0 list-unstyled">
                             {columns
                               .filter(
                                 (column) => !visibleColumns.includes(column.key)
