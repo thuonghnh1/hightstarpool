@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import edu.poly.hightstar.domain.Course;
 
 @Repository
-public interface CoursesRepository extends JpaRepository <Course, Long> {
+public interface CourseRepository extends JpaRepository <Course, Long> {
     
     
 }

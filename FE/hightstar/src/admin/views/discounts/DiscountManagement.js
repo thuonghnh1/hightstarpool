@@ -98,7 +98,7 @@ const DiscountManagement = () => {
     }));
   };
 
-  // Hàm validate toàn bộ form
+// Hàm validate toàn bộ form
   const validateForm = () => {
     const newErrors = {};
 
@@ -116,7 +116,7 @@ const DiscountManagement = () => {
       newErrors.percentage =
         "Tỷ lệ giảm giá phải là một số từ lớn hơn 0 đến 100.";
     }
-
+  
     if (!formData.startDate) {
       newErrors.startDate = "Ngày bắt đầu không được để trống.";
     }

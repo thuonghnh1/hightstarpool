@@ -76,7 +76,7 @@ const deleteDiscount = async (id) => {
 };
 
 // Gán object vào một biến trước khi export
-const discountService = {
+const DiscountService = {
   getDiscounts,
   getDiscountById,
   createDiscount,
@@ -84,4 +84,4 @@ const discountService = {
   deleteDiscount,
 };
 
-export default discountService;
+export default DiscountService;
