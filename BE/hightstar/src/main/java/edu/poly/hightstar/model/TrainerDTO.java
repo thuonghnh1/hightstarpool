@@ -21,5 +21,5 @@ public class TrainerDTO {
     private double rating;
     private String schedule;
     private Long userId; // Từ bảng User
-    private UserStatus status; // ACTIVE, INACTIVE, DISABLED
+    private UserStatus status; // ACTIVE, DISABLED
 }

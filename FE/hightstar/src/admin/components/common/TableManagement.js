@@ -30,6 +30,49 @@ const TableManagement = ({
   const [showConfirmModal, setShowConfirmModal] = useState(false); // Hiển thị modal xác nhận xóa
   const [expandedRows, setExpandedRows] = useState([]); // Theo dõi các hàng đang được mở
 
+  // Hàm render custom cell dựa trên loại cột
+  const renderCustomCell = (column, item) => {
+    switch (column.key) {
+      case "status":
+        return (
+          <span
+            className={`rounded-3 fw-bold px-2 py-1 ${
+              item.status === "ACTIVE" ? "text-bg-success" : "text-bg-secondary"
+            }`}
+            style={{ fontSize: "13px" }}
+          >
+            {item.status === "ACTIVE" ? "Hoạt động" : "Vô hiệu hóa"}
+          </span>
+        );
+      case "image":
+        return (
+          <img
+            src={item[column.key]}
+            alt={item.name}
+            className="img-fluid rounded-circle"
+            style={{ width: "50px", height: "50px" }}
+          />
+        );
+      case "rating":
+        const stars = [];
+        for (let i = 1; i <= 5; i++) {
+          stars.push(
+            <i
+              key={i}
+              className={`bi ${
+                i <= item.averageRating ? "bi-star-fill" : "bi-star"
+              } text-warning me-1`}
+            ></i>
+          );
+        }
+        return <div>{stars}</div>;
+
+      // Thêm các case khác nếu cần cho các cột tuỳ chỉnh khác
+      default:
+        return item[column.key]; // Trả về giá trị mặc định nếu không cần custom
+    }
+  };
+
   // Xử lý toggle mở rộng hàng
   const handleRowToggle = (id) => {
     setExpandedRows((prev) =>
@@ -113,8 +156,8 @@ const TableManagement = ({
   const handleCloseModal = () => setShowModal(false);
 
   // Xử lý lưu dữ liệu
-  const handleSubmit = () => {
-    if (handleSaveItem()) {
+  const handleSubmit = async () => {
+    if (await handleSaveItem()) {
       handleCloseModal();
     }
   };
@@ -190,7 +233,7 @@ const TableManagement = ({
       </div>
 
       <div className="table__wrapper row m-0">
-        <div className="light__text table-responsive col-12 p-0">
+        <div className="light__text table-responsive col-12 p-0 custom-scrollbar">
           <table className="table table-hover mb-2">
             <thead>
               <tr>
@@ -234,29 +277,10 @@ const TableManagement = ({
                       .filter((col) => visibleColumns.includes(col.key))
                       .map((column) => (
                         <td key={column.key} className="align-middle">
-                          {item[column.key]}
+                          {renderCustomCell(column, item)}
                         </td>
                       ))}
                     <td>
-                      <button
-                        className="btn btn__edit me-3 p-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEdit(item);
-                          handleShowModal();
-                        }}
-                      >
-                        <i className="bi bi-pencil"></i>
-                      </button>
-                      <button
-                        className="btn btn__delete p-1 me-3"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleShowConfirmModal(item.id);
-                        }}
-                      >
-                        <i className="bi bi-trash-fill"></i>
-                      </button>
                       {visibleColumns.length === columns.length || (
                         <button
                           className="btn btn__show p-1"
@@ -293,6 +317,28 @@ const TableManagement = ({
                                   </span>
                                 </li>
                               ))}
+                            <li>
+                              <button
+                                className="btn btn__edit me-3 my-2"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onEdit(item);
+                                  handleShowModal();
+                                }}
+                              >
+                                <i className="bi bi-pencil-square"></i> Chỉnh
+                                sửa
+                              </button>
+                              <button
+                                className="btn btn__delete p-1 me-3"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleShowConfirmModal(item.id);
+                                }}
+                              >
+                                <i className="bi bi-trash-fill"></i> Xóa
+                              </button>
+                            </li>
                           </ul>
                         </div>
                       </td>
@@ -348,7 +394,19 @@ const TableManagement = ({
       <CustomModal
         show={showModal}
         handleClose={handleCloseModal}
-        title={isEditing ? "Cập nhật bản ghi" : "Thêm mới bản ghi"}
+        title={
+          isEditing ? (
+            <>
+              CẬP NHẬT BẢN GHI{" "}
+              <i className="bi bi-arrow-repeat text-success fs-4"></i>
+            </>
+          ) : (
+            <>
+              THÊM MỚI BẢN GHI{" "}
+              <i className="bi bi-plus-circle-dotted text-success ms-1 fs-4"></i>
+            </>
+          )
+        }
         onSubmit={handleSubmit}
         isLoading={isLoading}
       >

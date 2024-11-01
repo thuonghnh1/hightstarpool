@@ -14,4 +14,8 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
 
     void deleteByUser_UserId(Long userId);
 
+    boolean existsByPhoneNumber(String phoneNumber);
+
+    boolean existsByPhoneNumberAndUserUserIdNot(String phoneNumber, Long userId); // không tính userId đang cập nhật
+
 }

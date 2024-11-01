@@ -1,93 +1,86 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import TableManagement from "../../components/common/TableManagement";
-import discountService from "../../services/DiscountService";
+import trainerService from "../../services/TrainerService"; // Cập nhật lại tên service
 import Page500 from "../pages/Page500";
-import {
-  formatDateTimeToISO,
-  formatDateTimeToDMY,
-  formatDateTimeLocal,
-} from "../../utils/FormatDate";
 import { Spinner, Form } from "react-bootstrap";
+import { Helmet } from "react-helmet-async";
 
-const DiscountManagement = () => {
-  // State để lưu trữ dữ liệu giảm giá từ API
-  const [discountData, setDiscountData] = useState([]);
-  const [formData, setFormData] = useState({}); // State quản lý dữ liệu hiện tại
-  const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
-  const [isEditing, setIsEditing] = useState(false); // Trạng thái để biết đang thêm mới hay chỉnh sửa
-  // State để xử lý trạng thái tải dữ liệu và lỗi
-
+const TrainerManagement = () => {
+  const [trainerData, setTrainerData] = useState([]);
+  const [formData, setFormData] = useState({});
+  const [errorFields, setErrorFields] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
+  const [loadingPage, setLoadingPage] = useState(false);
   const [errorServer, setErrorServer] = useState(null);
 
-  // Mảng cột của bảng
-  const discountColumns = [
-    { key: "id", label: "Mã giảm giá" },
-    { key: "discountName", label: "Tên giảm giá" },
-    { key: "percentage", label: "Phần trăm giảm (%)" },
-    { key: "startDate", label: "Ngày Bắt Đầu" },
-    { key: "endDate", label: "Ngày Kết Thúc" },
-    { key: "description", label: "Mô tả" },
+  const trainerColumns = [
+    { key: "id", label: "ID" },
+    { key: "fullName", label: "Họ và Tên" },
+    { key: "phoneNumber", label: "Số điện thoại" },
+    { key: "email", label: "Email" },
+    { key: "specialty", label: "Chuyên môn" },
+    { key: "experienceYears", label: "Kinh nghiệm (năm)" },
+    { key: "schedule", label: "Lịch Trình" },
+    { key: "rating", label: "Đánh giá TB" },
+    { key: "status", label: "Trạng thái" },
+    { key: "userId", label: "Mã người dùng" },
   ];
 
-  // Loại bỏ cột 'description' khỏi discountColumns
-  const defaultColumns = discountColumns.filter(
-    (column) => column.key !== "description"
+  // Loại bỏ một số cột không cần thiết khỏi trainerColumns
+  const keysToRemove = ["email", "phoneNumber", "userId" , "specialty"];
+  const defaultColumns = trainerColumns.filter(
+    (column) => !keysToRemove.includes(column.key)
   );
 
-  // Gọi API để lấy dữ liệu từ server
-  const fetchDiscountData = async () => {
+  const fetchTrainerData = async () => {
     setLoadingPage(true);
     try {
-      const data = await discountService.getDiscounts();
-      setDiscountData(data); // Lưu dữ liệu vào state
+      const data = await trainerService.getTrainers();
+      setTrainerData(data);
     } catch (err) {
-      setErrorServer(err.message); // Lưu lỗi vào state nếu có
+      setErrorServer(err.message);
     } finally {
       setLoadingPage(false);
     }
   };
 
-  // Gọi API khi component mount
   useEffect(() => {
-    fetchDiscountData();
+    fetchTrainerData();
   }, []);
 
-  // Hàm validate cho từng trường input
   const validateField = (key, value) => {
     let error = "";
 
     switch (key) {
-      case "discountName":
+      case "fullName":
         if (!value || value.trim() === "") {
           error = "Tên không được để trống.";
         }
         break;
-
-      case "percentage":
-        if (value === "" || value === null) {
-          error = "Tỷ lệ giảm giá không được để trống.";
-        } else if (isNaN(value) || value < 0 || value > 100) {
-          error = "Tỷ lệ giảm giá phải là một số từ 0 đến 100.";
+      case "phoneNumber":
+        if (!value || !/^\d{10}$/.test(value)) {
+          // kiểm tra số điện thoại có 10 chữ số
+          error = "Số điện thoại không hợp lệ.";
         }
         break;
-
-      case "startDate":
-        if (!value) {
-          error = "Ngày bắt đầu không được để trống.";
+      case "specialty":
+        if (!value || value.trim() === "") {
+          error = "Chuyên môn không được để trống.";
         }
         break;
-
-      case "endDate":
-        if (!value) {
-          error = "Ngày kết thúc không được để trống.";
-        } else if (new Date(value) < new Date(formData.startDate)) {
-          error = "Ngày kết thúc phải sau ngày bắt đầu.";
+      case "experienceYears":
+        if (!value || isNaN(value) || value < 0 || value > 100) {
+          // giới hạn từ 0 đến 100
+          error = "Số năm kinh nghiệm không hợp lệ.";
         }
         break;
-
+      case "schedule":
+        if (!value || value.trim() === "") {
+          error = "Lịch trình không được để trống.";
+        }
+        break;
       default:
         break;
     }
@@ -98,33 +91,34 @@ const DiscountManagement = () => {
     }));
   };
 
-  // Hàm validate toàn bộ form
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.discountName || formData.discountName.trim() === "") {
-      newErrors.discountName = "Tên không được để trống.";
+    if (!formData.fullName || formData.fullName.trim() === "") {
+      newErrors.fullName = "Tên không được để trống.";
     }
-
-    if (formData.percentage === "" || formData.percentage === null) {
-      newErrors.percentage = "Tỷ lệ giảm giá không được để trống.";
-    } else if (
-      isNaN(formData.percentage) ||
-      formData.percentage < 0 ||
-      formData.percentage > 100
+    if (!formData.phoneNumber || !/^\d{10}$/.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = "Số điện thoại không hợp lệ.";
+    }
+    if (
+      !formData.email ||
+      !/^[\w-]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)
     ) {
-      newErrors.percentage =
-        "Tỷ lệ giảm giá phải là một số từ lớn hơn 0 đến 100.";
+      newErrors.email = "Email không hợp lệ.";
     }
-
-    if (!formData.startDate) {
-      newErrors.startDate = "Ngày bắt đầu không được để trống.";
+    if (!formData.specialty || formData.specialty.trim() === "") {
+      newErrors.specialty = "Chuyên môn không được để trống.";
     }
-
-    if (!formData.endDate) {
-      newErrors.endDate = "Ngày kết thúc không được để trống.";
-    } else if (new Date(formData.endDate) < new Date(formData.startDate)) {
-      newErrors.endDate = "Ngày kết thúc phải sau ngày bắt đầu.";
+    if (
+      !formData.experienceYears ||
+      isNaN(formData.experienceYears) ||
+      formData.experienceYears < 0 ||
+      formData.experienceYears > 100
+    ) {
+      newErrors.experienceYears = "Số năm kinh nghiệm không hợp lệ.";
+    }
+    if (!formData.schedule || formData.schedule.trim() === "") {
+      newErrors.schedule = "Lịch trình không được để trống.";
     }
 
     setErrorFields(newErrors);
@@ -137,109 +131,70 @@ const DiscountManagement = () => {
     validateField(key, value);
   };
 
-  // Hàm reset form khi thêm mới
   const handleReset = () => {
     setFormData({
-      discountName: "",
-      percentage: "",
-      startDate: formatDateTimeLocal(), // Ngày hiện tại
-      endDate: "",
-      description: "",
+      fullName: "",
+      phoneNumber: "",
+      email: "",
+      gender: true,
+      specialty: "",
+      experienceYears: "0",
+      schedule: "",
+      status: "ACTIVE",
     });
     setIsEditing(false);
     setErrorFields({});
   };
 
-  // Hàm gọi khi nhấn "Sửa" một hàng
   const handleEdit = (item) => {
-    setFormData({
-      ...item,
-      startDate: formatDateTimeToISO(item.startDate),
-      endDate: formatDateTimeToISO(item.endDate), //yyyy-MM-dd hh:mm:ss -> yyyy-DD-mmThh:mm
-    });
+    setFormData(item);
     setIsEditing(true);
     setErrorFields({});
   };
 
-  // Hàm lưu thông tin sau khi thêm hoặc sửa
-  const handleSaveItem = () => {
+  const handleSaveItem = async () => {
     if (!validateForm()) return false;
 
-    setIsLoading(true); // Bắt đầu quá trình tải
+    setIsLoading(true);
 
-    if (isEditing) {
-      // Gọi API cập nhật sử dụng discountService
-      discountService
-        .updateDiscount(formData.id, formData)
-        .then((response) => {
-          let updatedDiscount = response; // Lấy phản hồi từ server
-          console.log("Update: " + updatedDiscount);
-
-          updatedDiscount = {
-            // Đổi định dạng ngày giờ trước khi lưu vào mảng
-            ...updatedDiscount,
-            startDate: formatDateTimeToDMY(updatedDiscount.startDate),
-            endDate: formatDateTimeToDMY(updatedDiscount.endDate),
-          };
-
-          // Cập nhật state discountData với discount đã được sửa
-          const updatedDiscounts = discountData.map((discount) =>
-            discount.id === updatedDiscount.id ? updatedDiscount : discount
-          );
-          setDiscountData(updatedDiscounts);
-          toast.success("Cập nhật thành công!");
-          handleReset();
-        })
-        .catch((error) => {
-          console.error("Lỗi khi cập nhật", error);
-          toast.error("Đã xảy ra lỗi khi cập nhật. Vui lòng thử lại sau.");
-        })
-        .finally(() => {
-          setIsLoading(false); // Kết thúc quá trình tải
-        });
-    } else {
-      // Nếu đang ở trạng thái thêm mới
-      const newDiscount = {
-        ...formData,
-      };
-
-      // Gọi API thêm mới sử dụng discountService
-      discountService
-        .createDiscount(newDiscount)
-        .then((response) => {
-          let createdDiscount = response; // Lấy phản hồi từ server (bao gồm ID)
-          createdDiscount = {
-            // đổi định dạng ngày giờ trước khi lưu vào mảng
-            ...createdDiscount,
-            startDate: formatDateTimeToDMY(createdDiscount.startDate),
-            endDate: formatDateTimeToDMY(createdDiscount.endDate),
-          };
-          // Cập nhật mảng discountData với item vừa được thêm
-          setDiscountData([...discountData, createdDiscount]);
-
-          toast.success("Thêm mới thành công!");
-          handleReset();
-        })
-        .catch((error) => {
-          console.error("Lỗi khi thêm mới", error);
-          toast.error("Đã xảy ra lỗi khi thêm mới. Vui lòng thử lại sau.");
-        })
-        .finally(() => {
-          setIsLoading(false); // Kết thúc quá trình tải
-        });
+    try {
+      if (isEditing) {
+        const updatedTrainer = await trainerService.updateTrainer(
+          formData.id,
+          formData
+        );
+        const updatedTrainers = trainerData.map((trainer) =>
+          trainer.id === updatedTrainer.id ? updatedTrainer : trainer
+        );
+        setTrainerData(updatedTrainers);
+        toast.success("Cập nhật thành công!");
+      } else {
+        const newTrainer = await trainerService.createTrainer(formData);
+        setTrainerData([...trainerData, newTrainer]);
+        toast.success("Thêm mới thành công!");
+      }
+      handleReset();
+      return true;
+    } catch (error) {
+      if (error.response) {
+        toast.error(error.response.data + "!"); // Hiển thị thông điệp lỗi
+      } else {
+        toast.error("Đã xảy ra lỗi không xác định. Vui lòng thử lại sau !"); // Thông báo lỗi chung
+      }
+      return false;
+    } finally {
+      setIsLoading(false);
     }
-    return true;
   };
 
-  // Hàm xóa một discount
   const handleDelete = (deleteId) => {
     if (deleteId) {
       setIsLoading(true);
-      discountService
-        .deleteDiscount(deleteId)
+      trainerService
+        .deleteTrainer(deleteId)
         .then(() => {
-          setDiscountData(
-            discountData.filter((discount) => discount.id !== deleteId)
+          setTrainerData(
+            trainerData.filter((trainer) => trainer.trainerId !== deleteId)
           );
           toast.success("Xóa thành công!");
         })
@@ -256,90 +211,174 @@ const DiscountManagement = () => {
     <>
       <div className="row">
         <div className="col-md-6 mb-3">
-          <Form.Group controlId="formName">
-            <Form.Label>Tên giảm giá</Form.Label>
+          <Form.Group controlId="formFullName">
+            <Form.Label>Họ và tên <span className="text-danger">(*)</span></Form.Label>
             <Form.Control
               type="text"
-              name="discountName"
-              value={formData.discountName}
-              onChange={(e) =>
-                handleInputChange("discountName", e.target.value)
-              }
-              isInvalid={!!errorFields.discountName}
+              name="fullName"
+              value={formData.fullName}
+              maxLength={100}
+              onChange={(e) => handleInputChange("fullName", e.target.value)}
+              isInvalid={!!errorFields.fullName}
+              placeholder="VD: Nguyen Van A"
               required
             />
             <Form.Control.Feedback type="invalid">
-              {errorFields.discountName}
+              {errorFields.fullName}
             </Form.Control.Feedback>
           </Form.Group>
         </div>
 
         <div className="col-md-6 mb-3">
-          <Form.Group controlId="formPercentage">
-            <Form.Label>Tỷ lệ giảm giá (%)</Form.Label>
+          <Form.Group controlId="formPhoneNumber">
+            <Form.Label>Số điện thoại <span className="text-danger">(*)</span></Form.Label>
+            <Form.Control
+              type="text"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              maxLength={15}
+              onChange={(e) =>
+                handleInputChange("phoneNumber", e.target.value.trim())
+              }
+              isInvalid={!!errorFields.phoneNumber}
+              placeholder="Nhập vào SĐT"
+              required
+            />
+            <Form.Control.Feedback type="invalid">
+              {errorFields.phoneNumber}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </div>
+
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formEmail">
+            <Form.Label>Email <span className="text-danger">(*)</span></Form.Label>
+            <Form.Control
+              type="email"
+              name="email"
+              value={formData.email}
+              maxLength={100}
+              onChange={(e) =>
+                handleInputChange("email", e.target.value.trim())
+              }
+              isInvalid={!!errorFields.email}
+              placeholder="Nhập vào email"
+              required
+            />
+            <Form.Control.Feedback type="invalid">
+              {errorFields.email}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </div>
+
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formGender">
+            <Form.Label>Giới tính</Form.Label>
+            <div>
+              <Form.Check
+                type="radio"
+                label="Nam"
+                name="gender"
+                value="true"
+                checked={formData.gender === true}
+                onChange={() => handleInputChange("gender", true)}
+                inline
+                isInvalid={!!errorFields.gender}
+              />
+              <Form.Check
+                type="radio"
+                label="Nữ"
+                name="gender"
+                value="false"
+                checked={formData.gender === false}
+                onChange={() => handleInputChange("gender", false)}
+                inline
+                isInvalid={!!errorFields.gender}
+              />
+            </div>
+            {errorFields.gender && (
+              <div className="invalid-feedback d-block">
+                {errorFields.gender}
+              </div>
+            )}
+          </Form.Group>
+        </div>
+
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formSpecialty">
+            <Form.Label>Chuyên môn <span className="text-danger">(*)</span></Form.Label>
+            <Form.Control
+              type="text"
+              name="specialty"
+              value={formData.specialty}
+              onChange={(e) => handleInputChange("specialty", e.target.value)}
+              isInvalid={!!errorFields.specialty}
+                placeholder="VD: HLV bơi lội, ..."
+              required
+            />
+            <Form.Control.Feedback type="invalid">
+              {errorFields.specialty}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </div>
+
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formExperienceYears">
+            <Form.Label>Số năm kinh nghiệm <span className="text-danger">(*)</span></Form.Label>
             <Form.Control
               type="number"
-              name="percentage"
-              min={0}
-              max={100}
-              value={formData.percentage}
-              onChange={(e) => handleInputChange("percentage", e.target.value)}
-              isInvalid={!!errorFields.percentage}
+              name="experienceYears"
+              min="0"
+              max="90"
+              value={formData.experienceYears}
+              onChange={(e) =>
+                handleInputChange("experienceYears", e.target.value)
+              }
+              isInvalid={!!errorFields.experienceYears}
               required
             />
             <Form.Control.Feedback type="invalid">
-              {errorFields.percentage}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </div>
-      </div>
-
-      <div className="row">
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formStartDate">
-            <Form.Label>Ngày bắt đầu</Form.Label>
-            <Form.Control
-              type="datetime-local"
-              name="startDate"
-              value={formData.startDate}
-              onChange={(e) => handleInputChange("startDate", e.target.value)}
-              isInvalid={!!errorFields.startDate}
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              {errorFields.startDate}
+              {errorFields.experienceYears}
             </Form.Control.Feedback>
           </Form.Group>
         </div>
 
         <div className="col-md-6 mb-3">
-          <Form.Group controlId="formEndDate">
-            <Form.Label>Ngày kết thúc</Form.Label>
+          <Form.Group controlId="formSchedule">
+            <Form.Label>Lịch trình <span className="text-danger">(*)</span></Form.Label>
             <Form.Control
-              type="datetime-local"
-              name="endDate"
-              value={formData.endDate}
-              onChange={(e) => handleInputChange("endDate", e.target.value)}
-              isInvalid={!!errorFields.endDate}
+              type="text"
+              name="schedule"
+              value={formData.schedule}
+              onChange={(e) => handleInputChange("schedule", e.target.value)}
+              isInvalid={!!errorFields.schedule}
+                placeholder="VD: Cả tuần (6h-18h)"
               required
             />
             <Form.Control.Feedback type="invalid">
-              {errorFields.endDate}
+              {errorFields.schedule}
             </Form.Control.Feedback>
           </Form.Group>
         </div>
-      </div>
 
-      <div className="row">
-        <div className="col-md-12 mb-3">
-          <Form.Group controlId="formDescription">
-            <Form.Label>Mô tả</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              name="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formSchedule">
+            <Form.Label>Trạng thái</Form.Label>
+            <Form.Check
+              type="switch"
+              id="custom-switch"
+              label={
+                formData.status && formData.status.includes("ACTIVE")
+                  ? "Hoạt động"
+                  : "Vô hiệu hóa"
+              }
+              onChange={(e) =>
+                handleInputChange(
+                  "status",
+                  e.target.checked ? "ACTIVE" : "DISABLED"
+                )
+              }
+              checked={formData.status === "ACTIVE"}
             />
           </Form.Group>
         </div>
@@ -349,32 +388,32 @@ const DiscountManagement = () => {
 
   return (
     <>
-      {/* Hiển thị loader khi đang tải trang */}
+      <Helmet>
+        <title>Quản lý Huấn luyện viên - Hight Star</title>
+      </Helmet>
       {loadingPage ? (
         <div className="w-100 h-100 d-flex justify-content-center align-items-center">
-          <Spinner animation="border" variant="primary" className=""></Spinner>
+          <Spinner animation="border" className="text-primary" />
         </div>
       ) : errorServer ? (
         <Page500 message={errorServer} />
       ) : (
-        <section className="row m-0 p-0 ">
-          <TableManagement
-            data={discountData}
-            columns={discountColumns}
-            title={"Quản lý giảm giá"}
-            defaultColumns={defaultColumns} // Truyền mảng cột đã lọc
-            modalContent={modalContent}
-            isEditing={isEditing}
-            handleReset={handleReset}
-            onEdit={handleEdit}
-            handleSaveItem={handleSaveItem}
-            onDelete={handleDelete}
-            isLoading={isLoading}
-          />
-        </section>
+        <TableManagement
+          columns={trainerColumns}
+          data={trainerData}
+          title={"Quản lý huấn luyện viên"}
+          defaultColumns={defaultColumns}
+          modalContent={modalContent}
+          isEditing={isEditing}
+          handleReset={handleReset}
+          onEdit={handleEdit}
+          handleSaveItem={handleSaveItem}
+          onDelete={handleDelete}
+          isLoading={isLoading}
+        />
       )}
     </>
   );
 };
 
-export default DiscountManagement;
+export default TrainerManagement;

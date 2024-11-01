@@ -1,10 +1,31 @@
-import React from "react";
+import { useState } from "react";
 import Logo from "../../assets/brand/Logo";
+import { Collapse } from "react-bootstrap";
 import { NavLink } from "react-router-dom"; // Sử dụng NavLink để có trạng thái active
+import { useTheme } from "./common/ThemeContext";
 
 const AppSidebar = ({ isSidebarOpen }) => {
+  const { theme } = useTheme();
+  const [menuState, setMenuState] = useState({
+    // lưu trạng thái đóng mở của các menu có menu con
+    ticket: false,
+    stock: false,
+  });
+
+  // Toggle function for submenus
+  const toggleMenu = (menu) => {
+    setMenuState((prevState) => ({
+      ...prevState,
+      [menu]: !prevState[menu],
+    }));
+  };
+
   return (
-    <div className={`sidebar ${isSidebarOpen ? "open" : "closed"}  p-0`}>
+    <div
+      className={`sidebar ${isSidebarOpen ? "open" : "closed"}  p-0 ${
+        theme === "dark" ? "dark-theme" : "light-theme"
+      }`}
+    >
       <div
         className="logo d-flex justify-content-center align-items-center border-dark-subtle  border-bottom "
         style={{ height: "66px" }}
@@ -14,15 +35,14 @@ const AppSidebar = ({ isSidebarOpen }) => {
         </NavLink>
       </div>
       <ul className="menu list-unstyled overflow-auto custom-scrollbar">
-        <li>
+        <li className="mt-3">
           <NavLink
             to="/admin/dashboard"
             className={({ isActive }) =>
               isActive ? "active-link" : "inactive-link"
             }
-            style={{ marginTop: "12px", position: "relative"}}
           >
-            <i className="me-2 bi bi-speedometer2"></i> Bảng điều khiển
+            <i className="me-2 fs-5 bi bi-house-door"></i> Bảng điều khiển
           </NavLink>
         </li>
         <li className="sidebar__title text-uppercase fw-bold opacity-50">
@@ -38,15 +58,49 @@ const AppSidebar = ({ isSidebarOpen }) => {
             <i className="me-2 fa fa-shopping-cart"></i> Bán hàng
           </NavLink>
         </li>
+        {/* menu có menu con */}
         <li>
-          <NavLink
-            to="/admin/ticket-management"
-            className={({ isActive }) =>
-              isActive ? "active-link" : "inactive-link"
-            }
+          <div
+            className={`d-flex justify-content-center align-items-center ${
+              menuState.ticket ? "active-link" : "inactive-link"
+            }`}
+            onClick={() => toggleMenu("ticket")}
+            style={{ cursor: "pointer" }}
           >
             <i className="me-2 bi bi-ticket-perforated"></i> Vé bơi
-          </NavLink>
+            <i
+              className={`ms-auto bi ${
+                menuState.ticket
+                  ? "bi-chevron-compact-up"
+                  : "bi-chevron-compact-down"
+              }`}
+            ></i>
+          </div>
+          {/* Submenu collapse */}
+          <Collapse in={menuState.ticket}>
+            <ul className="list-unstyled ms-2">
+              <li>
+                <NavLink
+                  to="/admin/ticket/ticket-management"
+                  className={({ isActive }) =>
+                    isActive ? "active-link" : "inactive-link"
+                  }
+                >
+                  <i className="me-2 bi bi-calendar-day"></i> Quản lý vé
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/admin/ticket/ticket-check"
+                  className={({ isActive }) =>
+                    isActive ? "active-link" : "inactive-link"
+                  }
+                >
+                  <i className="me-2 bi bi-qr-code"></i> Soát vé
+                </NavLink>
+              </li>
+            </ul>
+          </Collapse>
         </li>
         <li>
           <NavLink
@@ -80,12 +134,12 @@ const AppSidebar = ({ isSidebarOpen }) => {
         </li>
         <li>
           <NavLink
-            to="/admin/employee-management"
+            to="/admin/trainer-management"
             className={({ isActive }) =>
               isActive ? "active-link" : "inactive-link"
             }
           >
-            <i className="me-2 fa-solid fa-building-user"></i> Nhân viên
+            <i className="me-2 fa-solid fa-building-user"></i> Huấn Luyện Viên
           </NavLink>
         </li>
 
@@ -112,14 +166,47 @@ const AppSidebar = ({ isSidebarOpen }) => {
         </li>
 
         <li>
-          <NavLink
-            to="/admin/stook-management"
-            className={({ isActive }) =>
-              isActive ? "active-link" : "inactive-link"
-            }
+          <div
+            className={`d-flex justify-content-center align-items-center ${
+              menuState.stock ? "active-link" : "inactive-link"
+            }`}
+            onClick={() => toggleMenu("stock")}
+            style={{ cursor: "pointer" }}
           >
             <i className="me-2 fa fa-archive"></i> Kho hàng
-          </NavLink>
+            <i
+              className={`ms-auto bi ${
+                menuState.stock
+                  ? "bi-chevron-compact-up"
+                  : "bi-chevron-compact-down"
+              }`}
+            ></i>
+          </div>
+          {/* Submenu collapse */}
+          <Collapse in={menuState.stock}>
+            <ul className="list-unstyled ms-2">
+              <li className="text-nowrap">
+                <NavLink
+                  to="/admin/stock/category-management"
+                  className={({ isActive }) =>
+                    isActive ? "active-link" : "inactive-link"
+                  }
+                >
+                  <i className="me-2 bi bi-table"></i> Quản lý danh mục
+                </NavLink>
+              </li>
+              <li className="text-nowrap">
+                <NavLink
+                  to="/admin/stock/product-management"
+                  className={({ isActive }) =>
+                    isActive ? "active-link" : "inactive-link"
+                  }
+                >
+                  <i className="me-2 bi bi-inboxes-fill"></i> Quản lý sản phẩm
+                </NavLink>
+              </li>
+            </ul>
+          </Collapse>
         </li>
         <li className="sidebar__title text-uppercase fw-bold opacity-50">
           Tiện ích
