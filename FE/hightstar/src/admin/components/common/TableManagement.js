@@ -44,6 +44,7 @@ const TableManagement = ({
             {item.status === "ACTIVE" ? "Hoạt động" : "Vô hiệu hóa"}
           </span>
         );
+
       case "image":
         return (
           <img
@@ -53,6 +54,7 @@ const TableManagement = ({
             style={{ width: "50px", height: "50px" }}
           />
         );
+
       case "rating":
         const stars = [];
         for (let i = 1; i <= 5; i++) {
@@ -67,7 +69,22 @@ const TableManagement = ({
         }
         return <div>{stars}</div>;
 
-      // Thêm các case khác nếu cần cho các cột tuỳ chỉnh khác
+      case "role":
+        return (
+          <span className="d-flex align-items-center">
+            {item.role === "ADMIN" && (
+              <i className="bi bi-shield-fill text-primary me-1"></i>
+            )}
+            {item.role === "USER" && (
+              <i className="bi bi-person-fill text-info me-1"></i>
+            )}
+            {item.role === "TRAINER" && (
+              <i className="bi bi-dumbbell-fill text-warning me-1"></i>
+            )}
+            {item.role}
+          </span>
+        );
+
       default:
         return item[column.key]; // Trả về giá trị mặc định nếu không cần custom
     }

@@ -1,531 +1,356 @@
-// function UserManagement() {
-//   return (
-//     <div className="user-management mh-100 fw-bold fs-3 m-auto">
-//       QUẢN LÝ NGƯỜI DÙNG
-//     </div>
-//   );
-// }
-
-// export default UserManagement;
-
-import React, { useState, useEffect } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-// import "../../css/users/user-management.css";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import TableManagement from "../../components/common/TableManagement";
+import userService from "../../services/UserService";
+import Page500 from "../pages/Page500";
+import { Helmet } from "react-helmet-async";
+import {
+  formatDateTimeToISO,
+  formatDateTimeToDMY,
+  formatDateTimeLocal,
+} from "../../utils/FormatDate";
+import { Spinner, Form } from "react-bootstrap";
 
 const UserManagement = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [usersPerPage] = useState(7);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [users, setUsers] = useState([]);
-  const [showAddUserForm, setShowAddUserForm] = useState(false);
-  const [showEditUserForm, setShowEditUserForm] = useState(false);
-  const [editingUserId, setEditingUserId] = useState(null);
-  const [errors, setErrors] = useState({});
-  const [newUser, setNewUser] = useState({
-    Username: "",
-    Password: "",
-    Email: "",
-    Role: "User",
-    RegisteredDate: new Date().toISOString().split("T")[0], // Ngày hiện tại
-  });
+  const [userData, setUserData] = useState([]);
+  const [formData, setFormData] = useState({});
+  const [errorFields, setErrorFields] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
 
-  // useEffect(() => {
-  //   const fetchUsers = async () => {
-  //     try {
-  //       const response = await axios.get("http://localhost:3001/api/users");
-  //       setUsers(response.data);
-  //     } catch (error) {
-  //       console.error("Có lỗi khi lấy dữ liệu người dùng:", error);
-  //     }
-  //   };
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(false);
+  const [errorServer, setErrorServer] = useState(null);
+  const today = new Date().toISOString().split("T")[0];
 
-  //   fetchUsers();
-  // }, []);
+  const userColumns = [
+    { key: "id", label: "ID" },
+    { key: "username", label: "Tên người dùng" },
+    { key: "email", label: "Email" },
+    { key: "role", label: "Vai Trò" },
+    { key: "registeredDate", label: "Ngày đăng ký" },
+    { key: "lastLogin", label: "Lần đăng nhập cuối" },
+    { key: "status", label: "Trạng thái" },
+    { key: "password", label: "Mật khẩu" },
+  ];
+
+  const keysToRemove = ["lastLogin"];
+  const defaultColumns = userColumns.filter(
+    (column) => !keysToRemove.includes(column.key)
+  );
+
+  const fetchUserData = async () => {
+    setLoadingPage(true);
+    try {
+      const data = await userService.getUsers();
+      setUserData(data);
+    } catch (err) {
+      setErrorServer(err.message);
+    } finally {
+      setLoadingPage(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/api/users");
-        setUsers(
-          response.data.length > 0 ? response.data : generateSampleUsers()
-        );
-      } catch (error) {
-        console.error("Có lỗi khi lấy dữ liệu người dùng:", error);
-        setUsers(generateSampleUsers()); // Nếu có lỗi, sử dụng dữ liệu mẫu
-      }
-    };
-
-    const generateSampleUsers = () => {
-      return [
-        {
-          UserId: 1,
-          Username: "Nguyễn Thị A Ly",
-          Password: "pass1",
-          Email: "lynta@gmail.com",
-          Role: "Admin",
-          Status: true,
-        },
-        {
-          UserId: 2,
-          Username: "Trần Quang Hiệp",
-          Password: "pass2",
-          Email: "hieptq@gmail.com",
-          Role: "User",
-          Status: true,
-        },
-        {
-          UserId: 3,
-          Username: "Lê Minh Beo",
-          Password: "pass3",
-          Email: "beolm@gmail.com",
-          Role: "Admin",
-          Status: true,
-        },
-        {
-          UserId: 4,
-          Username: "Hải Âu",
-          Password: "pass4",
-          Email: "auh@gmail.com",
-          Role: "User",
-          Status: false,
-        },
-        {
-          UserId: 5,
-          Username: "Nguyễn Việt Kiều",
-          Password: "pass5",
-          Email: "kieunv@gmail.com",
-          Role: "User",
-          Status: true,
-        },
-        {
-          UserId: 6,
-          Username: "Đình Quang Trọng",
-          Password: "pass6",
-          Email: "trongdq@gmail.com",
-          Role: "User",
-          Status: false,
-        },
-        {
-          UserId: 7,
-          Username: "Pham Quang Linh",
-          Password: "pass7",
-          Email: "linhpq@gmail.com",
-          Role: "Admin",
-          Status: true,
-        },
-        {
-          UserId: 8,
-          Username: "Hoàng Thái Tam",
-          Password: "pass8",
-          Email: "tamht@gmail.com",
-          Role: "User",
-          Status: true,
-        },
-      ];
-    };
-
-    fetchUsers();
+    fetchUserData();
   }, []);
 
-  const handleDelete = async (userId) => {
-    setUsers(users.filter((user) => user.UserId !== userId));
+  const validateField = (key, value) => {
+    let error = "";
+
+    switch (key) {
+      case "username":
+        if (!value || value.trim() === "") {
+          error = "Tên người dùng không được để trống.";
+        }
+        break;
+
+      case "email":
+        if (!value || value.trim() === "") {
+          error = "Email không được để trống.";
+        } else if (!/\S+@\S+\.\S+/.test(value)) {
+          error = "Email không hợp lệ.";
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    setErrorFields((prevErrors) => ({
+      ...prevErrors,
+      [key]: error,
+    }));
   };
 
-  const handleAddUser = () => {
-    setShowAddUserForm(true);
-  };
-
-  const handleViewUser = (user) => {
-    setNewUser({
-      UserId: user.UserId,
-      Username: user.Username,
-      Password: user.Password,
-      Email: user.Email,
-      Role: user.Role,
-      RegisteredDate: user.RegisteredDate,
-    });
-    // setShowAddUserForm(true); // Mở modal để chỉnh sửa
-    setShowEditUserForm(true);
-    setEditingUserId(user.UserId);
-  };
-
-  const validate = () => {
+  const validateForm = () => {
     const newErrors = {};
-    if (!newUser.Username)
-      newErrors.Username = "Tên đăng nhập không được để trống.";
-    if (!newUser.Password) newErrors.Password = "Mật khẩu không được để trống.";
-    if (!newUser.Email) newErrors.Email = "Email không được để trống.";
-    return newErrors;
-  };
 
-  const handleSaveUser = () => {
-    const validationErrors = validate();
-    setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0) {
-      return;
+    if (!formData.username || formData.username.trim() === "") {
+      newErrors.username = "Tên người dùng không được để trống.";
     }
 
-    // Tạo ID mới
-    const newUserId = newUser.UserId || users.length + 1;
-    const userToAdd = {
-      UserId: newUserId,
-      ...newUser,
-      Status: true,
-    };
+    if (!formData.email || formData.email.trim() === "") {
+      newErrors.email = "Email không được để trống.";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email không hợp lệ.";
+    }
 
-    setUsers((prevUsers) =>
-      prevUsers.filter((user) => user.UserId !== newUserId).concat(userToAdd)
-    );
-    setShowAddUserForm(false);
-    setShowEditUserForm(false);
-    setNewUser({
-      UserId: null,
-      Username: "",
-      Password: "",
-      Email: "",
-      Role: "User",
-      RegisteredDate: new Date().toISOString().split("T")[0],
+    if (!isEditing) {
+      if (!formData.password || formData.password.trim() === "") {
+        newErrors.password = "Mật khẩu không được để trống.";
+      } else if (formData.password.length < 5) {
+        newErrors.password = "Mật khẩu phải có ít nhất 5 ký tự.";
+      }
+    }
+
+    setErrorFields(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleInputChange = (key, value) => {
+    setFormData({ ...formData, [key]: value });
+    validateField(key, value);
+  };
+
+  const handleReset = () => {
+    setFormData({
+      username: "",
+      email: "",
+      registeredDate: formatDateTimeLocal(),
     });
-    setEditingUserId(null);
+    setIsEditing(false);
+    setErrorFields({});
   };
 
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+  const handleEdit = (item) => {
+    setFormData({
+      ...item,
+      registeredDate: formatDateTimeToISO(item.registeredDate),
+      lastLogin: formatDateTimeToISO(item.lastLogin),
+    });
+    setIsEditing(true);
+    setErrorFields({});
+  };
 
-  const totalPages = Math.ceil(users.length / usersPerPage);
+  const handleSaveItem = async () => {
+    if (!validateForm()) return false;
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+    setIsLoading(true);
+
+    try {
+      if (isEditing) {
+        const updatedUser = await userService.updateUser(formData.id, formData);
+
+        const formattedUser = {
+          ...updatedUser,
+          registeredDate: formatDateTimeToDMY(updatedUser.registeredDate),
+          lastLogin: formatDateTimeToDMY(updatedUser.lastLogin),
+        };
+
+        const updatedUsers = userData.map((user) =>
+          user.id === formattedUser.id ? formattedUser : user
+        );
+
+        setUserData(updatedUsers);
+        toast.success("Cập nhật thành công!");
+      } else {
+        const newUser = await userService.createUser(formData);
+
+        const formattedUser = {
+          ...newUser,
+          registeredDate: formatDateTimeToDMY(newUser.registeredDate),
+          lastLogin: formatDateTimeToDMY(newUser.lastLogin),
+        };
+
+        setUserData([...userData, formattedUser]);
+        toast.success("Thêm mới thành công!");
+      }
+
+      handleReset();
+      return true;
+    } catch (error) {
+      if (error.response) {
+        toast.error(error.response.data + "!");
+      } else {
+        toast.error("Đã xảy ra lỗi không xác định. Vui lòng thử lại sau!");
+      }
+      return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+  const handleDelete = (deleteId) => {
+    if (deleteId) {
+      setIsLoading(true);
+      userService
+        .deleteUser(deleteId)
+        .then(() => {
+          setUserData(userData.filter((user) => user.id !== deleteId));
+          toast.success("Xóa thành công!");
+        })
+        .catch(() => {
+          toast.error("Đã xảy ra lỗi khi xóa.");
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
   };
 
-  return (
-    <div className="container my-4">
-      <h1 className="text-center text-dark mb-4">Quản lý người dùng</h1>
+  const modalContent = (
+    <>
+      <div className="row">
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formUsername">
+            <Form.Label>
+              Tên người dùng <span className="text-danger">(*)</span>
+            </Form.Label>
+            <Form.Control
+              type="text"
+              name="username"
+              value={formData.username}
+              maxLength={100}
+              onChange={(e) => handleInputChange("username", e.target.value)}
+              isInvalid={!!errorFields.username}
+              placeholder="Nhập tên người dùng"
+              required
+            />
+            <Form.Control.Feedback type="invalid">
+              {errorFields.username}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </div>
 
-      <div className="mb-3 d-flex">
-        <input
-          type="text"
-          className="form-control me-2"
-          placeholder="Tìm kiếm theo tên đăng nhập..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <button className="btn btn-primary me-2" onClick={() => {}}>
-          Lọc
-        </button>
-        <button className="btn btn-success" onClick={handleAddUser}>
-          Thêm
-        </button>
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formEmail">
+            <Form.Label>
+              Email <span className="text-danger">(*)</span>
+            </Form.Label>
+            <Form.Control
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange("email", e.target.value)}
+              isInvalid={!!errorFields.email}
+              required
+            />
+            <Form.Control.Feedback type="invalid">
+              {errorFields.email}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </div>
       </div>
 
-      {/* Overlay khi modal hiển thị */}
-      {showAddUserForm && (
-        <div className="overlay" onClick={() => setShowAddUserForm(false)}>
-          <div
-            className={`modal ${showAddUserForm ? "show" : ""}`}
-            style={{ display: showAddUserForm ? "block" : "none" }}
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Thêm người dùng mới</h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={() => setShowAddUserForm(false)}
-                  ></button>
-                </div>
-                <div
-                  className="modal-body"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <form>
-                    <div className="mb-3">
-                      <label>Tên đăng nhập:</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={newUser.Username}
-                        onChange={(e) =>
-                          setNewUser({ ...newUser, Username: e.target.value })
-                        }
-                        required
-                      />
-                      {errors.Username && (
-                        <small className="text-danger">{errors.Username}</small>
-                      )}
-                    </div>
-                    <div className="mb-3">
-                      <label>Mật khẩu:</label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        value={newUser.Password}
-                        onChange={(e) =>
-                          setNewUser({ ...newUser, Password: e.target.value })
-                        }
-                        required
-                      />
-                      {errors.Password && (
-                        <small className="text-danger">{errors.Password}</small>
-                      )}
-                    </div>
-                    <div className="mb-3">
-                      <label>Email:</label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        value={newUser.Email}
-                        onChange={(e) =>
-                          setNewUser({ ...newUser, Email: e.target.value })
-                        }
-                        required
-                      />
-                      {errors.Email && (
-                        <small className="text-danger">{errors.Email}</small>
-                      )}
-                    </div>
-                    <div className="mb-3">
-                      <label>Vai trò:</label>
-                      <select
-                        className="form-select"
-                        value={newUser.Role}
-                        onChange={(e) =>
-                          setNewUser({ ...newUser, Role: e.target.value })
-                        }
-                      >
-                        <option value="User">User</option>
-                        <option value="Admin">Admin</option>
-                      </select>
-                    </div>
-                    <button
-                      type="button"
-                      className="btn btn-success"
-                      onClick={handleSaveUser}
-                    >
-                      Lưu
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-secondary ms-2"
-                      onClick={() => setShowAddUserForm(false)}
-                    >
-                      Hủy
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Overlay khi modal hiển thị */}
-
-      {/* Modal chỉnh sửa người dùng */}
-      {showEditUserForm && (
-        <div className="overlay" onClick={() => setShowEditUserForm(false)}>
-          <div
-            className={`modal ${showEditUserForm ? "show" : ""}`}
-            style={{ display: showEditUserForm ? "block" : "none" }}
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Chỉnh sửa người dùng</h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={() => setShowEditUserForm(false)}
-                  ></button>
-                </div>
-                <div
-                  className="modal-body"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <form>
-                    <div className="mb-3">
-                      <label>Tên đăng nhập:</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={newUser.Username}
-                        onChange={(e) =>
-                          setNewUser({ ...newUser, Username: e.target.value })
-                        }
-                        required
-                      />
-                      {errors.Username && (
-                        <small className="text-danger">{errors.Username}</small>
-                      )}
-                    </div>
-                    <div className="mb-3">
-                      <label>Mật khẩu:</label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        value={newUser.Password}
-                        onChange={(e) =>
-                          setNewUser({ ...newUser, Password: e.target.value })
-                        }
-                        required
-                      />
-                      {errors.Password && (
-                        <small className="text-danger">{errors.Password}</small>
-                      )}
-                    </div>
-                    <div className="mb-3">
-                      <label>Email:</label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        value={newUser.Email}
-                        onChange={(e) =>
-                          setNewUser({ ...newUser, Email: e.target.value })
-                        }
-                        required
-                      />
-                      {errors.Email && (
-                        <small className="text-danger">{errors.Email}</small>
-                      )}
-                    </div>
-                    <div className="mb-3">
-                      <label>Vai trò:</label>
-                      <select
-                        className="form-select"
-                        value={newUser.Role}
-                        onChange={(e) =>
-                          setNewUser({ ...newUser, Role: e.target.value })
-                        }
-                      >
-                        <option value="User">User</option>
-                        <option value="Admin">Admin</option>
-                      </select>
-                    </div>
-                    <div className="mb-3">
-                      <label>Ngày đăng ký:</label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={newUser.RegisteredDate.split("T")[0]}
-                        onChange={(e) =>
-                          setNewUser({
-                            ...newUser,
-                            RegisteredDate: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </form>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowEditUserForm(false)}
-                  >
-                    Đóng
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={handleSaveUser}
-                  >
-                    Lưu
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <table className="table table-bordered">
-        <thead className="table-dark">
-          <tr>
-            <th className="text-center">ID</th>
-            <th className="text-center">Tên đăng nhập</th>
-            <th className="text-center">Email</th>
-            <th className="text-center">Quyền</th>
-            <th className="text-center">Trạng thái</th>
-            <th className="text-center">Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentUsers.map((user) => (
-            <tr key={user.UserId}>
-              <td>{user.UserId}</td>
-              <td>{user.Username}</td>
-              <td>{user.Email}</td>
-              <td>{user.Role}</td>
-              <td>{user.Status ? "Kích hoạt" : "Không kích hoạt"}</td>
-              <td>
-                <button
-                  className="btn btn-outline-info me-2"
-                  onClick={() => handleViewUser(user)}
-                >
-                  Xem
-                </button>
-                <button
-                  className="btn btn-outline-warning me-2"
-                  onClick={() => {}}
-                >
-                  Sửa
-                </button>
-                <button
-                  className="btn btn-outline-danger"
-                  onClick={() => handleDelete(user.UserId)}
-                >
-                  Xóa
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <nav>
-        <ul className="pagination justify-content-center">
-          <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-            <button className="page-link" onClick={handlePrevPage}>
-              Trước
-            </button>
-          </li>
-          {Array.from({ length: totalPages }, (_, index) => (
-            <li
-              className={`page-item ${
-                currentPage === index + 1 ? "active" : ""
-              }`}
-              key={index}
+      <div className="row">
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formRole">
+            <Form.Label>Vai trò</Form.Label>
+            <Form.Select
+              name="role"
+              value={formData.role}
+              onChange={(e) => handleInputChange("role", e.target.value)}
+              isInvalid={!!errorFields.role}
+              required
             >
-              <button
-                className="page-link"
-                onClick={() => setCurrentPage(index + 1)}
-              >
-                {index + 1}
-              </button>
-            </li>
-          ))}
-          <li
-            className={`page-item ${
-              currentPage === totalPages ? "disabled" : ""
-            }`}
-          >
-            <button className="page-link" onClick={handleNextPage}>
-              Tiếp theo
-            </button>
-          </li>
-        </ul>
-      </nav>
-    </div>
+              <option value="">Chọn vai trò</option>
+              <option value="ADMIN">ADMIN</option>
+              <option value="USER">USER</option>
+              <option value="TRAINER">TRAINER</option>
+            </Form.Select>
+            <Form.Control.Feedback type="invalid">
+              {errorFields.role}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </div>
+
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formPassword">
+            <Form.Label>
+              Mật khẩu <span className="text-danger">(*)</span>
+            </Form.Label>
+            <Form.Control
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={(e) => handleInputChange("password", e.target.value)}
+              isInvalid={!!errorFields.password}
+              required={!isEditing}
+            />
+            <Form.Control.Feedback type="invalid">
+              {errorFields.password}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </div>
+      </div>
+
+      <div className="row">
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formRegisteredDate">
+            <Form.Label>Ngày đăng ký</Form.Label>
+            <Form.Control
+              type="datetime-local"
+              name="registeredDate"
+              value={formData.registeredDate || today}
+              onChange={(e) =>
+                handleInputChange("registeredDate", e.target.value)
+              }
+              required
+              readOnly={isEditing}
+            />
+          </Form.Group>
+        </div>
+
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formStatus">
+            <Form.Label>Trạng thái</Form.Label>
+            <Form.Check
+              type="switch"
+              id="custom-switch"
+              label={formData.status === "ACTIVE" ? "Hoạt động" : "Vô hiệu hóa"}
+              onChange={(e) =>
+                handleInputChange(
+                  "status",
+                  e.target.checked ? "ACTIVE" : "DISABLED"
+                )
+              }
+              checked={formData.status === "ACTIVE"}
+            />
+          </Form.Group>
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <>
+      <Helmet>
+        <title>Quản lý người dùng - Hight Star</title>
+      </Helmet>
+      {loadingPage ? (
+        <div className="w-100 h-100 d-flex justify-content-center align-items-center">
+          <Spinner animation="border" className="text-primary" />
+        </div>
+      ) : errorServer ? (
+        <Page500 message={errorServer} />
+      ) : (
+        <section className="row m-0 p-0 ">
+          <TableManagement
+            columns={userColumns}
+            data={userData}
+            title={"Quản lý người dùng"}
+            defaultColumns={defaultColumns}
+            modalContent={modalContent}
+            isEditing={isEditing}
+            handleReset={handleReset}
+            onEdit={handleEdit}
+            handleSaveItem={handleSaveItem}
+            onDelete={handleDelete}
+            isLoading={isLoading}
+          />
+        </section>
+      )}
+    </>
   );
 };
 
