@@ -2,7 +2,8 @@ import Dashboard from "./dashboards/Dashboard";
 import UserManagement from "./users/UserManagement";
 import TicketManagement from "./tickets/TicketManagement";
 import CourseManagement from "./courses/CourseManagement";
-import DiscountManagement from "./discounts/DiscountManagement";
+import StudentManagement from "./students/StudentManagement";
+import DiscountManagement from "./discounts/DiscountManagement"; 
 import Page404 from "./pages/Page404";
 
 export {
@@ -10,6 +11,7 @@ export {
   UserManagement,
   CourseManagement,
   TicketManagement,
+  StudentManagement,
   DiscountManagement,
   Page404,
 };

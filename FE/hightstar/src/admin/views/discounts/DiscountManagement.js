@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import TableManagement from "../../components/common/TableManagement";
-import discountService from "../../services/DiscountService";
+import DiscountService from "../../services/DiscountService";
 import Page500 from "../pages/Page500";
 import {
   formatDateTimeToISO,
@@ -41,7 +41,7 @@ const DiscountManagement = () => {
   const fetchDiscountData = async () => {
     setLoadingPage(true);
     try {
-      const data = await discountService.getDiscounts();
+      const data = await DiscountService.getDiscounts();
       setDiscountData(data); // Lưu dữ liệu vào state
     } catch (err) {
       setErrorServer(err.message); // Lưu lỗi vào state nếu có
@@ -104,7 +104,7 @@ const DiscountManagement = () => {
 
     if (!formData.discountName || formData.discountName.trim() === "") {
       newErrors.discountName = "Tên không được để trống.";
-    } 
+    }
 
     if (formData.percentage === "" || formData.percentage === null) {
       newErrors.percentage = "Tỷ lệ giảm giá không được để trống.";
@@ -168,8 +168,8 @@ const DiscountManagement = () => {
     setIsLoading(true); // Bắt đầu quá trình tải
 
     if (isEditing) {
-      // Gọi API cập nhật sử dụng discountService
-      discountService
+      // Gọi API cập nhật sử dụng DiscountService
+      DiscountService
         .updateDiscount(formData.id, formData)
         .then((response) => {
           let updatedDiscount = response; // Lấy phản hồi từ server
@@ -203,8 +203,8 @@ const DiscountManagement = () => {
         ...formData,
       };
 
-      // Gọi API thêm mới sử dụng discountService
-      discountService
+      // Gọi API thêm mới sử dụng DiscountService
+      DiscountService
         .createDiscount(newDiscount)
         .then((response) => {
           let createdDiscount = response; // Lấy phản hồi từ server (bao gồm ID)
@@ -235,7 +235,7 @@ const DiscountManagement = () => {
   const handleDelete = (deleteId) => {
     if (deleteId) {
       setIsLoading(true);
-      discountService
+      DiscountService
         .deleteDiscount(deleteId)
         .then(() => {
           setDiscountData(
