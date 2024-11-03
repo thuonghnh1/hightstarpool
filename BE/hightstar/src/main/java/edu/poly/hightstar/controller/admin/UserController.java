@@ -36,12 +36,14 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody UserDTO userDto) {
         if (userService.isPhoneNumberExists(userDto.getPhoneNumber())) {
+            System.out.println("--------------------"+userDto.getPhoneNumber());
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Số điện thoại này đã được sử dụng");
         }
 
         if (userService.isEmailExists(userDto.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email này đã được sử dụng");
         }
+        System.out.println("-------------------- Đã tới đay");
         UserDTO create = userService.createUser(userDto);
         // trả về phản hồi với mã trạng thái(HTTP 201 created), body là phần thân p/hồi
         return ResponseEntity.status(HttpStatus.CREATED).body(create);

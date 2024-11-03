@@ -276,6 +276,7 @@ const UserManagement = () => {
               onChange={(e) => handleInputChange("role", e.target.value)}
               isInvalid={!!errorFields.role}
               required
+              disabled={isEditing}
             >
               <option value="ADMIN">Quản trị</option>
               <option value="USER">Người dùng</option>

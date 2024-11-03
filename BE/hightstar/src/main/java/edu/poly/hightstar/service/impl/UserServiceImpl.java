@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
         // Tạo mới đối tượng UserProfile
         UserProfile newUserProfile = new UserProfile();
         newUserProfile.setFullName(userDto.getFullName());
-        newUserProfile.setPhoneNumber(userDto.getUsername());
+        newUserProfile.setPhoneNumber(userDto.getPhoneNumber());
         newUserProfile.setUser(createdUser);
         userProfileRepository.save(newUserProfile);
         return createdUserDto;
