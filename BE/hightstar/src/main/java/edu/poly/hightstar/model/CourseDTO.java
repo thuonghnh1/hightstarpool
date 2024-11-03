@@ -14,6 +14,7 @@ public class CourseDTO {
      @JsonProperty("id") // cấu hình thuộc tính giống với trong file json.
     private Long courseId;        // ID khóa học
     private String courseName;    // Tên khóa học
+    @JsonProperty("image")
     private String courseImage;   // Hình ảnh khóa học
     private int maxStudents;      // Số lượng học viên tối đa
     private String description;   // Mô tả khóa học

@@ -50,7 +50,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
         </li>
         <li>
           <NavLink
-            to="/admin/sell"
+            to="/admin/sales-management"
             className={({ isActive }) =>
               isActive ? "active-link" : "inactive-link"
             }

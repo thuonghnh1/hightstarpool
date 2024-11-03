@@ -12,20 +12,21 @@ import edu.poly.hightstar.model.CourseDTO;
 @RestController
 @RequestMapping("/api/courses")
 public class CoursesController {
-    private final CourseService courseService;
+        private final CourseService courseService;
 
-    public CoursesController(CourseService courseService) {
-        this.courseService = courseService;
-    }
+        public CoursesController(CourseService courseService) {
+                this.courseService = courseService;
+        }
 
-    @GetMapping
+        @GetMapping
 
-    public List<CourseDTO> getAllCourses() {
+        public List<CourseDTO> getAllCourses() {
+                System.out.println("List" + courseService.getAllCourses());
+                return courseService.getAllCourses();
 
-        return courseService.getAllCourses();
-    }
+        }
 
-    @GetMapping("/{id}")
+        @GetMapping("/{id}")
 
         public ResponseEntity<CourseDTO> getCourseById(@PathVariable Long id) {
                 CourseDTO courseDTO = courseService.getCourseById(id);
@@ -34,16 +35,15 @@ public class CoursesController {
                 }
                 return ResponseEntity.ok(courseDTO); // 200 OK với discountDto
         }
-    @PostMapping
+
+        @PostMapping
         public ResponseEntity<CourseDTO> createCourse(@RequestBody CourseDTO courseDTO) {
-                CourseDTO createdCourse  = courseService.createCourse(courseDTO);
+                CourseDTO createdCourse = courseService.createCourse(courseDTO);
 
                 // trả về phản hồi với mã trạng thái(HTTP 201 created), body là phần thân p/hồi
                 return ResponseEntity.status(HttpStatus.CREATED).body(createdCourse);
 
         }
-
-
 
         @PutMapping("/{id}")
         public ResponseEntity<CourseDTO> updateDiscount(@PathVariable Long id, @RequestBody CourseDTO courseDTO) {

@@ -280,7 +280,7 @@ const TableManagement = ({
                           {renderCustomCell(column, item)}
                         </td>
                       ))}
-                    <td>
+                    <td className="align-middle">
                       {visibleColumns.length === columns.length || (
                         <button
                           className="btn btn__show p-1"
@@ -313,7 +313,7 @@ const TableManagement = ({
                                     {column.label}:
                                   </strong>
                                   <span className=" p-0">
-                                    {item[column.key]}
+                                    {renderCustomCell(column, item)}
                                   </span>
                                 </li>
                               ))}

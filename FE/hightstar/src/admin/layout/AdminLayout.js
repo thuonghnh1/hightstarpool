@@ -4,6 +4,7 @@ import { AppSidebar, AppFooter, AppHeader } from "../components/index";
 import {
   Dashboard,
   Page404,
+  SalesManagement,
   UserManagement,
   CourseManagement,
   TrainerManagement,
@@ -60,6 +61,10 @@ const AdminLayout = () => {
               <Routes>
                 <Route index element={<Navigate to="/admin/dashboard" />} />
                 <Route path="dashboard" element={<Dashboard />} />
+                <Route
+                  path="sales-management"
+                  element={<SalesManagement />}
+                />
                 <Route path="user-management" element={<UserManagement />} />
                 <Route
                   path="course-management"

@@ -19,7 +19,7 @@ const CourseManagement =() => {
   const courseColumns = [
     { key: "id", label: "Mã khóa học" },
     { key: "courseName", label: "Tên khóa học" },
-    { key: "courseImage", label: "Hình ảnh" },
+    { key: "image", label: "Hình ảnh" },
     { key: "maxStudents", label: "Số lượng học viên tối đa" },
     { key: "numberOfSessions", label: "Số lượng buổi học" }, 
     { key: "price", label: "Giá khóa học" },
@@ -59,7 +59,7 @@ const CourseManagement =() => {
               error = "Tên không được để trống.";
             }
             break;
-            case "courseImage":
+            case "image":
             if (!value || value.trim() === "") {
               error = "Hình ảnh không được để trống.";
             }
@@ -108,8 +108,8 @@ const validateForm = () => {
     }
   
     // Kiểm tra hình ảnh khóa học
-    if (!formData.courseImage || formData.courseImage.trim() === "") {
-      newErrors.courseImage = "Hình ảnh không được để trống.";
+    if (!formData.image || formData.image.trim() === "") {
+      newErrors.image = "Hình ảnh không được để trống.";
     }
   
     // Kiểm tra số lượng học viên tối đa
@@ -146,7 +146,7 @@ const validateForm = () => {
     const handleReset = () => {
         setFormData({
         courseName: "",
-        courseImage: "",
+        image: "",
         maxStudents: "",
         numberOfSessions: "",
         price: "",
@@ -199,6 +199,7 @@ const validateForm = () => {
       const newCourse = {
         ...formData,
       };
+      console.log(formData)
   
       // Gọi API thêm mới sử dụng CourseService
       CourseService
@@ -268,18 +269,18 @@ const handleDelete = (deleteId) => {
         </div>
 
         <div className="col-md-6 mb-3">
-          <Form.Group controlId="formCourseImage">
+          <Form.Group controlId="formimage">
             <Form.Label>Hình ảnh khóa học (URL)</Form.Label>
             <Form.Control
               type="text"
-              name="courseImage"
-              value={formData.courseImage} // Thêm trường nhập cho hình ảnh
-              onChange={(e) => handleInputChange("courseImage", e.target.value)}
-              isInvalid={!!errorFields.courseImage}
+              name="image"
+              value={formData.image} // Thêm trường nhập cho hình ảnh
+              onChange={(e) => handleInputChange("image", e.target.value)}
+              isInvalid={!!errorFields.image}
               required
             />
             <Form.Control.Feedback type="invalid">
-              {errorFields.courseImage}
+              {errorFields.image}
             </Form.Control.Feedback>
           </Form.Group>
         </div>
