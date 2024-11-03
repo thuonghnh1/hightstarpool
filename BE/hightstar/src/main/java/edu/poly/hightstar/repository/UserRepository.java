@@ -16,4 +16,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     boolean existsByEmailAndUserIdNot(String email, Long userId); // không tính id đang cập nhật
+
 }

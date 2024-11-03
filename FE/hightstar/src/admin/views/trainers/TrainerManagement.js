@@ -194,7 +194,7 @@ const TrainerManagement = () => {
         .deleteTrainer(deleteId)
         .then(() => {
           setTrainerData(
-            trainerData.filter((trainer) => trainer.trainerId !== deleteId)
+            trainerData.filter((trainer) => trainer.id !== deleteId)
           );
           toast.success("Xóa thành công!");
         })

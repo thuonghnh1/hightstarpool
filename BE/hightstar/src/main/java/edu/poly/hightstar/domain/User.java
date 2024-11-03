@@ -47,4 +47,13 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatus status = UserStatus.ACTIVE; // Mặc định là hoạt động
+
+    // Liên kết với UserProfile, kèm theo Cascade và Orphan Removal để tự động xóa
+    // UserProfile khi xóa User
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private UserProfile userProfile;
+
+    // Liên kết Trainer, sẽ tự động xóa khi User bị xóa
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Trainer trainer;
 }
