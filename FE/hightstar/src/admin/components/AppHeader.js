@@ -335,7 +335,7 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
               {theme === "light" ? (
                 <i className="bi bi-brightness-high fs-5"></i>
               ) : (
-                <i class="bi bi-brightness-high-fill fs-5"></i>
+                <i className="bi bi-brightness-high-fill fs-5"></i>
               )}
             </button>
           </li>

@@ -3,6 +3,7 @@ import { Form, Pagination, Dropdown, DropdownButton } from "react-bootstrap";
 import CustomModal from "./CustomModal";
 import DeleteModal from "./DeleteModal";
 import "../../css/table-management.css";
+import iconTrainer from "../../../assets/images/icons/trainer.png";
 
 const TableManagement = ({
   data,
@@ -76,10 +77,15 @@ const TableManagement = ({
               <i className="bi bi-shield-fill text-primary me-1"></i>
             )}
             {item.role === "USER" && (
-              <i className="bi bi-person-fill text-info me-1"></i>
+              <i className="bi bi-person-fill fs-5 text-info me-1"></i>
             )}
             {item.role === "TRAINER" && (
-              <i className="bi bi-dumbbell-fill text-warning me-1"></i>
+              <img
+                src={iconTrainer}
+                alt="Role hlv"
+                className="img-fluid rounded-circle"
+                style={{ width: "17px", height: "17px" }}
+              />
             )}
             {item.role}
           </span>

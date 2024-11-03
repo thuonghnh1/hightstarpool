@@ -9,6 +9,14 @@ import lombok.RequiredArgsConstructor;
 import edu.poly.hightstar.enums.Role;
 import edu.poly.hightstar.enums.UserStatus;
 import edu.poly.hightstar.model.RegisterDTO;
+import edu.poly.hightstar.model.UserDTO;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +24,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private UserRepository userRepository;
-    private UserProfileRepository userProfileRepository;
+    private final UserRepository userRepository;
+    private final UserProfileRepository userProfileRepository;
 
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -66,4 +74,93 @@ public class UserServiceImpl implements UserService {
     // }
     // return false;
     // }
+
+    // THUONG
+
+    @Override
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll().stream().map(user -> {
+            UserDTO dto = new UserDTO();
+            System.out.println();
+            BeanUtils.copyProperties(user, dto);
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public UserDTO getUserById(Long id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            UserDTO userDto = new UserDTO();
+            BeanUtils.copyProperties(user.get(), userDto);
+            return userDto;
+        }
+        return null;
+    }
+
+    @Override
+    public UserDTO createUser(UserDTO userDto) {
+        User user = new User();
+        BeanUtils.copyProperties(userDto, user);
+        // Tạo mật khẩu ngẫu nhiên có 6 chữ số
+        String defaultPassword = RandomStringUtils.randomAlphanumeric(6);
+        user.setPassword(passwordEncoder.encode(defaultPassword)); // Mã hóa mật khẩu
+        user.setUsername(userDto.getPhoneNumber()); // mặc định username là sđt
+        User createdUser = userRepository.save(user);
+
+        UserDTO createdUserDto = new UserDTO();
+        BeanUtils.copyProperties(createdUser, createdUserDto);
+
+        // Tạo tự động UserProfile
+        // Tạo mới đối tượng UserProfile
+        UserProfile newUserProfile = new UserProfile();
+        newUserProfile.setFullName(userDto.getFullName());
+        newUserProfile.setPhoneNumber(userDto.getUsername());
+        newUserProfile.setUser(createdUser);
+        userProfileRepository.save(newUserProfile);
+        return createdUserDto;
+    }
+
+    @Override
+    public UserDTO updateUser(Long id, UserDTO userDto) {
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isPresent()) {
+            User userDetails = userOptional.get();
+            BeanUtils.copyProperties(userDto, userDetails);
+            User updatedUser = userRepository.save(userDetails);
+
+            UserDTO updatedUserDto = new UserDTO();
+            BeanUtils.copyProperties(updatedUser, updatedUserDto);
+            return updatedUserDto;
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+
+    }
+
+    public boolean checkUserExists(Long id) {
+        return userRepository.existsById(id);
+    }
+
+    @Override
+    public boolean isPhoneNumberExists(String phoneNumber) {
+        return userProfileRepository.existsByPhoneNumber(phoneNumber);
+    }
+
+    @Override
+    public boolean isEmailExists(String email) {
+        // Kiểm tra xem email có tồn tại trong database không
+        return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean isEmailExistsForUpdate(String email, Long userId) {
+        // Kiểm tra xem email có tồn tại trong database không
+        return userRepository.existsByEmailAndUserIdNot(email, userId);
+    }
+
 }

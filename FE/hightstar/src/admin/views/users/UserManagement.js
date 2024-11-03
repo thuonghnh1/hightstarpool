@@ -7,7 +7,6 @@ import { Helmet } from "react-helmet-async";
 import {
   formatDateTimeToISO,
   formatDateTimeToDMY,
-  formatDateTimeLocal,
 } from "../../utils/FormatDate";
 import { Spinner, Form } from "react-bootstrap";
 
@@ -20,7 +19,6 @@ const UserManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
   const [errorServer, setErrorServer] = useState(null);
-  const today = new Date().toISOString().split("T")[0];
 
   const userColumns = [
     { key: "id", label: "ID" },
@@ -30,7 +28,6 @@ const UserManagement = () => {
     { key: "registeredDate", label: "Ngày đăng ký" },
     { key: "lastLogin", label: "Lần đăng nhập cuối" },
     { key: "status", label: "Trạng thái" },
-    { key: "password", label: "Mật khẩu" },
   ];
 
   const keysToRemove = ["lastLogin"];
@@ -58,9 +55,14 @@ const UserManagement = () => {
     let error = "";
 
     switch (key) {
-      case "username":
+      case "fullName":
         if (!value || value.trim() === "") {
-          error = "Tên người dùng không được để trống.";
+          error = "Tên không được để trống.";
+        }
+        break;
+      case "phoneNumber":
+        if (!value || !/^\d{10}$/.test(value)) {
+          error = "Số điện thoại không hợp lệ.";
         }
         break;
 
@@ -84,23 +86,18 @@ const UserManagement = () => {
 
   const validateForm = () => {
     const newErrors = {};
+    if (!isEditing && (!formData.fullName || formData.fullName.trim() === "")) { // nếu là edit thì sẽ không validate trường này
+      newErrors.fullName = "Tên không được để trống.";
+    }
 
-    if (!formData.username || formData.username.trim() === "") {
-      newErrors.username = "Tên người dùng không được để trống.";
+    if (!isEditing && (!formData.phoneNumber || !/^\d{10}$/.test(formData.phoneNumber))) {
+      newErrors.phoneNumber = "Số điện thoại không hợp lệ.";
     }
 
     if (!formData.email || formData.email.trim() === "") {
       newErrors.email = "Email không được để trống.";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email không hợp lệ.";
-    }
-
-    if (!isEditing) {
-      if (!formData.password || formData.password.trim() === "") {
-        newErrors.password = "Mật khẩu không được để trống.";
-      } else if (formData.password.length < 5) {
-        newErrors.password = "Mật khẩu phải có ít nhất 5 ký tự.";
-      }
     }
 
     setErrorFields(newErrors);
@@ -114,9 +111,12 @@ const UserManagement = () => {
 
   const handleReset = () => {
     setFormData({
-      username: "",
+      fullName: "",
+      phoneNumber: "",
       email: "",
-      registeredDate: formatDateTimeLocal(),
+      role: "USER",
+      password: "",
+      status: "ACTIVE",
     });
     setIsEditing(false);
     setErrorFields({});
@@ -133,8 +133,8 @@ const UserManagement = () => {
   };
 
   const handleSaveItem = async () => {
-    if (!validateForm()) return false;
 
+    if (!validateForm()) return false;
     setIsLoading(true);
 
     try {
@@ -155,7 +155,7 @@ const UserManagement = () => {
         toast.success("Cập nhật thành công!");
       } else {
         const newUser = await userService.createUser(formData);
-
+        console.log(formData.fullName);
         const formattedUser = {
           ...newUser,
           registeredDate: formatDateTimeToDMY(newUser.registeredDate),
@@ -200,27 +200,54 @@ const UserManagement = () => {
 
   const modalContent = (
     <>
+      {/* Nếu là edit thì không cần họ và tên */}
       <div className="row">
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formUsername">
-            <Form.Label>
-              Tên người dùng <span className="text-danger">(*)</span>
-            </Form.Label>
-            <Form.Control
-              type="text"
-              name="username"
-              value={formData.username}
-              maxLength={100}
-              onChange={(e) => handleInputChange("username", e.target.value)}
-              isInvalid={!!errorFields.username}
-              placeholder="Nhập tên người dùng"
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              {errorFields.username}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </div>
+        {isEditing || (
+          <div className="col-md-6 mb-3">
+            <Form.Group controlId="formFullName">
+              <Form.Label>
+                Họ và tên <span className="text-danger">(*)</span>
+              </Form.Label>
+              <Form.Control
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                maxLength={100}
+                onChange={(e) => handleInputChange("fullName", e.target.value)}
+                isInvalid={!!errorFields.fullName}
+                placeholder="VD: Nguyen Van A"
+                required
+              />
+              <Form.Control.Feedback type="invalid">
+                {errorFields.fullName}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </div>
+        )}
+        {isEditing || (
+          <div className="col-md-6 mb-3">
+            <Form.Group controlId="formPhoneNumber">
+              <Form.Label>
+                Số điện thoại <span className="text-danger">(*)</span>
+              </Form.Label>
+              <Form.Control
+                type="text"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                maxLength={100}
+                onChange={(e) =>
+                  handleInputChange("phoneNumber", e.target.value)
+                }
+                isInvalid={!!errorFields.phoneNumber}
+                placeholder="Nhập số điện thoại"
+                required
+              />
+              <Form.Control.Feedback type="invalid">
+                {errorFields.phoneNumber}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </div>
+        )}
 
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formEmail">
@@ -240,9 +267,6 @@ const UserManagement = () => {
             </Form.Control.Feedback>
           </Form.Group>
         </div>
-      </div>
-
-      <div className="row">
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formRole">
             <Form.Label>Vai trò</Form.Label>
@@ -253,54 +277,36 @@ const UserManagement = () => {
               isInvalid={!!errorFields.role}
               required
             >
-              <option value="">Chọn vai trò</option>
-              <option value="ADMIN">ADMIN</option>
-              <option value="USER">USER</option>
-              <option value="TRAINER">TRAINER</option>
+              <option value="ADMIN">Quản trị</option>
+              <option value="USER">Người dùng</option>
+              {/* Nếu là tạo mới thì không tạo HLV ở user */}
+              {isEditing && <option value="TRAINER">Huấn luyện viên</option>}
             </Form.Select>
             <Form.Control.Feedback type="invalid">
               {errorFields.role}
             </Form.Control.Feedback>
           </Form.Group>
         </div>
-
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formPassword">
-            <Form.Label>
-              Mật khẩu <span className="text-danger">(*)</span>
-            </Form.Label>
-            <Form.Control
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={(e) => handleInputChange("password", e.target.value)}
-              isInvalid={!!errorFields.password}
-              required={!isEditing}
-            />
-            <Form.Control.Feedback type="invalid">
-              {errorFields.password}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </div>
-      </div>
-
-      <div className="row">
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formRegisteredDate">
-            <Form.Label>Ngày đăng ký</Form.Label>
-            <Form.Control
-              type="datetime-local"
-              name="registeredDate"
-              value={formData.registeredDate || today}
-              onChange={(e) =>
-                handleInputChange("registeredDate", e.target.value)
-              }
-              required
-              readOnly={isEditing}
-            />
-          </Form.Group>
-        </div>
-
+        {isEditing && (
+          <div className="col-md-6 mb-3">
+            <Form.Group controlId="formPassword">
+              <Form.Label>
+                Mật khẩu <span className="text-danger">(*)</span>
+              </Form.Label>
+              <Form.Control
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={(e) => handleInputChange("password", e.target.value)}
+                isInvalid={!!errorFields.password}
+                required={!isEditing}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errorFields.password}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </div>
+        )}
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formStatus">
             <Form.Label>Trạng thái</Form.Label>
