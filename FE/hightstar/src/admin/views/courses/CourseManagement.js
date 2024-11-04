@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
+import { NumericFormat } from "react-number-format";
 import { toast } from "react-toastify";
 import TableManagement from "../../components/common/TableManagement";
 import CourseService from "../../services/CourseService";
 import Page500 from "../pages/Page500";
-import { Spinner, Form } from "react-bootstrap";
+import { Spinner, Form, InputGroup } from "react-bootstrap";
 
-const CourseManagement =() => {
-    // State lưu data từ api
+const CourseManagement = () => {
+  // State lưu data từ api
   const [courseData, setCourseData] = useState([]);
   const [formData, setFormData] = useState({}); // State quản lý dữ liệu hiện tại
+  const [imageFile, setImageFile] = useState(null); // State lưu trữ ảnh upload
   const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
   const [isEditing, setIsEditing] = useState(false); // Trạng thái để biết đang thêm mới hay chỉnh sửa
   const [isLoading, setIsLoading] = useState(false); // State để xử lý trạng thái tải dữ liệu
@@ -21,7 +23,7 @@ const CourseManagement =() => {
     { key: "courseName", label: "Tên khóa học" },
     { key: "image", label: "Hình ảnh" },
     { key: "maxStudents", label: "Số lượng học viên tối đa" },
-    { key: "numberOfSessions", label: "Số lượng buổi học" }, 
+    { key: "numberOfSessions", label: "Số lượng buổi học" },
     { key: "price", label: "Giá khóa học" },
     { key: "description", label: "Mô tả" },
   ];
@@ -48,70 +50,70 @@ const CourseManagement =() => {
   useEffect(() => {
     fetchCourseData();
   }, []);
-    
-      // Hàm validate cho từng trường input
-      const validateField = (key, value) => {
-        let error = "";
-    
-        switch (key) {
-          case "courseName":
-            if (!value || value.trim() === "") {
-              error = "Tên không được để trống.";
-            }
-            break;
-            case "image":
-            if (!value || value.trim() === "") {
-              error = "Hình ảnh không được để trống.";
-            }
-            break;
 
-         case "maxStudents":
-            if (value === "" || value === null) {
-             error = "Số lượng học viên tối đa không được để trống.";
-            } else if (isNaN(value) || value <= 0) {
-             error = "Số lượng học viên tối đa phải là một số dương.";
-            }
-            break;
+  // Hàm validate cho từng trường input
+  const validateField = (key, value) => {
+    let error = "";
 
-            case "numberOfSessions":
-            if (value === "" || value === null) {
-             error = "Số lượng buổi học không được để trống.";
-            } else if (isNaN(value) || value <= 0) {
-             error = "Số lượng buổi học phải là một số dương.";
-            }
-            break;
-
-         case "price":
-            if (value === "" || value === null) {
-             error = "Giá khóa học không được để trống.";
-            } else if (isNaN(value) || value < 0) {
-             error = "Giá khóa học phải là một số không âm.";
-            }
-            break;
-    
-        default:
-            break;
+    switch (key) {
+      case "courseName":
+        if (!value || value.trim() === "") {
+          error = "Tên không được để trống.";
         }
-    
-        setErrorFields((prevErrors) => ({
-          ...prevErrors,
-          [key]: error,
-        }));
-      };
+        break;
+      case "image":
+        if (!value || value.trim() === "") {
+          error = "Hình ảnh không được để trống.";
+        }
+        break;
 
-      // Hàm validate toàn bộ form
-const validateForm = () => {
+      case "maxStudents":
+        if (value === "" || value === null) {
+          error = "Số lượng học viên tối đa không được để trống.";
+        } else if (isNaN(value) || value <= 0) {
+          error = "Số lượng học viên tối đa phải là một số dương.";
+        }
+        break;
+
+      case "numberOfSessions":
+        if (value === "" || value === null) {
+          error = "Số lượng buổi học không được để trống.";
+        } else if (isNaN(value) || value <= 0) {
+          error = "Số lượng buổi học phải là một số dương.";
+        }
+        break;
+
+      case "price":
+        if (value === "" || value === null) {
+          error = "Giá khóa học không được để trống.";
+        } else if (isNaN(value) || value < 0) {
+          error = "Giá khóa học phải là một số không âm.";
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    setErrorFields((prevErrors) => ({
+      ...prevErrors,
+      [key]: error,
+    }));
+  };
+
+  // Hàm validate toàn bộ form
+  const validateForm = () => {
     const newErrors = {};
     // Kiểm tra tên khóa học
     if (!formData.courseName || formData.courseName.trim() === "") {
       newErrors.courseName = "Tên khóa học không được để trống.";
     }
-  
+
     // Kiểm tra hình ảnh khóa học
     if (!formData.image || formData.image.trim() === "") {
       newErrors.image = "Hình ảnh không được để trống.";
     }
-  
+
     // Kiểm tra số lượng học viên tối đa
     if (formData.maxStudents === "" || formData.maxStudents === null) {
       newErrors.maxStudents = "Số lượng học viên tối đa không được để trống.";
@@ -119,163 +121,158 @@ const validateForm = () => {
       newErrors.maxStudents = "Số lượng học viên tối đa phải là một số dương.";
     }
     // Kiểm tra số lượng buổi học
-    if (formData.numberOfSessions === "" || formData.numberOfSessions === null) {
+    if (
+      formData.numberOfSessions === "" ||
+      formData.numberOfSessions === null
+    ) {
       newErrors.numberOfSessions = "Số lượng buổi học không được để trống.";
-    } else if (isNaN(formData.numberOfSessions) || formData.numberOfSessions <= 0) {
+    } else if (
+      isNaN(formData.numberOfSessions) ||
+      formData.numberOfSessions <= 0
+    ) {
       newErrors.numberOfSessions = "Số lượng buổi học phải là một số dương.";
     }
-  
+
     // Kiểm tra giá khóa học
     if (formData.price === "" || formData.price === null) {
       newErrors.price = "Giá khóa học không được để trống.";
     } else if (isNaN(formData.price) || formData.price < 0) {
       newErrors.price = "Giá khóa học phải là một số không âm.";
     }
-  
+
     setErrorFields(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
   // Hàm xử lý khi thay đổi giá trị input
   const handleInputChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
     validateField(key, value);
   };
 
-    // Hàm reset form khi thêm mới
-    const handleReset = () => {
-        setFormData({
-        courseName: "",
-        image: "",
-        maxStudents: "",
-        numberOfSessions: "",
-        price: "",
-        description: "", // Nếu vẫn cần trường mô tả
-        });
-        setIsEditing(false);
-        setErrorFields({});
-    };
-  
-    // Hàm gọi khi nhấn "Sửa" một hàng
-    const handleEdit = (item) => {
-        setFormData({
-        ...item, // Sao chép tất cả thuộc tính của item
-        });
-        setIsEditing(true);
-        setErrorFields({});
-    };
-  
-    // Hàm lưu thông tin sau khi thêm hoặc sửa
-    const handleSaveItem = () => {
+  // Hàm reset form khi thêm mới
+  const handleReset = () => {
+    setFormData({
+      courseName: "",
+      image: "",
+      maxStudents: "4",
+      numberOfSessions: "0",
+      price: "0",
+      description: "", // Nếu vẫn cần trường mô tả
+    });
+    setIsEditing(false);
+    setErrorFields({});
+  };
+
+  // Hàm gọi khi nhấn "Sửa" một hàng
+  const handleEdit = (item) => {
+    setFormData({
+      ...item, // Sao chép tất cả thuộc tính của item
+    });
+    setIsEditing(true);
+    setErrorFields({});
+  };
+  // Hàm gọi khi lưu
+  const handleSaveItem = async () => {
     if (!validateForm()) return false;
-  
-    setIsLoading(true); // Bắt đầu quá trình tải
-  
-    if (isEditing) {
-      // Gọi API cập nhật sử dụng CourseService
-      CourseService
-        .updateCourse(formData.id, formData) 
-        .then((response) => {
-          let updatedCourse = response; // Lấy phản hồi từ server
-          console.log("Update: " + updatedCourse);
-  
-          // Cập nhật state courseData với course đã được sửa
-          const updatedCourses = courseData.map((course) =>
-            course.id === updatedCourse.id ? updatedCourse : course
-          );
-          setCourseData(updatedCourses);
-          toast.success("Cập nhật thành công!");
-          handleReset();
-        })
-        .catch((error) => {
-          console.error("Lỗi khi cập nhật", error);
-          toast.error("Đã xảy ra lỗi khi cập nhật. Vui lòng thử lại sau.");
-        })
-        .finally(() => {
-          setIsLoading(false); // Kết thúc quá trình tải
-        });
-    } else {
-      // Nếu đang ở trạng thái thêm mới
-      const newCourse = {
-        ...formData,
-      };
-      console.log(formData)
-  
-      // Gọi API thêm mới sử dụng CourseService
-      CourseService
-        .createCourse(newCourse) 
-        .then((response) => {
-          let createdCourse = response; // Lấy phản hồi từ server (bao gồm ID)
-  
-          // Cập nhật mảng courseData với item vừa được thêm
-          setCourseData([...courseData, createdCourse]);
-  
-          toast.success("Thêm mới thành công!");
-          handleReset();
-        })
-        .catch((error) => {
-          console.error("Lỗi khi thêm mới", error);
-          toast.error("Đã xảy ra lỗi khi thêm mới. Vui lòng thử lại sau.");
-        })
-        .finally(() => {
-          setIsLoading(false); // Kết thúc quá trình tải
-        });
-    }
-    return true;
-  };
-  
-  // Hàm xóa một khóa học
-const handleDelete = (deleteId) => {
-    if (deleteId) {
-      setIsLoading(true);
-      CourseService 
-        .deleteCourse(deleteId) 
-        .then(() => {
-          setCourseData( 
-            courseData.filter((course) => course.id !== deleteId) 
-          );
-          toast.success("Xóa thành công!");
-        })
-        .catch(() => {
-          toast.error("Đã xảy ra lỗi khi xóa.");
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+
+    setIsLoading(true);
+
+    try {
+      if (isEditing) {
+        // Gọi API cập nhật khóa học
+        const updatedCourse = await CourseService.updateCourse(
+          formData.id,
+          formData,
+          imageFile
+        );
+        const updatedCourses = courseData.map((course) =>
+          course.id === updatedCourse.id ? updatedCourse : course
+        );
+        setCourseData(updatedCourses);
+        toast.success("Cập nhật thành công!");
+      } else {
+        // Gọi API thêm mới khóa học
+        const createdCourse = await CourseService.createCourse(
+          formData,
+          imageFile
+        );
+        setCourseData([...courseData, createdCourse]);
+        toast.success("Thêm mới thành công!");
+      }
+      handleReset();
+      return true;
+    } catch (error) {
+      if (error.response) {
+        toast.error(error.response.data + "!"); // Hiển thị thông điệp lỗi từ server
+      } else {
+        toast.error("Đã xảy ra lỗi không xác định. Vui lòng thử lại sau!"); // Thông báo lỗi chung
+      }
+      return false;
+    } finally {
+      setIsLoading(false); // Kết thúc quá trình tải
     }
   };
-  
+
+  const handleDelete = async (deleteId) => {
+    if (!deleteId) return;
+
+    setIsLoading(true);
+
+    try {
+      await CourseService.deleteCourse(deleteId);
+      setCourseData(courseData.filter((course) => course.id !== deleteId));
+      toast.success("Xóa thành công!");
+    } catch (error) {
+      toast.error("Đã xảy ra lỗi khi xóa.");
+    } finally {
+      setIsLoading(false); // Kết thúc quá trình tải
+    }
+  };
+
   const modalContent = (
     <>
       <div className="row">
         <div className="col-md-6 mb-3">
-          <Form.Group controlId="formCourseName">
-            <Form.Label>Tên khóa học</Form.Label>
+          {/* Phần hiển thị hình ảnh */}
+          <Form.Label>Hình ảnh khóa học</Form.Label>
+          <div
+            className="d-flex justify-content-center align-items-center mb-3 rounded bg-light"
+            style={{
+              width: "100%",
+              height: "240px",
+              overflow: "hidden",
+              border: "2px dashed #ddd",
+            }}
+          >
+            {formData.image ? (
+              <img
+                src={formData.image}
+                alt="Hình ảnh khóa học"
+                className="w-100 h-100 object-fit-cover rounded"
+              />
+            ) : (
+              <span className="text-muted">Chưa có hình ảnh nào</span>
+            )}
+          </div>
+          <Form.Group controlId="formImage">
             <Form.Control
-              type="text"
-              name="courseName"
-              value={formData.courseName}
-              maxLength={100}
-              onChange={(e) =>
-                handleInputChange("courseName", e.target.value)
-              }
-              isInvalid={!!errorFields.courseName}
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              {errorFields.courseName}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </div>
-
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formimage">
-            <Form.Label>Hình ảnh khóa học (URL)</Form.Label>
-            <Form.Control
-              type="text"
+              type="file"
               name="image"
-              value={formData.image} // Thêm trường nhập cho hình ảnh
-              onChange={(e) => handleInputChange("image", e.target.value)}
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files[0];
+
+                if (file) {
+                  setImageFile(file); // lưu file vào imgFile để guwỉ lên server
+                  const fileUrl = URL.createObjectURL(file);
+                  handleInputChange("image", fileUrl); // lưu file vào img để xem trước
+                } else {
+                  // Nếu người dùng xóa hình ảnh đã chọn thì xóa cả image và imageFile
+                  handleInputChange("image", "");
+                  setImageFile(null);
+                }
+              }}
               isInvalid={!!errorFields.image}
               required
             />
@@ -284,67 +281,97 @@ const handleDelete = (deleteId) => {
             </Form.Control.Feedback>
           </Form.Group>
         </div>
-  
-        
-      </div>
-  
-      <div className="row">
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formMaxStudents">
-            <Form.Label>Số lượng học viên tối đa</Form.Label>
-            <Form.Control
-              type="number"
-              name="maxStudents"
-              min={1}
-              value={formData.maxStudents}
-              onChange={(e) => handleInputChange("maxStudents", e.target.value)}
-              isInvalid={!!errorFields.maxStudents}
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              {errorFields.maxStudents}
-            </Form.Control.Feedback>
-          </Form.Group>
+        <div className="col-md-6">
+          <div className="row m-0 p-0">
+            <div className="mb-3 p-0">
+              <Form.Group controlId="formCourseName">
+                <Form.Label>Tên khóa học</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="courseName"
+                  value={formData.courseName}
+                  maxLength={100}
+                  onChange={(e) =>
+                    handleInputChange("courseName", e.target.value)
+                  }
+                  placeholder="VD: Khóa học bơi ếch..."
+                  isInvalid={!!errorFields.courseName}
+                  required
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errorFields.courseName}
+                </Form.Control.Feedback>
+              </Form.Group>
+            </div>
+            <div className="mb-3 p-0">
+              <Form.Group controlId="formMaxStudents">
+                <Form.Label>Loại khóa học</Form.Label>
+                <Form.Select
+                  name="maxStudents"
+                  value={formData.maxStudents}
+                  onChange={(e) =>
+                    handleInputChange("maxStudents", e.target.value)
+                  }
+                  isInvalid={!!errorFields.maxStudents}
+                  required
+                >
+                  {[1, 2, 3, 4].map((num) => (
+                    <option key={num} value={num}>
+                      1 kèm {num}
+                    </option>
+                  ))}
+                </Form.Select>
+                <Form.Control.Feedback type="invalid">
+                  {errorFields.maxStudents}
+                </Form.Control.Feedback>
+              </Form.Group>
+            </div>
+            <div className="mb-3 p-0">
+              <Form.Group controlId="formPrice">
+                <Form.Label>Giá khóa học</Form.Label>
+                <NumericFormat
+                  thousandSeparator={true}
+                  suffix=" VNĐ"
+                  decimalScale={0} // Không cho phép số thập phân
+                  value={formData.price}
+                  onValueChange={(values) => {
+                    const { floatValue } = values;
+                    handleInputChange("price", floatValue); // Lấy giá trị số thực (floatValue là giá trị số thực không có dấu phân cách hay định dạng   )
+                  }}
+                  className="form-control"
+                  placeholder="Nhập giá (VNĐ)"
+                  required
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errorFields.price}
+                </Form.Control.Feedback>
+              </Form.Group>
+            </div>
+          </div>
+          <div className="mb-3 p-0">
+            <Form.Group controlId="formNumberOfSessions">
+              <Form.Label>Tổng số buổi học</Form.Label>
+              <InputGroup>
+                <Form.Control
+                  type="number"
+                  name="numberOfSessions"
+                  value={formData.numberOfSessions}
+                  onChange={(e) =>
+                    handleInputChange("numberOfSessions", e.target.value)
+                  }
+                  isInvalid={!!errorFields.numberOfSessions}
+                  required
+                />
+                <InputGroup.Text>Buổi</InputGroup.Text>
+              </InputGroup>
+              <Form.Control.Feedback type="invalid">
+                {errorFields.numberOfSessions}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </div>
         </div>
 
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formPrice">
-            <Form.Label>Giá khóa học</Form.Label>
-            <Form.Control
-              type="number"
-              name="price"
-              min={0}
-              value={formData.price}
-              onChange={(e) => handleInputChange("price", e.target.value)}
-              isInvalid={!!errorFields.price}
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              {errorFields.price}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </div>
-      </div>
-  
-      <div className="row">
-       <div className="col-md-6 mb-3">
-          <Form.Group controlId="formNumberOfSessions">
-            <Form.Label>Số buổi học</Form.Label>
-            <Form.Control
-              type="number"
-              name="numberOfSessions"
-              value={formData.numberOfSessions}
-              onChange={(e) => handleInputChange("numberOfSessions", e.target.value)}
-              isInvalid={!!errorFields.numberOfSessions}
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              {errorFields.numberOfSessions}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </div>
-  
-        <div className="col-md-6 mb-3">
+        <div className="col-md-12 mb-1">
           <Form.Group controlId="formDescription">
             <Form.Label>Mô tả</Form.Label>
             <Form.Control
@@ -353,13 +380,14 @@ const handleDelete = (deleteId) => {
               name="description"
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
+              placeholder="Mô tả khóa học..."
             />
           </Form.Group>
         </div>
       </div>
     </>
   );
-  
+
   return (
     <>
       {/* Hiển thị loader khi đang tải trang */}
@@ -388,235 +416,6 @@ const handleDelete = (deleteId) => {
       )}
     </>
   );
-  
-
-
-
-}
-
-
+};
 
 export default CourseManagement;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useState } from 'react';
-// import { Pagination, Modal, Button, Form } from 'react-bootstrap';
-// //QLy khóa học nha
-
-// function CourseManagement() {
-
-//     //định nghĩa cho pagination
-//     const [current2Page, setCurrentPage] = useState(1);
-//     const totalPages = 5; // Số trang thực tế của bạn
-//     const handlePrevPage = () => {
-//         if (currentPage > 1) {
-//             setCurrentPage(currentPage - 1);
-//         }
-//     };
-//     const handleNextPage = () => {
-//         if (currentPage < totalPages) {
-//             setCurrentPage(currentPage + 1);
-//         }
-//     };
-
-//     // Modal state để mở/đóng modal
-//     const [showModal, setShowModal] = useState(false);
-
-//     const handleShowModal = () => setShowModal(true);
-//     const handleCloseModal = () => setShowModal(false);
-
-//     // Hàm xử lý form submit
-//     const handleFormSubmit = (e) => {
-//         e.preventDefault();
-//         // Xử lý logic thêm khóa học tại đây
-//         handleCloseModal(); // Đóng modal sau khi submit
-//     };
-
-//     return (
-//         <div className="container-fluid">
-//             <h4>Danh sách khóa học</h4>
-
-            
-//             <div className="row">
-//                 <div className="col-md-6 mb-2">
-                    
-//                     <form className="d-flex w-100" role="search">
-//                         <div className="input-group">
-//                             <input className="form-control" type="search" placeholder="Tìm kiếm khóa học" aria-label="Search" />
-//                             <button className="btn btn-outline-success" type="submit">
-//                                 <i className="fa-solid fa-magnifying-glass"></i>
-//                             </button>
-//                         </div>
-//                     </form>
-//                 </div>
-//                 <div className="col-md-6 d-flex justify-content-end">
-//                     <button className="btn btn-outline-success me-2 " type="submit">
-//                         <i className="fa-solid fa-filter"></i> Filter
-//                     </button>
-//                     <button className="btn btn-outline-success me-2" type="submit" onClick={handleShowModal}>
-//                         <i className="fa-solid fa-plus"></i> Thêm
-//                     </button>
-//                 </div>
-//             </div>
-//             <table class="table table-responsive table-bordered mt-3">
-//                 <thead>
-//                     <tr>
-//                         <th scope="col">Mã KH</th>
-//                         <th scope="col">Tên Khóa học</th>
-//                         <th scope="col">Hình ảnh</th>
-//                         <th scope="col">Học sinh tối đa</th>
-//                         <th scope="col">Mô tả</th>
-//                         <th scope="col">Giá tiền</th>
-//                         <th scope="col">Số buổi học</th>
-//                         <th scope="col">Hành động</th>
-
-//                     </tr>
-//                 </thead>
-//                 <tbody>
-//                     <tr>
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-                     
-//                         <td className="ps-3">
-//                             <i className="fa-solid fa-pen m-2"></i>
-//                             <i className="fa-solid fa-trash-can "></i>
-//                         </td>
-
-
-//                     </tr>
-//                     <tr>
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-                       
-//                         <td className="ps-3">
-//                             <i className="fa-solid fa-pen m-2"></i>
-//                             <i className="fa-solid fa-trash-can "></i>
-//                         </td>
-//                     </tr>
-//                     <tr>
-
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-//                         <td></td>
-//                         <td className="ps-3">
-//                             <i className="fa-solid fa-pen m-2"></i>
-//                             <i className="fa-solid fa-trash-can "></i>
-//                         </td>
-//                     </tr>
-
-//                 </tbody>
-//             </table>
-
-//             <Pagination className="justify-content-center">
-//                 <Pagination.Prev onClick={handlePrevPage} disabled={currentPage === 1} />
-//                 {Array.from({ length: totalPages }, (_, index) => (
-//                     <Pagination.Item
-//                         key={index}
-//                         active={currentPage === index + 1}
-//                         onClick={() => setCurrentPage(index + 1)}
-//                     >
-//                         {index + 1}
-//                     </Pagination.Item>
-//                 ))}
-//                 <Pagination.Next onClick={handleNextPage} disabled={currentPage === totalPages} />
-//             </Pagination>
-
-
-//             {/* Modal thêm khóa học */}
-//             <Modal show={showModal} onHide={handleCloseModal}>
-//                 <Modal.Header closeButton>
-//                     <Modal.Title>Thêm Khóa Học</Modal.Title>
-//                 </Modal.Header>
-//                 <Modal.Body>
-//                     <Form onSubmit={handleFormSubmit}>
-//                         <Form.Group controlId="formCourseCode">
-//                             <Form.Label>Mã khóa học</Form.Label>
-//                             <Form.Control type="text" placeholder="Nhập mã khóa học" required />
-//                         </Form.Group>
-
-
-
-//                         <Form.Group controlId="formName" className="mt-3">
-//                             <Form.Label>Tên Khóa Học</Form.Label>
-//                             <Form.Control type="text" placeholder="Nhập tên khóa học" required />
-//                         </Form.Group>
-//                         <Form.Group controlId="formImage" className="mt-3">
-//                             <Form.Label>Hình ảnh</Form.Label>
-//                             <Form.Control type="text" placeholder="Nhập link hình ảnh" required />
-//                         </Form.Group>
-
-//                         <Form.Group controlId="formMaxStudent" className="mt-3">
-//                             <Form.Label>Số học viên tham gia tối đa</Form.Label>
-//                             <Form.Control type="number" required />
-//                         </Form.Group>
-
-//                         <Form.Group controlId="formDescription" className="mt-3">
-//                             <Form.Label>Mô tả khóa học</Form.Label>
-//                             <Form.Control type="text-area" required />
-//                         </Form.Group>
-
-//                         <Form.Group controlId="formPrice" className="mt-3">
-//                             <Form.Label>Học phí</Form.Label>
-//                             <Form.Control type="number" placeholder="Nhập học phí (đơn vị: VNĐ)" required />
-//                         </Form.Group>
-
-//                         <Form.Group controlId="formSessions" className="mt-3">
-//                             <Form.Label>Số buổi học</Form.Label>
-//                             <Form.Control type="number" placeholder="Nhập số lượng buổi học" required />
-//                         </Form.Group>
-//                         <Button variant="primary" type="submit" className="mt-3">
-//                             Thêm Khóa Học
-//                         </Button>
-//                     </Form>
-//                 </Modal.Body>
-//             </Modal>
-
-
-
-//         </div>
-//     )
-// }
-
-
-
-
-
-
-
-

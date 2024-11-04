@@ -14,9 +14,11 @@ public class WebConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
-                registry.addMapping("/api/**") // Cho phép tất cả các endpoint có đường dẫn bắt đầu bằng /api
-                        .allowedOrigins("http://localhost:3000") // Chỉ cho phép từ localhost:3000
-                        .allowedMethods("GET", "POST", "PUT", "DELETE"); // Cho phép các phương thức
+                registry.addMapping("/api/**")
+                        .allowedOrigins("http://localhost:3000")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+                        .allowedHeaders("*") // Cho phép tất cả các header, bao gồm Content-Type
+                        .allowCredentials(true); // Cho phép gửi thông tin đăng nhập nếu cần
             }
         };
     }

@@ -1,6 +1,7 @@
 import { Fragment, useState } from "react";
 import { Form, Pagination, Dropdown, DropdownButton } from "react-bootstrap";
 import CustomModal from "./CustomModal";
+import ImageModal from "./ImageModal";
 import DeleteModal from "./DeleteModal";
 import "../../css/table-management.css";
 import iconTrainer from "../../../assets/images/icons/trainer.png";
@@ -30,6 +31,16 @@ const TableManagement = ({
   const [deleteId, setDeleteId] = useState(null); // ID của item cần xóa
   const [showConfirmModal, setShowConfirmModal] = useState(false); // Hiển thị modal xác nhận xóa
   const [expandedRows, setExpandedRows] = useState([]); // Theo dõi các hàng đang được mở
+  const [showModalImage, setShowModalImage] = useState(false); // Hiển thị modal hình ảnh lớn
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const handleImageClick = (imageSrc) => {
+    // xử lý khi click vào hình ảnh trên bảng
+    setSelectedImage(imageSrc);
+    setShowModalImage(true);
+  };
+
+  const handleCloseModalImage = () => setShowModalImage(false);
 
   // Hàm render custom cell dựa trên loại cột
   const renderCustomCell = (column, item) => {
@@ -47,12 +58,14 @@ const TableManagement = ({
         );
 
       case "image":
+      case "avatar":
         return (
           <img
             src={item[column.key]}
             alt={item.name}
-            className="img-fluid rounded-circle"
-            style={{ width: "50px", height: "50px" }}
+            className="object-fit-cover rounded-circle"
+            style={{ width: "45px", height: "45px", cursor: "pointer" }}
+            onClick={() => handleImageClick(item[column.key])}
           />
         );
 
@@ -441,6 +454,12 @@ const TableManagement = ({
         onConfirm={handleConfirm}
         onClose={handleCloseConfirmModal}
         isLoading={isLoading}
+      />
+      {/* Sử dụng ImageModal */}
+      <ImageModal
+        show={showModalImage}
+        imageSrc={selectedImage}
+        onClose={handleCloseModalImage}
       />
     </div>
   );

@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import TableManagement from "../../components/common/TableManagement";
 import trainerService from "../../services/TrainerService"; // Cập nhật lại tên service
 import Page500 from "../pages/Page500";
-import { Spinner, Form } from "react-bootstrap";
+import { Spinner, Form, InputGroup } from "react-bootstrap";
 import { Helmet } from "react-helmet-async";
 
 const TrainerManagement = () => {
@@ -65,6 +65,12 @@ const TrainerManagement = () => {
           error = "Số điện thoại không hợp lệ.";
         }
         break;
+      case "email":
+        if (!value || !/^[\w.-]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)) {
+          // kiểm tra email
+          error = "Email không hợp lệ!";
+        }
+        break;
       case "specialty":
         if (!value || value.trim() === "") {
           error = "Chuyên môn không được để trống.";
@@ -73,7 +79,7 @@ const TrainerManagement = () => {
       case "experienceYears":
         if (!value || isNaN(value) || value < 0 || value > 100) {
           // giới hạn từ 0 đến 100
-          error = "Số năm kinh nghiệm không hợp lệ.";
+          error = "Số năm kinh nghiệm không hợp lệ!";
         }
         break;
       case "schedule":
@@ -102,7 +108,7 @@ const TrainerManagement = () => {
     }
     if (
       !formData.email ||
-      !/^[\w-]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)
+      !/^[\w.-]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)
     ) {
       newErrors.email = "Email không hợp lệ.";
     }
@@ -335,18 +341,21 @@ const TrainerManagement = () => {
             <Form.Label>
               Số năm kinh nghiệm <span className="text-danger">(*)</span>
             </Form.Label>
-            <Form.Control
-              type="number"
-              name="experienceYears"
-              min="0"
-              max="90"
-              value={formData.experienceYears}
-              onChange={(e) =>
-                handleInputChange("experienceYears", e.target.value)
-              }
-              isInvalid={!!errorFields.experienceYears}
-              required
-            />
+            <InputGroup>
+              <Form.Control
+                type="number"
+                name="experienceYears"
+                min="0"
+                max="90"
+                value={formData.experienceYears}
+                onChange={(e) =>
+                  handleInputChange("experienceYears", e.target.value)
+                }
+                isInvalid={!!errorFields.experienceYears}
+                required
+              />
+              <InputGroup.Text>Năm</InputGroup.Text>
+            </InputGroup>
             <Form.Control.Feedback type="invalid">
               {errorFields.experienceYears}
             </Form.Control.Feedback>

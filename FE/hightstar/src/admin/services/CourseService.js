@@ -25,22 +25,38 @@ const getCourseById = async (id) => {
   }
 };
 
-// Hàm thêm mới khóa học
-const createCourse = async (courseData) => {
+const createCourse = async (courseData, file) => {
+  const formData = new FormData();
+  formData.append("course", JSON.stringify(courseData));
+  formData.append("file", file);
+
   try {
-    const response = await axios.post(API_URL, courseData);
-    return response.data; // Trả về dữ liệu khóa học vừa được tạo
+    const response = await axios.post(API_URL, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
   } catch (error) {
     console.error("Lỗi khi thêm mới khóa học:", error);
     throw error;
   }
 };
 
-// Hàm cập nhật khóa học
-const updateCourse = async (id, courseData) => {
+const updateCourse = async (id, courseData, file) => {
+  const formData = new FormData();
+  formData.append("course", JSON.stringify(courseData));
+  if (file) {
+    formData.append("file", file);
+  }
+
   try {
-    const response = await axios.put(`${API_URL}/${id}`, courseData);
-    return response.data; // Trả về dữ liệu khóa học đã được cập nhật
+    const response = await axios.put(`${API_URL}/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
   } catch (error) {
     console.error(`Lỗi khi cập nhật khóa học với ID: ${id}`, error);
     throw error;

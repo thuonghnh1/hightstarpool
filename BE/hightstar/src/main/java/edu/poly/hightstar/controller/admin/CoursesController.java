@@ -1,60 +1,131 @@
 package edu.poly.hightstar.controller.admin;
 
+import edu.poly.hightstar.service.CloudinaryService;
 import edu.poly.hightstar.service.CourseService;
+import lombok.RequiredArgsConstructor;
+import edu.poly.hightstar.model.CourseDTO;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import edu.poly.hightstar.model.CourseDTO;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/courses")
+@RequiredArgsConstructor
 public class CoursesController {
+        private final CloudinaryService cloudinaryService;
         private final CourseService courseService;
 
-        public CoursesController(CourseService courseService) {
-                this.courseService = courseService;
-        }
-
         @GetMapping
-
-        public List<CourseDTO> getAllCourses() {
-                System.out.println("List" + courseService.getAllCourses());
-                return courseService.getAllCourses();
-
+        public ResponseEntity<List<CourseDTO>> getAllCourses() {
+                List<CourseDTO> courses = courseService.getAllCourses();
+                return courses.isEmpty()
+                                ? ResponseEntity.noContent().build()
+                                : ResponseEntity.ok(courses);
         }
 
         @GetMapping("/{id}")
-
         public ResponseEntity<CourseDTO> getCourseById(@PathVariable Long id) {
                 CourseDTO courseDTO = courseService.getCourseById(id);
-                if (courseDTO == null) {
-                        return ResponseEntity.notFound().build(); // 404 Not Found nếu không tìm thấy
-                }
-                return ResponseEntity.ok(courseDTO); // 200 OK với discountDto
+                return courseDTO != null
+                                ? ResponseEntity.ok(courseDTO)
+                                : ResponseEntity.notFound().build();
         }
 
+        // Spring Boot không tự động phân tích cú pháp JSON trong FormData nếu gửi cả
+        // tệp và JSON cùng nhau nên phải tự đọc json sau khi nhận bằng mapper
         @PostMapping
-        public ResponseEntity<CourseDTO> createCourse(@RequestBody CourseDTO courseDTO) {
-                CourseDTO createdCourse = courseService.createCourse(courseDTO);
+        public ResponseEntity<CourseDTO> createCourse(
+                        @RequestPart("course") String courseData,
+                        @RequestPart("file") MultipartFile file) {
+                String publicId = null;
 
-                // trả về phản hồi với mã trạng thái(HTTP 201 created), body là phần thân p/hồi
-                return ResponseEntity.status(HttpStatus.CREATED).body(createdCourse);
+                System.out.println(file);
+                try {
+                        // Chuyển chuỗi JSON thành CourseDTO
+                        ObjectMapper mapper = new ObjectMapper();
+                        CourseDTO courseDTO = mapper.readValue(courseData, CourseDTO.class);
 
+                        String imageUrl = cloudinaryService.uploadImage(file, "course");
+                        if (imageUrl != null) {
+                                publicId = extractPublicId(imageUrl);
+                                courseDTO.setCourseImage(imageUrl);
+                        }
+
+                        CourseDTO createdCourse = courseService.createCourse(courseDTO);
+                        return ResponseEntity.status(HttpStatus.CREATED).body(createdCourse);
+
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        handleImageDeletion(publicId);
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+                }
         }
 
         @PutMapping("/{id}")
-        public ResponseEntity<CourseDTO> updateDiscount(@PathVariable Long id, @RequestBody CourseDTO courseDTO) {
-                CourseDTO updatedCourse = courseService.updateCourse(id, courseDTO);
+        public ResponseEntity<CourseDTO> updateCourse(
+                        @PathVariable Long id,
+                        @RequestPart("course") String courseData,
+                        @RequestPart(value = "file", required = false) MultipartFile file) {
+                try {
+                        // Chuyển đổi chuỗi JSON thành đối tượng CourseDTO
+                        ObjectMapper mapper = new ObjectMapper();
+                        CourseDTO courseDTO = mapper.readValue(courseData, CourseDTO.class);
+                        CourseDTO existingCourse = courseService.getCourseById(id);
+                        if (existingCourse == null) {
+                                return ResponseEntity.notFound().build();
+                        }
 
-                return ResponseEntity.ok(updatedCourse);
+                        if (file != null && !file.isEmpty()) {
+                                // xóa ảnh cũ và chọn ảnh mới.
+                                handleImageDeletion(extractPublicId(existingCourse.getCourseImage()));
+                                courseDTO.setCourseImage(cloudinaryService.uploadImage(file, "course"));
+                        } else {
+                                // nếu k có file mới thì giữ nguyên ảnh hiện tại
+                                courseDTO.setCourseImage(existingCourse.getCourseImage());
+                        }
+
+                        CourseDTO updatedCourse = courseService.updateCourse(id, courseDTO);
+                        return ResponseEntity.ok(updatedCourse);
+
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+                }
         }
 
         @DeleteMapping("/{id}")
-        public ResponseEntity<String> deleteDiscount(@PathVariable Long id) {
+        public ResponseEntity<String> deleteCourse(@PathVariable Long id) {
+                CourseDTO courseDTO = courseService.getCourseById(id);
+                if (courseDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                        .body("Khóa học không tồn tại hoặc không thể xóa.");
+                }
+
+                handleImageDeletion(extractPublicId(courseDTO.getCourseImage()));
                 courseService.deleteCourse(id);
-                return ResponseEntity.ok("course deleted successfully."); // 200 OK với thông điệp
+                return ResponseEntity.ok("Khóa học đã được xóa thành công.");
+        }
+
+        private String extractPublicId(String imageUrl) {
+                return imageUrl != null
+                                ? imageUrl.substring(imageUrl.lastIndexOf("/") + 1, imageUrl.lastIndexOf("."))
+                                : null;
+        }
+
+        private void handleImageDeletion(String publicId) {
+                if (publicId != null) {
+                        try {
+                                cloudinaryService.deleteImage(publicId);
+                        } catch (IOException e) {
+                                System.err.println("Lỗi khi xóa ảnh: " + e.getMessage());
+                        }
+                }
         }
 }
