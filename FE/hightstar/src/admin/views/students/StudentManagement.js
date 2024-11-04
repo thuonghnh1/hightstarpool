@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import TableManagement from "../../components/common/TableManagement";
 import studentService from "../../services/StudentService.js";
+import UserService from "../../services/UserService.js";
 import Page500 from "../pages/Page500";
 import { Spinner, Form } from "react-bootstrap";
 import { Bounce, ToastContainer, toast } from "react-toastify";
@@ -10,6 +11,7 @@ const StudentManagement = () => {
     // State để lưu trữ dữ liệu giảm giá từ API
     const [studentData, setStudentData] = useState([]); // đổi tên biến
     const [formData, setFormData] = useState({}); // State quản lý dữ liệu hiện tại
+    const [listUserOption, setListUserOption] = useState([]);
 
     const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
     const [isEditing, setIsEditing] = useState(false); // Trạng thái để biết đang thêm mới hay chỉnh sửa
@@ -17,14 +19,14 @@ const StudentManagement = () => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
-    const [errorServer, setErrorServer] = useState(null);
+    const [errorServer, setErrorServer] = useState(null)
 
     // Mảng cột của bảng (cần đổi theo các trường có trong csdl. lưu ý giữ nguyên id là 'id' sau ni làm be r giải thích sau)
     const studentColumns = [
-        { key: "id", label: "Mã Học Viên" },
+        { key: "id", label: "ID" }, 
+        { key: "avatar", label: "Ảnh" },
         { key: "fullName", label: "Họ Tên Học Viên" },
         { key: "age", label: "Tuổi" },
-        { key: "avatar", label: "Ảnh" },
         { key: "nickname", label: "Biệt Danh" },
         { key: "gender", label: "Giới Tính" },
         { key: "note", label: "Ghi Chú" },
@@ -46,6 +48,21 @@ const StudentManagement = () => {
             setErrorServer(err.message); // Lưu lỗi vào state nếu có
         } finally {
             setLoadingPage(false);
+        }
+        try {
+            // Lấy danh sách người dùng từ API
+            let users = await UserService.getUsers();
+
+            // Chuyển đổi danh sách người dùng thành định dạng phù hợp cho Select
+            const userOptions = users.map(user => ({
+                value: user.id, // giả sử user có thuộc tính id
+                label: user.id, // giả sử user có thuộc tính name
+            }));
+            console.log(userOptions)
+            // Cập nhật trạng thái danh sách tùy chọn cho Select
+            setListUserOption(userOptions);
+        } catch (error) {
+            toast.error("Lỗi khi lấy danh sách người dùng:", error);
         }
     };
 
@@ -77,7 +94,7 @@ const StudentManagement = () => {
                 if (value === "" || value === null) {
                     error = "Mã người dùng không được để trống.";
                 }
-                
+                break;
             default:
                 break;
         }
@@ -134,15 +151,15 @@ const StudentManagement = () => {
         setIsEditing(false);
         setErrorFields({});
     };
-
     // Hàm gọi khi nhấn "Sửa" một hàng
-    const handleEdit = (item) => {
+    const handleEdit = async (item) => {
         setFormData({
             ...item,
         });
         setIsEditing(true);
         setErrorFields({});
     };
+
 
     // Hàm lưu thông tin sau khi thêm hoặc sửa
     const handleSaveItem = () => {
@@ -221,14 +238,6 @@ const StudentManagement = () => {
                 });
         }
     };
-
-    // Fake data cho danh sách người dùng
-    const userOptions = [
-        { value: 'user1', label: 'Nguyễn Văn A' },
-        { value: 'user2', label: 'Trần Thị B' },
-        { value: 'user3', label: 'Lê Văn C' },
-        // Thêm nhiều người dùng hơn nếu cần
-    ];
 
     const modalContent = (
         <>
@@ -370,13 +379,18 @@ const StudentManagement = () => {
                     <Form.Group controlId="formUserId">
                         <Form.Label>Mã Người Dùng</Form.Label>
                         <Select
-                            options={userOptions} // danh sách user fake
-                            value={userOptions.find((option) => option.value === formData.userId)}
+                            options={listUserOption} // danh sách user fake
+                            value={listUserOption.find((option) => option.value === formData.userId)}
                             onChange={(selectedOption) => handleInputChange("userId", selectedOption ? selectedOption.value : '')}
                             placeholder="Chọn mã người dùng"
                             isInvalid={!!errorFields.userId}
                             isClearable // Cho phép xóa chọn lựa
                             isSearchable // Bật tính năng tìm kiếm
+                            styles={{
+                                menu: (provided) => ({
+                                    ...provided,
+                                }),
+                            }}
                         />
                         {errorFields.userId && (
                             <div className="invalid-feedback d-block">
@@ -385,6 +399,7 @@ const StudentManagement = () => {
                         )}
                     </Form.Group>
                 </div>
+
                 {/* Ghi Chú */}
                 <div className="col-md-12 mb-3">
                     <Form.Group controlId="formNote">

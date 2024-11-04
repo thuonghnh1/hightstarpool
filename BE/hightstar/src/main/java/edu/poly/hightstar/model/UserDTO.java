@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import edu.poly.hightstar.enums.Role;
+import edu.poly.hightstar.enums.UserStatus;
 import lombok.*;
 
 @Data
@@ -13,11 +15,13 @@ public class UserDTO {
 
     @JsonProperty("id")
     private Long userId;
+    private String fullName; // Từ userProfile
+    private String phoneNumber; // Từ userProfile
     private String username;
     private String password;
     private String email;
-    private String role;
+    private Role role;
     private LocalDateTime registeredDate;
     private LocalDateTime lastLogin;
-    private boolean status;
+    private UserStatus status;
 }

@@ -3,6 +3,7 @@ import { Form, Pagination, Dropdown, DropdownButton } from "react-bootstrap";
 import CustomModal from "./CustomModal";
 import DeleteModal from "./DeleteModal";
 import "../../css/table-management.css";
+import iconTrainer from "../../../assets/images/icons/trainer.png";
 
 const TableManagement = ({
   data,
@@ -43,6 +44,7 @@ const TableManagement = ({
             {item.status === "ACTIVE" ? "Hoạt động" : "Vô hiệu hóa"}
           </span>
         );
+      case "avatar":
       case "image":
         return (
           <img
@@ -52,6 +54,7 @@ const TableManagement = ({
             style={{ width: "50px", height: "50px" }}
           />
         );
+
       case "rating":
         const stars = [];
         for (let i = 1; i <= 5; i++) {
@@ -73,6 +76,28 @@ const TableManagement = ({
           </span>
         );
       // Thêm các case khác nếu cần cho các cột tuỳ chỉnh khác
+
+      case "role":
+        return (
+          <span className="d-flex align-items-center">
+            {item.role === "ADMIN" && (
+              <i className="bi bi-shield-fill text-primary me-1"></i>
+            )}
+            {item.role === "USER" && (
+              <i className="bi bi-person-fill fs-5 text-info me-1"></i>
+            )}
+            {item.role === "TRAINER" && (
+              <img
+                src={iconTrainer}
+                alt="Role hlv"
+                className="img-fluid rounded-circle"
+                style={{ width: "17px", height: "17px" }}
+              />
+            )}
+            {item.role}
+          </span>
+        );
+
       default:
         return item[column.key]; // Trả về giá trị mặc định nếu không cần custom
     }

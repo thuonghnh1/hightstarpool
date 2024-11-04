@@ -6,6 +6,8 @@ import Page500 from "../pages/Page500";
 import { Spinner, Form } from "react-bootstrap";
 
 const CourseManagement =() => {
+
+  
     // State lưu data từ api
   const [courseData, setCourseData] = useState([]);
   const [formData, setFormData] = useState({}); // State quản lý dữ liệu hiện tại
@@ -19,7 +21,7 @@ const CourseManagement =() => {
   const courseColumns = [
     { key: "id", label: "Mã khóa học" },
     { key: "courseName", label: "Tên khóa học" },
-    { key: "courseImage", label: "Hình ảnh" },
+    { key: "image", label: "Hình ảnh" },
     { key: "maxStudents", label: "Số lượng học viên tối đa" },
     { key: "numberOfSessions", label: "Số lượng buổi học" }, 
     { key: "price", label: "Giá khóa học" },
@@ -59,7 +61,7 @@ const CourseManagement =() => {
               error = "Tên không được để trống.";
             }
             break;
-            case "courseImage":
+            case "image":
             if (!value || value.trim() === "") {
               error = "Hình ảnh không được để trống.";
             }
@@ -108,8 +110,8 @@ const validateForm = () => {
     }
   
     // Kiểm tra hình ảnh khóa học
-    if (!formData.courseImage || formData.courseImage.trim() === "") {
-      newErrors.courseImage = "Hình ảnh không được để trống.";
+    if (!formData.image || formData.image.trim() === "") {
+      newErrors.image = "Hình ảnh không được để trống.";
     }
   
     // Kiểm tra số lượng học viên tối đa
@@ -146,7 +148,7 @@ const validateForm = () => {
     const handleReset = () => {
         setFormData({
         courseName: "",
-        courseImage: "",
+        image: "",
         maxStudents: "",
         numberOfSessions: "",
         price: "",
@@ -268,20 +270,57 @@ const handleDelete = (deleteId) => {
         </div>
 
         <div className="col-md-6 mb-3">
-          <Form.Group controlId="formCourseImage">
-            <Form.Label>Hình ảnh khóa học (URL)</Form.Label>
+          <Form.Group controlId="formImage">
+            <Form.Label>Hình ảnh khóa học</Form.Label>
             <Form.Control
-              type="text"
-              name="courseImage"
-              value={formData.courseImage} // Thêm trường nhập cho hình ảnh
-              onChange={(e) => handleInputChange("courseImage", e.target.value)}
-              isInvalid={!!errorFields.courseImage}
+              type="file"
+              name="image"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  const fileUrl = URL.createObjectURL(file);
+                  handleInputChange("image", fileUrl);
+                }
+              }}
+              isInvalid={!!errorFields.image}
               required
             />
             <Form.Control.Feedback type="invalid">
-              {errorFields.courseImage}
+              {errorFields.image}
             </Form.Control.Feedback>
           </Form.Group>
+
+          {/* Phần để hiển thị hình ảnh */}
+          <div
+            style={{
+              width: '100%', // Chiếm hết chiều rộng của form
+              height: '150px', // Chiều cao cố định cho không gian hiển thị hình ảnh
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              border: '1px dashed #ccc', // Viền gạch để phân biệt không gian
+              borderRadius: '4px', // Bo góc nhẹ
+              overflow: 'hidden', // Ẩn phần vượt ra ngoài
+              marginTop: '10px', // Khoảng cách giữa input và không gian hình ảnh
+            }}
+          >
+            {formData.image ? (
+              <img
+                src={formData.image}
+                alt="Hình ảnh khóa học"
+                style={{
+                  width: '100%', // Chiếm toàn bộ chiều rộng
+                  height: '100%', // Chiếm toàn bộ chiều cao
+                  objectFit: 'cover', // Giữ tỷ lệ hình ảnh mà không bị bóp méo
+                }}
+              />
+            ) : (
+              <span>Chưa có hình ảnh nào</span> // Hiển thị thông điệp nếu chưa có hình ảnh
+            )}
+          </div>
+
+
         </div>
   
         
@@ -289,21 +328,27 @@ const handleDelete = (deleteId) => {
   
       <div className="row">
         <div className="col-md-6 mb-3">
-          <Form.Group controlId="formMaxStudents">
-            <Form.Label>Số lượng học viên tối đa</Form.Label>
-            <Form.Control
-              type="number"
-              name="maxStudents"
-              min={1}
-              value={formData.maxStudents}
-              onChange={(e) => handleInputChange("maxStudents", e.target.value)}
-              isInvalid={!!errorFields.maxStudents}
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              {errorFields.maxStudents}
-            </Form.Control.Feedback>
-          </Form.Group>
+        <Form.Group controlId="formMaxStudents">
+          <Form.Label>Số lượng học viên tối đa</Form.Label>
+          <Form.Select
+            name="maxStudents"
+            value={formData.maxStudents}
+            onChange={(e) => handleInputChange("maxStudents", e.target.value)}
+            isInvalid={!!errorFields.maxStudents}
+            required
+          >
+            <option value="">Chọn số lượng</option>
+            {[1, 2, 3, 4].map((num) => (
+              <option key={num} value={num}>
+                1 kèm {num}
+              </option>
+            ))}
+          </Form.Select>
+          <Form.Control.Feedback type="invalid">
+            {errorFields.maxStudents}
+          </Form.Control.Feedback>
+        </Form.Group>
+
         </div>
 
         <div className="col-md-6 mb-3">
@@ -358,7 +403,8 @@ const handleDelete = (deleteId) => {
       </div>
     </>
   );
-  
+
+
   return (
     <>
       {/* Hiển thị loader khi đang tải trang */}

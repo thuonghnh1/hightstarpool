@@ -29,7 +29,7 @@ const TrainerManagement = () => {
   ];
 
   // Loại bỏ một số cột không cần thiết khỏi trainerColumns
-  const keysToRemove = ["email", "phoneNumber", "userId" , "specialty"];
+  const keysToRemove = ["email", "phoneNumber", "userId", "specialty"];
   const defaultColumns = trainerColumns.filter(
     (column) => !keysToRemove.includes(column.key)
   );
@@ -194,7 +194,7 @@ const TrainerManagement = () => {
         .deleteTrainer(deleteId)
         .then(() => {
           setTrainerData(
-            trainerData.filter((trainer) => trainer.trainerId !== deleteId)
+            trainerData.filter((trainer) => trainer.id !== deleteId)
           );
           toast.success("Xóa thành công!");
         })
@@ -212,7 +212,9 @@ const TrainerManagement = () => {
       <div className="row">
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formFullName">
-            <Form.Label>Họ và tên <span className="text-danger">(*)</span></Form.Label>
+            <Form.Label>
+              Họ và tên <span className="text-danger">(*)</span>
+            </Form.Label>
             <Form.Control
               type="text"
               name="fullName"
@@ -231,7 +233,9 @@ const TrainerManagement = () => {
 
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formPhoneNumber">
-            <Form.Label>Số điện thoại <span className="text-danger">(*)</span></Form.Label>
+            <Form.Label>
+              Số điện thoại <span className="text-danger">(*)</span>
+            </Form.Label>
             <Form.Control
               type="text"
               name="phoneNumber"
@@ -252,7 +256,9 @@ const TrainerManagement = () => {
 
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formEmail">
-            <Form.Label>Email <span className="text-danger">(*)</span></Form.Label>
+            <Form.Label>
+              Email <span className="text-danger">(*)</span>
+            </Form.Label>
             <Form.Control
               type="email"
               name="email"
@@ -306,14 +312,16 @@ const TrainerManagement = () => {
 
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formSpecialty">
-            <Form.Label>Chuyên môn <span className="text-danger">(*)</span></Form.Label>
+            <Form.Label>
+              Chuyên môn <span className="text-danger">(*)</span>
+            </Form.Label>
             <Form.Control
               type="text"
               name="specialty"
               value={formData.specialty}
               onChange={(e) => handleInputChange("specialty", e.target.value)}
               isInvalid={!!errorFields.specialty}
-                placeholder="VD: HLV bơi lội, ..."
+              placeholder="VD: HLV bơi lội, ..."
               required
             />
             <Form.Control.Feedback type="invalid">
@@ -324,7 +332,9 @@ const TrainerManagement = () => {
 
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formExperienceYears">
-            <Form.Label>Số năm kinh nghiệm <span className="text-danger">(*)</span></Form.Label>
+            <Form.Label>
+              Số năm kinh nghiệm <span className="text-danger">(*)</span>
+            </Form.Label>
             <Form.Control
               type="number"
               name="experienceYears"
@@ -345,14 +355,16 @@ const TrainerManagement = () => {
 
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formSchedule">
-            <Form.Label>Lịch trình <span className="text-danger">(*)</span></Form.Label>
+            <Form.Label>
+              Lịch trình <span className="text-danger">(*)</span>
+            </Form.Label>
             <Form.Control
               type="text"
               name="schedule"
               value={formData.schedule}
               onChange={(e) => handleInputChange("schedule", e.target.value)}
               isInvalid={!!errorFields.schedule}
-                placeholder="VD: Cả tuần (6h-18h)"
+              placeholder="VD: Cả tuần (6h-18h)"
               required
             />
             <Form.Control.Feedback type="invalid">
