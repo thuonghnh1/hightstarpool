@@ -1,17 +1,52 @@
+/* Định dạng chung cho sidebar */
 .sidebar {
   width: 250px; /* Chiều rộng sidebar */
-  color: white;
   position: fixed; /* Đảm bảo sidebar được cố định */
   top: 0;
   left: 0;
   bottom: 0;
   max-height: 100%;
-  background-color: #212631;
   transition: transform 0.3s ease; /* Hiệu ứng chuyển động */
   z-index: 999; /* Đảm bảo sidebar ở trên */
 }
-.sidebar .menu{
-  /* margin: 10px 0; */
+
+/* Theme tối */
+.sidebar.dark-theme {
+  background-color: #1a2035; /* Màu nền tối */
+  color: white; /* Màu chữ */
+}
+
+.sidebar.dark-theme .inactive-link {
+  color: rgba(255, 255, 255, 0.771); /* Màu chữ cho link không được chọn */
+}
+
+.sidebar.dark-theme .active-link {
+  background-color: #2a303d; /* Màu nền cho link được chọn */
+  color: white; /* Màu chữ cho link được chọn */
+}
+
+/* Theme sáng */
+.sidebar.light-theme {
+  background-color: #f5f5f5; /* Màu nền sáng */
+  color: #333; /* Màu chữ */
+}
+
+.sidebar.light-theme .inactive-link {
+  color: rgba(
+    0,
+    0,
+    0,
+    0.771
+  ); /* Màu chữ cho link không được chọn trong theme sáng */
+}
+
+.sidebar.light-theme .active-link {
+  background-color: #ddd; /* Màu nền cho link được chọn trong theme sáng */
+  color: #333; /* Màu chữ cho link được chọn trong theme sáng */
+}
+
+/* Định dạng menu */
+.sidebar .menu {
   height: 90vh;
 }
 
@@ -29,50 +64,39 @@
   font-size: large;
 }
 
+/* Định dạng cho link không được chọn */
 .inactive-link {
-  color: rgba(255, 255, 255, 0.771);
   text-decoration: none;
   padding: 12px 15px;
   display: block;
   transition: 0.3s;
 }
 
+/* Định dạng cho link được chọn */
 .active-link {
-  color: white;
-  background-color: #2a303d;
   text-decoration: none;
-  padding: 12px ;
+  padding: 12px 15px;
   display: block;
   transition: 0.3s;
   border-radius: 6px;
 }
 
-/* Optional: Hover effect */
+/* Optional: Hiệu ứng hover */
 .inactive-link:hover {
-  background-color: #2a303d;
+  background-color: #2a303d; /* Màu nền khi hover */
   border-radius: 6px;
 }
 
-.inactive-link i{
+.inactive-link i {
   opacity: 30%;
 }
 
+/* Sidebar khi đóng */
 .sidebar.closed {
   transform: translateX(-100%); /* Đẩy sidebar ra ngoài màn hình */
 }
 
+/* Sidebar khi mở */
 .sidebar.open {
   transform: translateX(0);
 }
-
-/* custom thanh cuộn */
-
-/* Tùy chỉnh thanh cuộn */
-.custom-scrollbar {
-  overflow-y: scroll; /* Chỉ hiển thị thanh cuộn dọc */
-  scrollbar-width: thin; /* Đối với Firefox */
-  scrollbar-color: #00000084 #1a1a1a00; /* Màu con lăn và màu nền của thanh cuộn */
-}
-
-
-

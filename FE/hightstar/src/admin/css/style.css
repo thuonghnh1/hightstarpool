@@ -22,9 +22,16 @@
 }
 
 .main {
-  min-height: 82vh;
+  min-height: 85vh;
   display: flex;
   justify-content: center;
   margin-top: 66px;
   box-sizing: border-box; /* Bao gồm padding và border trong phép tính chiều rộng */
+}
+
+/* Tùy chỉnh thanh cuộn */
+.custom-scrollbar {
+  overflow-y: scroll; /* Chỉ hiển thị thanh cuộn dọc */
+  scrollbar-width: thin; /* Đối với Firefox */
+  scrollbar-color: #58525260 #1a1a1a00; /* Màu con lăn và màu nền của thanh cuộn */
 }

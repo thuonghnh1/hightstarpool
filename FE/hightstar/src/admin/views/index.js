@@ -4,12 +4,14 @@ import TicketManagement from "./tickets/TicketManagement";
 import CourseManagement from "./courses/CourseManagement";
 import StudentManagement from "./students/StudentManagement";
 import DiscountManagement from "./discounts/DiscountManagement"; 
+import TrainerManagement from "./trainers/TrainerManagement";
 import Page404 from "./pages/Page404";
 
 export {
   Dashboard,
   UserManagement,
   CourseManagement,
+  TrainerManagement,
   TicketManagement,
   StudentManagement,
   DiscountManagement,

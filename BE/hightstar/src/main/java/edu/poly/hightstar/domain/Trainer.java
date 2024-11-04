@@ -13,7 +13,7 @@ public class Trainer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long trainerId;
 
-    @Column(length = 30)
+    @Column(length = 60)
     private String specialty;
 
     @Column(nullable = false, length = 90)
@@ -22,7 +22,7 @@ public class Trainer {
     @Column(nullable = false, length = 100)
     private String schedule;
 
-    @Column(nullable = false, length = 300)
+    @Column(nullable = false)
     private double rating;
 
     @OneToOne(fetch = FetchType.LAZY) // thông tin User sẽ luôn được lấy cùng lúc khi truy vấn trainer

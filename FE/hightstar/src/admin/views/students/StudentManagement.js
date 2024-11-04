@@ -4,12 +4,12 @@ import studentService from "../../services/StudentService.js";
 import Page500 from "../pages/Page500";
 import { Spinner, Form } from "react-bootstrap";
 import { Bounce, ToastContainer, toast } from "react-toastify";
+import Select from 'react-select'; // thư viện tạo select có hỗ trợ search
 
 const StudentManagement = () => {
     // State để lưu trữ dữ liệu giảm giá từ API
     const [studentData, setStudentData] = useState([]); // đổi tên biến
     const [formData, setFormData] = useState({}); // State quản lý dữ liệu hiện tại
-    const [avatarPreview, setAvatarPreview] = useState({});
 
     const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
     const [isEditing, setIsEditing] = useState(false); // Trạng thái để biết đang thêm mới hay chỉnh sửa
@@ -73,6 +73,11 @@ const StudentManagement = () => {
                 }
                 break;
 
+            case "userId":
+                if (value === "" || value === null) {
+                    error = "Mã người dùng không được để trống.";
+                }
+                
             default:
                 break;
         }
@@ -101,6 +106,10 @@ const StudentManagement = () => {
             newErrors.age =
                 "Tuổi phải lớn hơn 0 và nhỏ hơn 100.";
         }
+        if (!formData.userId) {
+            newErrors.userId = "Mã người dùng là bắt buộc.";
+        }
+
 
         setErrorFields(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -108,20 +117,8 @@ const StudentManagement = () => {
 
     // Hàm xử lý khi thay đổi giá trị input
     const handleInputChange = (key, value) => {
-        setFormData({ ...formData, [key]: key === "gender" ? value === "true" : value === "false" ? false : value });
+        setFormData({ ...formData, [key]: value });
         validateField(key, value);
-    };
-
-    const handleAvatarChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setFormData({ ...formData, avatar: file });
-
-            // Hiển thị preview ảnh đại diện
-            const reader = new FileReader();
-            reader.onload = () => setAvatarPreview(reader.result);
-            reader.readAsDataURL(file);
-        }
     };
 
     // Hàm reset form khi thêm mới
@@ -131,9 +128,9 @@ const StudentManagement = () => {
             avatar: "",
             nickname: "",
             age: "",
+            gender: true,
             note: ""
         });
-        setAvatarPreview("");
         setIsEditing(false);
         setErrorFields({});
     };
@@ -143,7 +140,6 @@ const StudentManagement = () => {
         setFormData({
             ...item,
         });
-        setAvatarPreview(item.avatar || "");
         setIsEditing(true);
         setErrorFields({});
     };
@@ -226,10 +222,18 @@ const StudentManagement = () => {
         }
     };
 
-    // Đổi lại chọ input để thêm sửa (lưu ý chia cột theo định dạng bên dưới 2 hoặc 3 cột trên 1 hàng và có resposive)
+    // Fake data cho danh sách người dùng
+    const userOptions = [
+        { value: 'user1', label: 'Nguyễn Văn A' },
+        { value: 'user2', label: 'Trần Thị B' },
+        { value: 'user3', label: 'Lê Văn C' },
+        // Thêm nhiều người dùng hơn nếu cần
+    ];
+
     const modalContent = (
         <>
             <div className="row">
+                {/* Họ Tên Học Viên */}
                 <div className="col-md-6 mb-3">
                     <Form.Group controlId="formFullName">
                         <Form.Label>Họ Tên Học Viên</Form.Label>
@@ -250,7 +254,7 @@ const StudentManagement = () => {
                     </Form.Group>
                 </div>
 
-
+                {/* Biệt Danh */}
                 <div className="col-md-6 mb-3">
                     <Form.Group controlId="formNickname">
                         <Form.Label>Biệt Danh</Form.Label>
@@ -270,6 +274,7 @@ const StudentManagement = () => {
                     </Form.Group>
                 </div>
 
+                {/* Tuổi */}
                 <div className="col-md-6 mb-3">
                     <Form.Group controlId="formAge">
                         <Form.Label>Tuổi</Form.Label>
@@ -292,29 +297,95 @@ const StudentManagement = () => {
                 {/* Giới Tính */}
                 <div className="col-md-6 mb-3">
                     <Form.Group controlId="formGender">
-                        <Form.Label>Giới Tính</Form.Label>
-                        <Form.Select
-                            value={formData.gender}
-                            onChange={(e) => handleInputChange("gender", e.target.value)}
-                            isInvalid={!!errorFields.gender}
-                        >
-                            <option value="true">Nam</option>
-                            <option value="false">Nữ</option>
-                        </Form.Select>
-                        <Form.Control.Feedback type="invalid">
-                            {errorFields.gender}
-                        </Form.Control.Feedback>
+                        <Form.Label>Giới tính</Form.Label>
+                        <div>
+                            <Form.Check
+                                type="radio"
+                                label="Nam"
+                                name="gender"
+                                value="true"
+                                checked={formData.gender === true}
+                                onChange={() => handleInputChange("gender", true)}
+                                inline
+                                isInvalid={!!errorFields.gender}
+                            />
+                            <Form.Check
+                                type="radio"
+                                label="Nữ"
+                                name="gender"
+                                value="false"
+                                checked={formData.gender === false}
+                                onChange={() => handleInputChange("gender", false)}
+                                inline
+                                isInvalid={!!errorFields.gender}
+                            />
+                        </div>
+                        {errorFields.gender && (
+                            <div className="invalid-feedback d-block">
+                                {errorFields.gender}
+                            </div>
+                        )}
                     </Form.Group>
                 </div>
 
                 {/* Ảnh Đại Diện */}
                 <div className="col-md-6 mb-3">
-                    <Form.Group controlId="formAvatar">
-                        <Form.Label>Ảnh Đại Diện</Form.Label>
-                        <Form.Control type="file" onChange={handleAvatarChange} />
+                    <Form.Group controlId="formImage">
+                        <Form.Label>Hình ảnh khóa học</Form.Label>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <Form.Control
+                                type="file"
+                                name="image"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                        const fileUrl = URL.createObjectURL(file);
+                                        handleInputChange("image", fileUrl);
+                                    }
+                                }}
+                                isInvalid={!!errorFields.image}
+                                required
+                                style={{ flex: 1 }}
+                            />
+                            {formData.image && (
+                                <img
+                                    src={formData.image}
+                                    alt="Hình ảnh khóa học"
+                                    style={{
+                                        width: '50px',
+                                        height: 'auto',
+                                        marginLeft: '10px',
+                                    }}
+                                />
+                            )}
+                        </div>
+                        <Form.Control.Feedback type="invalid">
+                            {errorFields.image}
+                        </Form.Control.Feedback>
                     </Form.Group>
                 </div>
-
+                {/* Mã Người Dùng với Select có tìm kiếm */}
+                <div className="col-md-6 mb-3">
+                    <Form.Group controlId="formUserId">
+                        <Form.Label>Mã Người Dùng</Form.Label>
+                        <Select
+                            options={userOptions} // danh sách user fake
+                            value={userOptions.find((option) => option.value === formData.userId)}
+                            onChange={(selectedOption) => handleInputChange("userId", selectedOption ? selectedOption.value : '')}
+                            placeholder="Chọn mã người dùng"
+                            isInvalid={!!errorFields.userId}
+                            isClearable // Cho phép xóa chọn lựa
+                            isSearchable // Bật tính năng tìm kiếm
+                        />
+                        {errorFields.userId && (
+                            <div className="invalid-feedback d-block">
+                                {errorFields.userId}
+                            </div>
+                        )}
+                    </Form.Group>
+                </div>
+                {/* Ghi Chú */}
                 <div className="col-md-12 mb-3">
                     <Form.Group controlId="formNote">
                         <Form.Label>Ghi Chú</Form.Label>
@@ -332,30 +403,14 @@ const StudentManagement = () => {
                         </Form.Control.Feedback>
                     </Form.Group>
                 </div>
-
-                {/* <div className="col-md-6 mb-3">
-                    <Form.Group controlId="formUserId">
-                        <Form.Label>Mã Người Dùng</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="userId"
-                            value={formData.userId}
-                            onChange={(e) => handleInputChange("userId", e.target.value)}
-                            isInvalid={!!errorFields.userId}
-                            required
-                        />
-                        <Form.Control.Feedback type="invalid">
-                            {errorFields.userId}
-                        </Form.Control.Feedback>
-                    </Form.Group>
-                </div> */}
             </div>
         </>
     );
 
+
+
     return (
         <>
-        { console.log("Dữ liệu API trả về:", studentData)}
             {/* Những cái bên dưới truyền prop cho đúng tên của những cái m đổi rồi là đc */}
             {/* Hiển thị loader khi đang tải trang */}
             {loadingPage ? (

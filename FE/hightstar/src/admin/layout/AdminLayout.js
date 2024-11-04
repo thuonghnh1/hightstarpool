@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import { AppSidebar, AppFooter, AppHeader } from "../components/index";
 import {
   Dashboard,
@@ -7,11 +7,12 @@ import {
   UserManagement,
   StudentManagement,
   CourseManagement,
+  TrainerManagement,
   TicketManagement,
   DiscountManagement,
 } from "../views/index";
-import { Bounce, ToastContainer } from "react-toastify";
-
+import "../css/style.css";
+import { ThemeProvider } from "../components/common/ThemeContext";
 const AdminLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true); // Quản lý trạng thái ẩn/hiện sidebar
 
@@ -43,61 +44,52 @@ const AdminLayout = () => {
   }, []);
 
   return (
-    <div className="container__admin overflow-hidden">
-      <AppSidebar className="" isSidebarOpen={isSidebarOpen} />
-      <div
-        className={`right__box d-flex flex-column ${isSidebarOpen ? "with-sidebar" : ""
-          }`}
-      >
-        <AppHeader
-          toggleSidebar={toggleSidebar}
-          isSidebarOpen={isSidebarOpen}
-        />
-        <div className="main p-0">
-          <div className="container-fluid m-0 p-0 p-md-4">
-            <Routes>
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route
-                path="user-management"
-                element={<UserManagement />}
-              />
-              <Route
-                path="course-management"
-                element={<CourseManagement />}
-              />
-              <Route
-                path="discount-management"
-                element={<DiscountManagement />}
-              />
-              <Route
-                path="student-management"
-                element={<StudentManagement />}
-              />
-              <Route
-                path="ticket-management"
-                element={<TicketManagement />}
-              />
-              <Route path="*" element={<Page404 />} />
-            </Routes>
-            <Outlet /> {/* Để hiển thị các component con */}
+    <ThemeProvider>
+      <div className="container__admin overflow-hidden">
+        <AppSidebar className="" isSidebarOpen={isSidebarOpen} />
+        <div
+          className={`right__box d-flex flex-column ${isSidebarOpen ? "with-sidebar" : ""
+            }`}
+        >
+          <AppHeader
+            toggleSidebar={toggleSidebar}
+            isSidebarOpen={isSidebarOpen}
+          />
+          <div className="main p-0">
+            <div className="container-fluid m-0 p-0 p-md-4">
+              <Routes>
+                <Route index element={<Navigate to="/admin/dashboard" />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="user-management" element={<UserManagement />} />
+                <Route
+                  path="course-management"
+                  element={<CourseManagement />}
+                />
+                <Route
+                  path="trainer-management"
+                  element={<TrainerManagement />}
+                />
+                <Route
+                  path="discount-management"
+                  element={<DiscountManagement />}
+                />
+                <Route
+                  path="student-management"
+                  element={<StudentManagement />}
+                />
+                <Route
+                  path="ticket/ticket-management"
+                  element={<TicketManagement />}
+                />
+                <Route path="*" element={<Page404 />} />
+              </Routes>
+              <Outlet /> {/* Để hiển thị các component con */}
+            </div>
           </div>
+          <AppFooter />
         </div>
-        <AppFooter />
       </div>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        transition={Bounce}
-      />
-    </div>
+    </ThemeProvider>
   );
 };
 

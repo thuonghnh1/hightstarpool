@@ -11,23 +11,23 @@
 }
 
 .table__management table .btn__edit {
-  color: rgb(9, 170, 9);
+  color: rgb(53, 122, 53);
   transition: 0.3s;
   border: none;
 } 
 
 .table__management table .btn__edit:hover {
-  color: rgb(12, 94, 12);
+  color: rgb(21, 206, 21);
 }
 
 .table__management table .btn__delete {
-  color: red;
+  color: rgb(185, 13, 13);
   transition: 0.3s;
   border: none;
 }
 
 .table__management table .btn__delete:hover {
-  color: rgb(167, 40, 40);
+  color: rgb(250, 96, 57);
 }
 
 .table__management table .btn__show {

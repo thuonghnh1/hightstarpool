@@ -1,77 +1,78 @@
 import axios from "axios";
 import { formatDateTimeToDMY } from "../utils/FormatDate";
-// Cấu hình URL API chung
-const API_URL = "http://localhost:8080/api/discounts"; // Thay bằng URL thực tế của bạn
+
+// Cấu hình axios với URL API chung
+const axiosInstance = axios.create({
+  baseURL: "http://localhost:8080/api/discounts",
+  // headers: { Authorization: "Bearer <your_token>" }, // Nếu cần thêm mã thông báo
+});
+
+// Hàm xử lý lỗi chung
+const handleError = (error, message) => {
+  console.error(message, error);
+  throw error;
+};
 
 // Hàm lấy tất cả giảm giá
 const getDiscounts = async () => {
   try {
-    const response = await axios.get(API_URL);
+    const response = await axiosInstance.get("");
     const discounts = response.data;
 
     // Chuyển đổi định dạng ngày giờ cho từng phần tử
-    const formattedDiscounts = discounts.map((discount) => ({
+    return discounts.map((discount) => ({
       ...discount,
-      startDate: formatDateTimeToDMY(discount.startDate), // Chuyển đổi ngày giờ bắt đầu
-      endDate: formatDateTimeToDMY(discount.endDate), // Chuyển đổi ngày giờ kết thúc
+      startDate: formatDateTimeToDMY(discount.startDate),
+      endDate: formatDateTimeToDMY(discount.endDate),
     }));
-
-    return formattedDiscounts;
   } catch (error) {
-    console.error("Lỗi khi lấy danh sách giảm giá:", error);
-    throw error;
+    handleError(error, "Lỗi khi lấy danh sách giảm giá:");
   }
 };
 
 // Hàm lấy một giảm giá theo ID
 const getDiscountById = async (id) => {
   try {
-    const response = await axios.get(`${API_URL}/${id}`);
+    const response = await axiosInstance.get(`/${id}`);
     const discount = response.data;
 
     // Chuyển đổi định dạng ngày giờ
-    const formattedDiscount = {
+    return {
       ...discount,
-      startDate: formatDateTimeToDMY(discount.startDate), // Chuyển đổi ngày giờ bắt đầu
-      endDate: formatDateTimeToDMY(discount.endDate), // Chuyển đổi ngày giờ kết thúc
+      startDate: formatDateTimeToDMY(discount.startDate),
+      endDate: formatDateTimeToDMY(discount.endDate),
     };
-
-    return formattedDiscount;
   } catch (error) {
-    console.error(`Lỗi khi lấy giảm giá với ID: ${id}`, error);
-    throw error;
+    handleError(error, `Lỗi khi lấy giảm giá với ID: ${id}`);
   }
 };
 
 // Hàm thêm mới giảm giá
 const createDiscount = async (discountData) => {
   try {
-    const response = await axios.post(API_URL, discountData);
+    const response = await axiosInstance.post("", discountData);
     return response.data;
   } catch (error) {
-    console.error("Lỗi khi thêm mới giảm giá:", error);
-    throw error;
+    handleError(error, "Lỗi khi thêm mới giảm giá:");
   }
 };
 
 // Hàm cập nhật giảm giá
 const updateDiscount = async (id, discountData) => {
   try {
-    const response = await axios.put(`${API_URL}/${id}`, discountData);
+    const response = await axiosInstance.put(`/${id}`, discountData);
     return response.data;
   } catch (error) {
-    console.error(`Lỗi khi cập nhật giảm giá với ID: ${id}`, error);
-    throw error;
+    handleError(error, `Lỗi khi cập nhật giảm giá với ID: ${id}`);
   }
 };
 
 // Hàm xóa giảm giá
 const deleteDiscount = async (id) => {
   try {
-    await axios.delete(`${API_URL}/${id}`);
+    await axiosInstance.delete(`/${id}`);
   } catch (error) {
-    console.error(`Lỗi khi xóa giảm giá với ID: ${id}`, error);
-    throw error;
+    handleError(error, `Lỗi khi xóa giảm giá với ID: ${id}`);
   }
 };
 

@@ -1,22 +1,37 @@
+/* Định dạng chung cho header */
 .header {
   position: fixed !important; /* Đảm bảo navbar cố định */
   top: 0;
   right: 0;
-  /* left: 250px; */
   display: flex;
   justify-content: center;
   align-items: center;
-  /* padding: 10px 20px; */
   border-bottom: 1px solid #ddd; /* Đường viền dưới */
   z-index: 1000;
   transition: left 0.3s ease;
 }
 
+/* Theme tối */
+.header.dark-theme {
+  background-color: #1a2035; /* Màu nền tối */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Đường viền dưới nhạt hơn */
+  color: white; /* Màu chữ */
+}
+
+/* Theme sáng */
+.header.light-theme {
+  background-color: #f5f5f5; /* Màu nền sáng */
+  border-bottom: 1px solid #ddd; /* Đường viền dưới */
+  color: #333; /* Màu chữ */
+}
+
+/* Định dạng cho biểu tượng menu */
 .menu-icon {
   font-size: 24px;
   cursor: pointer;
 }
 
+/* Định dạng cho thông báo người dùng */
 .user-notifications {
   display: flex;
   align-items: center;
@@ -33,7 +48,8 @@
   margin-left: 20px;
 }
 
-.badge {
+/* Định dạng badge cho thông báo */
+.head__right .dropdown-toggle .badge {
   position: absolute;
   top: -5px;
   right: -10px;
@@ -44,6 +60,7 @@
   font-size: 12px;
 }
 
+/* Định dạng cho người dùng */
 .user {
   display: flex;
   align-items: center;
@@ -52,4 +69,26 @@
 .user i {
   font-size: 24px;
   margin-right: 8px;
+}
+
+/* Ẩn mũi tên dropdown */
+.head__right .dropdown-toggle::after {
+  display: none;
+}
+
+/* Định dạng cho item trong header */
+.head__right .box__item {
+  color: rgba(0, 0, 0, 0.548); /* Màu chữ cho item */
+  transition: 0.3s;
+}
+
+/* Hiệu ứng hover cho item */
+.head__right .box__item:hover {
+  background: #00000011; /* Màu nền khi hover */
+}
+
+/* Định dạng cho item mới */
+.head__right .box__item.new {
+  color: black;
+  background: #00000011; /* Màu nền cho item mới */
 }

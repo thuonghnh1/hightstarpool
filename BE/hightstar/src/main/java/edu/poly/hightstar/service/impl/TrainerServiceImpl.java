@@ -144,6 +144,31 @@ public class TrainerServiceImpl implements TrainerService {
                 trainerRepository.delete(trainer);
         }
 
+        @Override
+        public boolean isPhoneNumberExists(String phoneNumber) {
+                // Kiểm tra xem số điện thoại có tồn tại trong database không
+                return userProfileRepository.existsByPhoneNumber(phoneNumber);
+        }
+
+        @Override
+        public boolean isEmailExists(String email) {
+                // Kiểm tra xem email có tồn tại trong database không
+                return userRepository.existsByEmail(email);
+        }
+
+        @Override
+        public boolean isPhoneNumberExistsForUpdate(String phoneNumber, Long userId) {
+
+                // Kiểm tra xem số điện thoại có tồn tại trong database không
+                return userProfileRepository.existsByPhoneNumberAndUserUserIdNot(phoneNumber, userId);
+        }
+
+        @Override
+        public boolean isEmailExistsForUpdate(String email, Long userId) {
+                // Kiểm tra xem email có tồn tại trong database không
+                return userRepository.existsByEmailAndUserIdNot(email, userId);
+        }
+
         // Chuyển đổi từ Trainer, User, UserProfile thành TrainerDto
         private TrainerDTO convertToDto(Trainer trainer, User user, UserProfile userProfile) {
                 TrainerDTO trainerDTO = new TrainerDTO();
@@ -167,7 +192,8 @@ public class TrainerServiceImpl implements TrainerService {
                                 "    h1 { color: #333; }" +
                                 "    .info { background-color: #f9f9f9; padding: 15px; border: 1px solid #e1e1e1; border-radius: 5px; }"
                                 +
-                                "    .footer { margin-top: 20px; font-size: 0.9em; color: #666; }" +
+                                "    .footer { margin-top: 20px; font-size: 0.9em; color: #666; text-align: center; }" +
+                                "    .footer strong { color: #333; }" +
                                 "</style>" +
                                 "</head>" +
                                 "<body>" +
@@ -184,7 +210,12 @@ public class TrainerServiceImpl implements TrainerService {
                                 +
                                 "        <p>Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi.</p>" +
                                 "        <div class='footer'>" +
-                                "            <p>Chân thành cảm ơn bạn,<br>Đội ngũ hỗ trợ khách hàng.</p>" +
+                                "            <p>Chân thành cảm ơn bạn,<br><strong>Đội ngũ hỗ trợ khách hàng</strong></p>"
+                                +
+                                "            <p><strong>Hight Star</strong><br>" +
+                                "            Email: support@hightstar.com | Hotline: 0888-372-325</p>" +
+                                "            <p>Đây là email tự động từ phần mềm Hight Star. Vui lòng không trả lời email này.</p>"
+                                +
                                 "        </div>" +
                                 "    </div>" +
                                 "</body>" +
@@ -192,4 +223,5 @@ public class TrainerServiceImpl implements TrainerService {
 
                 emailService.sendHtmlEmail(trainerDTO.getEmail(), emailSubject, emailBody);
         }
+
 }

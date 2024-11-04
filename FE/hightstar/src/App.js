@@ -1,9 +1,10 @@
-import {BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Bounce, ToastContainer } from "react-toastify";
 import AdminLayout from "./admin/layout/AdminLayout";
 import SiteLayout from "./site/layout/SiteLayout";
-import Login from "./site/views/Auth/Login"
-import Register from "./site/views/Auth/Register"
-import "./admin/css/style.css";
+import LoginPage from "./site/views/Auth/LoginPage";
+import SignUpPage from "./site/views/Auth/SignUpPage";
+import ForgotPasswordPage from "./site/views/Auth/ForgotPasswordPage";
 
 function App() {
   return (
@@ -12,10 +13,24 @@ function App() {
         <Routes>
           <Route path="/admin/*" element={<AdminLayout />} />
           <Route path="/*" element={<SiteLayout />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<SignUpPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Routes>
       </Router>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
     </div>
   );
 }
