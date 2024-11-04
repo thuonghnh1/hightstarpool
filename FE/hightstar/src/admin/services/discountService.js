@@ -3,7 +3,7 @@ import { formatDateTimeToDMY } from "../utils/FormatDate";
 
 // Cấu hình axios với URL API chung
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080/api/discounts", // Thay bằng URL thực tế của bạn
+  baseURL: "http://localhost:8080/api/discounts",
   // headers: { Authorization: "Bearer <your_token>" }, // Nếu cần thêm mã thông báo
 });
 

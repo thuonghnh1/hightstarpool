@@ -48,15 +48,14 @@ const TableManagement = ({
       case "status":
         return (
           <span
-            className={`rounded-3 fw-bold px-2 py-1 ${
-              item.status === "ACTIVE" ? "text-bg-success" : "text-bg-secondary"
-            }`}
+            className={`rounded-3 fw-bold px-2 py-1 ${item.status === "ACTIVE" ? "text-bg-success" : "text-bg-secondary"
+              }`}
             style={{ fontSize: "13px" }}
           >
             {item.status === "ACTIVE" ? "Hoạt động" : "Vô hiệu hóa"}
           </span>
         );
-
+      case "avatar":
       case "image":
       case "avatar":
         return (
@@ -75,13 +74,21 @@ const TableManagement = ({
           stars.push(
             <i
               key={i}
-              className={`bi ${
-                i <= item.averageRating ? "bi-star-fill" : "bi-star"
-              } text-warning me-1`}
+              className={`bi ${i <= item.averageRating ? "bi-star-fill" : "bi-star"
+                } text-warning me-1`}
             ></i>
           );
         }
         return <div>{stars}</div>;
+      case "gender":
+        return (
+          <span
+            className={`rounded-3 px-2 py-1 `}
+          >
+            {item.gender === true ? <><i className="bi bi-gender-male"></i> Nam</> : <><i className="bi bi-gender-female"></i> Nữ</>}
+          </span>
+        );
+      // Thêm các case khác nếu cần cho các cột tuỳ chỉnh khác
 
       case "role":
         return (
@@ -136,13 +143,13 @@ const TableManagement = ({
         ? compareA > compareB
           ? 1
           : compareA < compareB
-          ? -1
-          : 0
+            ? -1
+            : 0
         : compareA < compareB
-        ? 1
-        : compareA > compareB
-        ? -1
-        : 0;
+          ? 1
+          : compareA > compareB
+            ? -1
+            : 0;
     }
     return 0;
   });
@@ -284,20 +291,18 @@ const TableManagement = ({
                       {column.label}
                       <span className="icon_sort ps-2 light__text">
                         <i
-                          className={`bi bi-arrow-up ${
-                            sortConfig.key === column.key &&
+                          className={`bi bi-arrow-up ${sortConfig.key === column.key &&
                             sortConfig.direction === "asc"
-                              ? "text-black"
-                              : "opacity-50"
-                          }`}
+                            ? "text-black"
+                            : "opacity-50"
+                            }`}
                         ></i>
                         <i
-                          className={`bi bi-arrow-down ${
-                            sortConfig.key === column.key &&
+                          className={`bi bi-arrow-down ${sortConfig.key === column.key &&
                             sortConfig.direction === "desc"
-                              ? "text-black"
-                              : "opacity-50"
-                          }`}
+                            ? "text-black"
+                            : "opacity-50"
+                            }`}
                         ></i>
                       </span>
                     </th>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import TableManagement from "../../components/common/TableManagement";
-import discountService from "../../services/DiscountService";
+import DiscountService from "../../services/DiscountService";
 import Page500 from "../pages/Page500";
 import { Helmet } from "react-helmet-async";
 import {
@@ -43,7 +43,7 @@ const DiscountManagement = () => {
   const fetchDiscountData = async () => {
     setLoadingPage(true);
     try {
-      const data = await discountService.getDiscounts();
+      const data = await DiscountService.getDiscounts();
       setDiscountData(data); // Lưu dữ liệu vào state
     } catch (err) {
       setErrorServer(err.message); // Lưu lỗi vào state nếu có
@@ -100,7 +100,7 @@ const DiscountManagement = () => {
     }));
   };
 
-// Hàm validate toàn bộ form
+  // Hàm validate toàn bộ form
   const validateForm = () => {
     const newErrors = {};
 
@@ -118,7 +118,7 @@ const DiscountManagement = () => {
       newErrors.percentage =
         "Tỷ lệ giảm giá phải là một số từ lớn hơn 0 đến 100.";
     }
-  
+
     if (!formData.startDate) {
       newErrors.startDate = "Ngày bắt đầu không được để trống.";
     }
@@ -171,7 +171,7 @@ const DiscountManagement = () => {
     try {
       if (isEditing) {
         // Gọi API cập nhật sử dụng discountService
-        const updatedDiscount = await discountService.updateDiscount(
+        const updatedDiscount = await DiscountService.updateDiscount(
           formData.id,
           formData
         );
@@ -192,7 +192,7 @@ const DiscountManagement = () => {
         toast.success("Cập nhật thành công!");
       } else {
         // Nếu đang ở trạng thái thêm mới
-        const newDiscount = await discountService.createDiscount(formData);
+        const newDiscount = await DiscountService.createDiscount(formData);
 
         // Đổi định dạng ngày giờ trước khi lưu vào mảng
         const formattedDiscount = {
@@ -225,7 +225,7 @@ const DiscountManagement = () => {
   const handleDelete = (deleteId) => {
     if (deleteId) {
       setIsLoading(true);
-      discountService
+      DiscountService
         .deleteDiscount(deleteId)
         .then(() => {
           setDiscountData(

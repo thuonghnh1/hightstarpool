@@ -6,6 +6,7 @@ import {
   Page404,
   SalesManagement,
   UserManagement,
+  StudentManagement,
   CourseManagement,
   TrainerManagement,
   TicketManagement,
@@ -48,9 +49,8 @@ const AdminLayout = () => {
       <div className="container__admin overflow-hidden">
         <AppSidebar className="" isSidebarOpen={isSidebarOpen} />
         <div
-          className={`right__box d-flex flex-column ${
-            isSidebarOpen ? "with-sidebar" : ""
-          }`}
+          className={`right__box d-flex flex-column ${isSidebarOpen ? "with-sidebar" : ""
+            }`}
         >
           <AppHeader
             toggleSidebar={toggleSidebar}
@@ -78,10 +78,10 @@ const AdminLayout = () => {
                   path="discount-management"
                   element={<DiscountManagement />}
                 />
-                {/* <Route
-                path="student-management"
-                element={<StudentList />}
-              /> */}
+                <Route
+                  path="student-management"
+                  element={<StudentManagement />}
+                />
                 <Route
                   path="ticket/ticket-management"
                   element={<TicketManagement />}

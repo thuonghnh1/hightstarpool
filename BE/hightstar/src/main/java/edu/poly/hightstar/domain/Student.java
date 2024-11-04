@@ -16,11 +16,10 @@ public class Student {
     private String fullName;
     @Column(length = 50)
     private String nickname;
-    @Column(length = 100, nullable = false)
+    @Column(length = 50, nullable = false)
     private Integer age;
     private String avatar;
-    @Column(length = 100, nullable = false)
-    private String gender;
+    private Boolean gender;
     @Column(length = 200, nullable = true)
     private String note;
 
