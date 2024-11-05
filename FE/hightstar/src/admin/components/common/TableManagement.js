@@ -5,6 +5,7 @@ import ImageModal from "./ImageModal";
 import DeleteModal from "./DeleteModal";
 import "../../css/table-management.css";
 import iconTrainer from "../../../assets/images/icons/trainer.png";
+import defaultImage from "../../../assets/images/defaultImage.png";
 
 const TableManagement = ({
   data,
@@ -48,23 +49,23 @@ const TableManagement = ({
       case "status":
         return (
           <span
-            className={`rounded-3 fw-bold px-2 py-1 ${item.status === "ACTIVE" ? "text-bg-success" : "text-bg-secondary"
-              }`}
+            className={`rounded-3 fw-bold px-2 py-1 ${
+              item.status === "ACTIVE" ? "text-bg-success" : "text-bg-secondary"
+            }`}
             style={{ fontSize: "13px" }}
           >
             {item.status === "ACTIVE" ? "Hoạt động" : "Vô hiệu hóa"}
           </span>
         );
-      case "avatar":
       case "image":
       case "avatar":
         return (
           <img
-            src={item[column.key]}
-            alt={item.name}
+            src={item[column.key] || defaultImage} // Nếu item[column.key] không có, hiển thị ảnh mặc định
+            alt={item.name || "Ảnh mặc định"} // Đổi alt thành "Default Image" nếu item.name không tồn tại
             className="object-fit-cover rounded-circle"
             style={{ width: "45px", height: "45px", cursor: "pointer" }}
-            onClick={() => handleImageClick(item[column.key])}
+            onClick={() => handleImageClick(item[column.key] || defaultImage)}
           />
         );
 
@@ -74,18 +75,25 @@ const TableManagement = ({
           stars.push(
             <i
               key={i}
-              className={`bi ${i <= item.averageRating ? "bi-star-fill" : "bi-star"
-                } text-warning me-1`}
+              className={`bi ${
+                i <= item.averageRating ? "bi-star-fill" : "bi-star"
+              } text-warning me-1`}
             ></i>
           );
         }
         return <div>{stars}</div>;
       case "gender":
         return (
-          <span
-            className={`rounded-3 px-2 py-1 `}
-          >
-            {item.gender === true ? <><i className="bi bi-gender-male"></i> Nam</> : <><i className="bi bi-gender-female"></i> Nữ</>}
+          <span className={`rounded-3 px-2 py-1 `}>
+            {item.gender === true ? (
+              <>
+                <i className="bi bi-gender-male"></i> Nam
+              </>
+            ) : (
+              <>
+                <i className="bi bi-gender-female"></i> Nữ
+              </>
+            )}
           </span>
         );
       // Thêm các case khác nếu cần cho các cột tuỳ chỉnh khác
@@ -143,13 +151,13 @@ const TableManagement = ({
         ? compareA > compareB
           ? 1
           : compareA < compareB
-            ? -1
-            : 0
+          ? -1
+          : 0
         : compareA < compareB
-          ? 1
-          : compareA > compareB
-            ? -1
-            : 0;
+        ? 1
+        : compareA > compareB
+        ? -1
+        : 0;
     }
     return 0;
   });
@@ -291,18 +299,20 @@ const TableManagement = ({
                       {column.label}
                       <span className="icon_sort ps-2 light__text">
                         <i
-                          className={`bi bi-arrow-up ${sortConfig.key === column.key &&
+                          className={`bi bi-arrow-up ${
+                            sortConfig.key === column.key &&
                             sortConfig.direction === "asc"
-                            ? "text-black"
-                            : "opacity-50"
-                            }`}
+                              ? "text-black"
+                              : "opacity-50"
+                          }`}
                         ></i>
                         <i
-                          className={`bi bi-arrow-down ${sortConfig.key === column.key &&
+                          className={`bi bi-arrow-down ${
+                            sortConfig.key === column.key &&
                             sortConfig.direction === "desc"
-                            ? "text-black"
-                            : "opacity-50"
-                            }`}
+                              ? "text-black"
+                              : "opacity-50"
+                          }`}
                         ></i>
                       </span>
                     </th>
