@@ -114,9 +114,14 @@ public class CoursesController {
         }
 
         private String extractPublicId(String imageUrl) {
-                return imageUrl != null
-                                ? imageUrl.substring(imageUrl.lastIndexOf("/") + 1, imageUrl.lastIndexOf("."))
-                                : null;
+                if (imageUrl != null && imageUrl.contains("/") && imageUrl.contains(".")) {
+                        int start = imageUrl.lastIndexOf("/") + 1;
+                        int end = imageUrl.lastIndexOf(".");
+                        if (start < end) { // Đảm bảo chỉ số bắt đầu nhỏ hơn chỉ số kết thúc
+                                return imageUrl.substring(start, end);
+                        }
+                }
+                return null;
         }
 
         private void handleImageDeletion(String publicId) {
