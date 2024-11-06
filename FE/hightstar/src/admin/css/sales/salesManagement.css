@@ -1,0 +1,7 @@
+.card__sales{
+    transition: 0.3s ease;
+}
+
+.card__sales:hover{
+    background: rgba(219, 217, 217, 0.678) !important;
+}

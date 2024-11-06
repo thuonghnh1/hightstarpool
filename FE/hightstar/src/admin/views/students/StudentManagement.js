@@ -324,7 +324,7 @@ const StudentManagement = () => {
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formImage">
             <Form.Label>
-              Ảnh đại diện <span className="text-danger">(*)</span>
+              Ảnh đại diện
             </Form.Label>
             <div style={{ display: "flex", alignItems: "center" }}>
               <Form.Control

@@ -241,7 +241,7 @@ const TableManagement = ({
           {/* Input tìm kiếm */}
           <input
             type="text"
-            className="form-control"
+            className="form-control shadow-none"
             placeholder="Tìm kiếm"
             value={searchTerm} // Giá trị của input
             onChange={(e) => setSearchTerm(e.target.value)} // Xử lý thay đổi giá trị
