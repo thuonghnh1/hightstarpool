@@ -10,7 +10,7 @@ const TrainerManagement = () => {
   const [trainerData, setTrainerData] = useState([]);
   const [formData, setFormData] = useState({});
   const [errorFields, setErrorFields] = useState({});
-  const [isEditing, setIsEditing] = useState(false);
+  const [statusFunction, setStatusFunction] = useState({ isAdd: false, isEditing: false, isViewDetail: false });
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
   const [errorServer, setErrorServer] = useState(null);
@@ -137,6 +137,17 @@ const TrainerManagement = () => {
     validateField(key, value);
   };
 
+  const updateStatus = (newStatus) => {
+    setStatusFunction(prevStatus => ({
+      ...prevStatus,    // Giữ lại các thuộc tính trước đó
+      ...newStatus      // Cập nhật các thuộc tính mới
+    }));
+  };
+
+  const handleResetStatus = () => {
+    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false })
+  };
+
   const handleReset = () => {
     setFormData({
       fullName: "",
@@ -148,13 +159,13 @@ const TrainerManagement = () => {
       schedule: "",
       status: "ACTIVE",
     });
-    setIsEditing(false);
+    handleResetStatus();
     setErrorFields({});
   };
 
   const handleEdit = (item) => {
     setFormData(item);
-    setIsEditing(true);
+    updateStatus({ isEditing: true })
     setErrorFields({});
   };
 
@@ -164,7 +175,7 @@ const TrainerManagement = () => {
     setIsLoading(true);
 
     try {
-      if (isEditing) {
+      if (statusFunction.isEditing) {
         const updatedTrainer = await trainerService.updateTrainer(
           formData.id,
           formData
@@ -174,7 +185,7 @@ const TrainerManagement = () => {
         );
         setTrainerData(updatedTrainers);
         toast.success("Cập nhật thành công!");
-      } else {
+      } else if (statusFunction.isAdd) {
         const newTrainer = await trainerService.createTrainer(formData);
         setTrainerData([...trainerData, newTrainer]);
         toast.success("Thêm mới thành công!");
@@ -426,12 +437,13 @@ const TrainerManagement = () => {
             title={"Quản lý huấn luyện viên"}
             defaultColumns={defaultColumns}
             modalContent={modalContent}
-            isEditing={isEditing}
             handleReset={handleReset}
             onEdit={handleEdit}
             handleSaveItem={handleSaveItem}
             onDelete={handleDelete}
             isLoading={isLoading}
+            statusFunction={statusFunction}
+            onResetStatus={handleResetStatus}
           />
         </section>
       )}

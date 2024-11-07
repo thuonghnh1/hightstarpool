@@ -3,9 +3,10 @@ import UserManagement from "./users/UserManagement";
 import TicketManagement from "./tickets/TicketManagement";
 import CourseManagement from "./courses/CourseManagement";
 import StudentManagement from "./students/StudentManagement";
-import DiscountManagement from "./discounts/DiscountManagement"; 
+import DiscountManagement from "./discounts/DiscountManagement";
 import TrainerManagement from "./trainers/TrainerManagement";
 import SalesManagement from "./sales/SalesManagement";
+import OrderManagement from "./orders/OrderManagement";
 import Page404 from "./pages/Page404";
 
 export {
@@ -17,5 +18,6 @@ export {
   StudentManagement,
   DiscountManagement,
   SalesManagement,
+  OrderManagement,
   Page404,
 };

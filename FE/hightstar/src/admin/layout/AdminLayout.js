@@ -11,6 +11,7 @@ import {
   TrainerManagement,
   TicketManagement,
   DiscountManagement,
+  OrderManagement,
 } from "../views/index";
 import "../css/style.css";
 import { ThemeProvider } from "../components/common/ThemeContext";
@@ -85,6 +86,10 @@ const AdminLayout = () => {
                 <Route
                   path="ticket/ticket-management"
                   element={<TicketManagement />}
+                />
+                <Route
+                  path="order-management"
+                  element={<OrderManagement />}
                 />
                 <Route path="*" element={<Page404 />} />
               </Routes>

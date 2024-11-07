@@ -14,7 +14,7 @@ const UserManagement = () => {
   const [userData, setUserData] = useState([]);
   const [formData, setFormData] = useState({});
   const [errorFields, setErrorFields] = useState({});
-  const [isEditing, setIsEditing] = useState(false);
+  const [statusFunction, setStatusFunction] = useState({ isAdd: false, isEditing: false, isViewDetail: false });
 
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
@@ -86,11 +86,11 @@ const UserManagement = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!isEditing && (!formData.fullName || formData.fullName.trim() === "")) { // nếu là edit thì sẽ không validate trường này
+    if (!statusFunction.isEditing && (!formData.fullName || formData.fullName.trim() === "")) { // nếu là edit thì sẽ không validate trường này
       newErrors.fullName = "Tên không được để trống.";
     }
 
-    if (!isEditing && (!formData.phoneNumber || !/^\d{10}$/.test(formData.phoneNumber))) {
+    if (!statusFunction.isEditing && (!formData.phoneNumber || !/^\d{10}$/.test(formData.phoneNumber))) {
       newErrors.phoneNumber = "Số điện thoại không hợp lệ.";
     }
 
@@ -109,6 +109,17 @@ const UserManagement = () => {
     validateField(key, value);
   };
 
+  const updateStatus = (newStatus) => {
+    setStatusFunction(prevStatus => ({
+      ...prevStatus,    // Giữ lại các thuộc tính trước đó
+      ...newStatus      // Cập nhật các thuộc tính mới
+    }));
+  };
+
+  const handleResetStatus = () => {
+    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false })
+  };
+
   const handleReset = () => {
     setFormData({
       fullName: "",
@@ -118,7 +129,7 @@ const UserManagement = () => {
       password: "",
       status: "ACTIVE",
     });
-    setIsEditing(false);
+    handleResetStatus()
     setErrorFields({});
   };
 
@@ -128,7 +139,7 @@ const UserManagement = () => {
       registeredDate: formatDateTimeToISO(item.registeredDate),
       lastLogin: formatDateTimeToISO(item.lastLogin),
     });
-    setIsEditing(true);
+    updateStatus({ isEditing: true })
     setErrorFields({});
   };
 
@@ -138,7 +149,7 @@ const UserManagement = () => {
     setIsLoading(true);
 
     try {
-      if (isEditing) {
+      if (statusFunction.isEditing) {
         const updatedUser = await userService.updateUser(formData.id, formData);
 
         const formattedUser = {
@@ -153,7 +164,7 @@ const UserManagement = () => {
 
         setUserData(updatedUsers);
         toast.success("Cập nhật thành công!");
-      } else {
+      } else if (statusFunction.isAdd) {
         const newUser = await userService.createUser(formData);
         console.log(formData.fullName);
         const formattedUser = {
@@ -202,7 +213,7 @@ const UserManagement = () => {
     <>
       {/* Nếu là edit thì không cần họ và tên */}
       <div className="row">
-        {isEditing || (
+        {statusFunction.isEditing || (
           <div className="col-md-6 mb-3">
             <Form.Group controlId="formFullName">
               <Form.Label>
@@ -224,7 +235,7 @@ const UserManagement = () => {
             </Form.Group>
           </div>
         )}
-        {isEditing || (
+        {statusFunction.isEditing || (
           <div className="col-md-6 mb-3">
             <Form.Group controlId="formPhoneNumber">
               <Form.Label>
@@ -276,19 +287,19 @@ const UserManagement = () => {
               onChange={(e) => handleInputChange("role", e.target.value)}
               isInvalid={!!errorFields.role}
               required
-              disabled={isEditing}
+              disabled={statusFunction.isEditing}
             >
               <option value="ADMIN">Quản trị</option>
               <option value="USER">Người dùng</option>
               {/* Nếu là tạo mới thì không tạo HLV ở user */}
-              {isEditing && <option value="TRAINER">Huấn luyện viên</option>}
+              {statusFunction.isEditing && <option value="TRAINER">Huấn luyện viên</option>}
             </Form.Select>
             <Form.Control.Feedback type="invalid">
               {errorFields.role}
             </Form.Control.Feedback>
           </Form.Group>
         </div>
-        {isEditing && (
+        {statusFunction.isEditing && (
           <div className="col-md-6 mb-3">
             <Form.Group controlId="formPassword">
               <Form.Label>
@@ -300,7 +311,7 @@ const UserManagement = () => {
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
                 isInvalid={!!errorFields.password}
-                required={!isEditing}
+                required={!statusFunction.isEditing}
               />
               <Form.Control.Feedback type="invalid">
                 {errorFields.password}
@@ -348,12 +359,13 @@ const UserManagement = () => {
             title={"Quản lý người dùng"}
             defaultColumns={defaultColumns}
             modalContent={modalContent}
-            isEditing={isEditing}
             handleReset={handleReset}
             onEdit={handleEdit}
             handleSaveItem={handleSaveItem}
             onDelete={handleDelete}
             isLoading={isLoading}
+            statusFunction={statusFunction}
+            onResetStatus={handleResetStatus}
           />
         </section>
       )}

@@ -4,7 +4,7 @@ import studentService from "../../services/StudentService.js";
 import UserService from "../../services/UserService.js";
 import Page500 from "../pages/Page500";
 import { Spinner, Form } from "react-bootstrap";
-import { Bounce, ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import Select from "react-select"; // thư viện tạo select có hỗ trợ search
 
 const StudentManagement = () => {
@@ -15,14 +15,14 @@ const StudentManagement = () => {
   const [listUserOption, setListUserOption] = useState([]);
 
   const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
-  const [isEditing, setIsEditing] = useState(false); // Trạng thái để biết đang thêm mới hay chỉnh sửa
+  const [statusFunction, setStatusFunction] = useState({ isAdd: false, isEditing: false, isViewDetail: false }); // Trạng thái để biết đang thêm mới hay chỉnh sửa hay xem chi tiết
   // State để xử lý trạng thái tải dữ liệu và lỗi
 
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
   const [errorServer, setErrorServer] = useState(null);
 
-  // Mảng cột của bảng (cần đổi theo các trường có trong csdl. lưu ý giữ nguyên id là 'id' sau ni làm be r giải thích sau)
+  // Mảng cột của bảng 
   const studentColumns = [
     { key: "id", label: "ID" },
     { key: "avatar", label: "Ảnh" },
@@ -133,6 +133,16 @@ const StudentManagement = () => {
     validateField(key, value);
   };
 
+  const updateStatus = (newStatus) => {
+    setStatusFunction(prevStatus => ({
+      ...prevStatus,    // Giữ lại các thuộc tính trước đó
+      ...newStatus      // Cập nhật các thuộc tính mới
+    }));
+  };
+  const handleResetStatus = () => {
+    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false })
+  };
+
   // Hàm reset form khi thêm mới
   const handleReset = () => {
     setFormData({
@@ -143,7 +153,7 @@ const StudentManagement = () => {
       gender: true,
       note: "",
     });
-    setIsEditing(false);
+    handleResetStatus();
     setErrorFields({});
   };
   // Hàm gọi khi nhấn "Sửa" một hàng
@@ -151,7 +161,7 @@ const StudentManagement = () => {
     setFormData({
       ...item,
     });
-    setIsEditing(true);
+    updateStatus({ isEditing: true })
     setErrorFields({});
   };
 
@@ -162,7 +172,7 @@ const StudentManagement = () => {
     setIsLoading(true);
 
     try {
-      if (isEditing) {
+      if (statusFunction.isEditing) {
         // Gọi API cập nhật sử dụng studentService
         const updatedStudent = await studentService.updateStudent(
           formData.id,
@@ -175,7 +185,7 @@ const StudentManagement = () => {
         );
         setStudentData(updatedStudents);
         toast.success("Cập nhật thành công!");
-      } else {
+      } else if (statusFunction.isAdd) {
         // Gọi API thêm mới sử dụng studentService
         const newStudent = await studentService.createStudent(formData, imageFile);
         // Cập nhật mảng studentData với item vừa được thêm
@@ -450,20 +460,8 @@ const StudentManagement = () => {
             setFormData={setFormData}
             modalContent={modalContent}
             isLoading={isLoading}
-          />
-
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-            transition={Bounce}
+            statusFunction={statusFunction}
+            onResetStatus={handleResetStatus}
           />
         </section>
       )}

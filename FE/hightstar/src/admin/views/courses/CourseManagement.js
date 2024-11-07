@@ -12,7 +12,7 @@ const CourseManagement = () => {
   const [formData, setFormData] = useState({}); // State quản lý dữ liệu hiện tại
   const [imageFile, setImageFile] = useState(null); // State lưu trữ ảnh upload
   const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
-  const [isEditing, setIsEditing] = useState(false); // Trạng thái để biết đang thêm mới hay chỉnh sửa
+  const [statusFunction, setStatusFunction] = useState({ isAdd: false, isEditing: false, isViewDetail: false }); // Trạng thái để biết đang thêm mới hay chỉnh sửa hay xem chi tiết
   const [isLoading, setIsLoading] = useState(false); // State để xử lý trạng thái tải dữ liệu
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
   const [errorServer, setErrorServer] = useState(null);
@@ -149,6 +149,16 @@ const CourseManagement = () => {
     setFormData({ ...formData, [key]: value });
     validateField(key, value);
   };
+  
+  const updateStatus = (newStatus) => {
+    setStatusFunction(prevStatus => ({
+      ...prevStatus,    // Giữ lại các thuộc tính trước đó
+      ...newStatus      // Cập nhật các thuộc tính mới
+    }));
+  };
+  const handleResetStatus = () => {
+    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false })
+  };
 
   // Hàm reset form khi thêm mới
   const handleReset = () => {
@@ -160,7 +170,7 @@ const CourseManagement = () => {
       price: "0",
       description: "", // Nếu vẫn cần trường mô tả
     });
-    setIsEditing(false);
+    handleResetStatus();
     setErrorFields({});
   };
 
@@ -169,7 +179,7 @@ const CourseManagement = () => {
     setFormData({
       ...item, // Sao chép tất cả thuộc tính của item
     });
-    setIsEditing(true);
+    updateStatus({ isEditing: true })
     setErrorFields({});
   };
   // Hàm gọi khi lưu
@@ -179,7 +189,7 @@ const CourseManagement = () => {
     setIsLoading(true);
 
     try {
-      if (isEditing) {
+      if (statusFunction.isEditing) {
         // Gọi API cập nhật khóa học
         const updatedCourse = await CourseService.updateCourse(
           formData.id,
@@ -191,7 +201,7 @@ const CourseManagement = () => {
         );
         setCourseData(updatedCourses);
         toast.success("Cập nhật thành công!");
-      } else {
+      } else  if (statusFunction.isAdd){
         // Gọi API thêm mới khóa học
         const createdCourse = await CourseService.createCourse(
           formData,
@@ -405,12 +415,13 @@ const CourseManagement = () => {
             title={"Quản lý khóa học"} // Đổi tiêu đề thành "Quản lý khóa học"
             defaultColumns={defaultColumns} // Truyền mảng cột đã lọc
             modalContent={modalContent}
-            isEditing={isEditing}
             handleReset={handleReset}
             onEdit={handleEdit}
             handleSaveItem={handleSaveItem}
             onDelete={handleDelete}
             isLoading={isLoading}
+            statusFunction={statusFunction}
+            onResetStatus={handleResetStatus}
           />
         </section>
       )}
