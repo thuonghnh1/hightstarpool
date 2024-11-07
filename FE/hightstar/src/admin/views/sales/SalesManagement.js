@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Form,
@@ -8,55 +8,87 @@ import {
   Offcanvas,
   Row,
   Col,
+  Dropdown,
+  Modal,
 } from "react-bootstrap";
+import { toast } from "react-toastify";
+import Select from "react-select"; // thư viện tạo select có hỗ trợ search
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../css/sales/salesManagement.css";
+import SalesService from "../../services/SalesService";
+import UserService from "../../services/UserService";
 
 const SalesManagement = () => {
   const [activeTab, setActiveTab] = useState("tickets");
   const [cartItems, setCartItems] = useState([]);
   const [showInvoice, setShowInvoice] = useState(false);
-
-  const handlePayment1Click = () => {
-    setShowInvoice(true);
-  };
-
-  const handleCloseOffcanvas = () => setShowInvoice(false);
-  const tickets = [
-    { id: "V01", name: "Vé dùng 1 lần", price: 60000 },
-    { id: "V02", name: "Vé tuần", price: 400000 },
-    { id: "V03", name: "Vé tháng", price: 1500000 },
-  ];
-
-  const courses = [
-    { id: "BF01", name: "Bơi ếch", type: "1 kèm 4", price: 3000000 },
-    { id: "BS02", name: "Bơi sải", type: "1 kèm 2", price: 3000000 },
-    { id: "BS03", name: "Bơi sải nâng cao", type: "1 kèm 1", price: 3000000 },
-    { id: "BS04", name: "Bơi ếch nâng cao", type: "1 kèm 2", price: 3000000 },
-    { id: "BF05", name: "Bơi bướm", type: "1 kèm 4", price: 3000000 },
-    { id: "BS06", name: "Bơi bướm nâng cao", type: "1 kèm 4", price: 3000000 },
-    { id: "BS07", name: "Bơi ngữa", type: "1 kèm 4", price: 3000000 },
+  const [selectedDiscount, setSelectedDiscount] = useState(null); // State cho mã giảm giá
+  const [tickets, setTickets] = useState([
+    { id: "VB1", name: "Vé dùng 1 lần", price: 60000 },
+    { id: "VB2", name: "Vé tuần", price: 400000 },
+    { id: "VB3", name: "Vé tháng", price: 1500000 },
+  ]);
+  const [courses, setCourses] = useState([]);
+  const [products, setProducts] = useState([
     {
-      id: "BS08",
-      name: "Kỹ năng bơi chống đuổi nước",
-      type: "1 kèm 4",
-      price: 3000000,
+      id: "SP01",
+      image:
+        "https://boidat.com/wp-content/uploads/2024/04/z4610703450640_e29a9e4149977230a446f105682e6d71-2048x1536.jpg",
+      name: "Nước uống",
+      type: "Đồ ăn",
+      price: 15000,
     },
-    { id: "BS09", name: "Bơi bướm nâng cao", type: "1 kèm 4", price: 3000000 },
-    { id: "BS011", name: "Bơi ngữa", type: "1 kèm 4", price: 3000000 },
     {
-      id: "BS012",
-      name: "Kỹ năng bơi chống đuổi nước",
-      type: "1 kèm 4",
-      price: 3000000,
+      id: "SP02",
+      image:
+        "https://boidat.com/wp-content/uploads/2024/04/z4610703450640_e29a9e4149977230a446f105682e6d71-2048x1536.jpg",
+      name: "Snack",
+      type: "Áo quần",
+      price: 10000,
     },
-  ];
+    {
+      id: "SP03",
+      image:
+        "https://boidat.com/wp-content/uploads/2024/04/z4610703450640_e29a9e4149977230a446f105682e6d71-2048x1536.jpg",
+      name: "Mì tôm trứng",
+      type: "Đồ ăn",
+      price: 15000,
+    },
+  ]);
+  const [listDiscountOption, setListDiscountOption] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(""); // State cho tìm kiếm
+  // State dùng để quản lý trạng thái hiển thị của các modal
+  const [modals, setModals] = useState({
+    modal1: false,
+    modal2: false,
+    modal3: false,
+  });
+  const [formData, setFormData] = useState({});
+  const [buyer, setBuyer] = useState({ fullName: "Khách" });
+  const [errorFields, setErrorFields] = useState("");
 
-  const products = [
-    { id: "SP01", name: "Nước uống", type: "Đồ ăn", price: 15000 },
-    { id: "SP02", name: "Snack", type: "Áo quần", price: 10000 },
-    { id: "SP03", name: "Mì tôm trứng", type: "Đồ ăn", price: 15000 },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (activeTab === "tickets") {
+          // const data = await SalesService.fetchTickets();
+          // setTickets(data);
+        } else if (activeTab === "courses") {
+          const data = await SalesService.fetchCourses();
+          setCourses(data);
+        } else if (activeTab === "products") {
+          // const data = await SalesService.fetchProducts();
+          // setProducts(data);
+        }
+        const data = await SalesService.fetchDiscounts();
+        setListDiscountOption(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [activeTab]);
 
   // Cập nhật items dựa trên activeTab
   const items =
@@ -66,22 +98,104 @@ const SalesManagement = () => {
       ? courses
       : products;
 
-  const handleAddToCart = (item) => {
-    const existingItem = cartItems.find((cartItem) => cartItem.id === item.id);
+  const handlePaymentClick = () => {
+    setShowInvoice(true);
+  };
 
-    if (existingItem) {
-      setCartItems(
-        cartItems.map((cartItem) =>
+  const handleCloseOffcanvas = () => setShowInvoice(false);
+
+  const handleAddToCart = (item) => {
+    setCartItems((prevItems) => {
+      const existingItem = prevItems.find(
+        (cartItem) => cartItem.id === item.id
+      );
+      if (existingItem) {
+        return prevItems.map((cartItem) =>
           cartItem.id === item.id
             ? { ...cartItem, quantity: cartItem.quantity + 1 }
             : cartItem
-        )
-      );
-    } else {
-      setCartItems([...cartItems, { ...item, quantity: 1 }]);
-    }
+        );
+      } else {
+        return [...prevItems, { ...item, quantity: 1 }];
+      }
+    });
   };
 
+  // Tính toán tổng tiền có áp dụng mã giảm giá
+  const calculateTotalPrice = () => {
+    const subtotal = cartItems.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
+
+    if (selectedDiscount) {
+      return subtotal * (1 - selectedDiscount.percentage / 100);
+    }
+    return subtotal;
+  };
+
+  const handleDiscountChange = (selectedOption) => {
+    setSelectedDiscount(selectedOption);
+  };
+
+  // Lọc kết quả theo từ khóa tìm kiếm
+  const filteredItems = items.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(item.id).toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Xử lý cập nhật giá trị tìm kiếm
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Hàm để mở modal theo tên
+  const handleShowModal = (modalName) => {
+    setModals((prevModals) => ({
+      ...prevModals,
+      [modalName]: true,
+    }));
+  };
+
+  // Hàm để đóng modal theo tên
+  const handleCloseModal = (modalName) => {
+    setModals((prevModals) => ({
+      ...prevModals,
+      [modalName]: false,
+    }));
+  };
+
+  // Hàm xử lý khi thay đổi giá trị input
+  const handleInputChange = (key, value) => {
+    setFormData({ ...formData, [key]: value });
+  };
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.phoneNumber || !/^\d{10}$/.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = "Số điện thoại không hợp lệ.";
+    }
+
+    setErrorFields(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Hàm kiểm tra User đang mua.
+  const handleCheckBuyer = async (modalName) => {
+    if (validateForm()) {
+      try {
+        // Gọi API để kiểm tra người dùng theo số điện thoại
+        const data = await UserService.getUserByUsername(formData.phoneNumber);
+        if (data) {
+          setBuyer(data);
+          handleCloseModal(modalName);
+          toast.success("Cập nhật người mua thành công!");
+        }
+      } catch (err) {
+        // đã xử lý ở service
+      }
+    }
+  };
   return (
     <section className="row m-0 p-0 bg-white rounded-3 h-100">
       <div className="row g-0">
@@ -91,8 +205,10 @@ const SalesManagement = () => {
           <div className="d-flex justify-content-between align-items-center mb-3">
             <Form.Control
               className="w-50 shadow-none"
-              placeholder="Tìm khóa học hoặc sản phẩm"
-              aria-label="Tìm khóa học hoặc sản phẩm"
+              placeholder="Tìm kiếm theo tên hoặc mã..."
+              aria-label="Tìm kiếm"
+              value={searchTerm} // Liên kết giá trị tìm kiếm
+              onChange={handleSearchChange} // Cập nhật khi gõ tìm kiếm
             />
             {/* <Button variant="outline-primary" className="mx-2">
               Hóa đơn 1
@@ -199,10 +315,7 @@ const SalesManagement = () => {
             <div className="text-end">
               <strong>Số lượng: </strong> {cartItems.length} <br />
               <strong>Tổng tiền: </strong>{" "}
-              {cartItems
-                .reduce((total, item) => total + item.price * item.quantity, 0)
-                .toLocaleString()}
-              đ
+              {calculateTotalPrice().toLocaleString()}đ
             </div>
           </div>
         </div>
@@ -233,13 +346,13 @@ const SalesManagement = () => {
             </Nav.Item>
           </Nav>
 
-          {/* Hiển thị danh sách khóa học, sản phẩm */}
+          {/* Hiển thị danh sách vé, khóa học, sản phẩm */}
           <div
-            className=" overflow-y-auto py-3 border-bottom border-top custom-scrollbar"
+            className=" overflow-y-auto py-2 border-bottom border-top custom-scrollbar"
             style={{ height: "63vh" }}
           >
             <div className="row g-0">
-              {items.map((item) => (
+              {filteredItems.map((item) => (
                 <div className="col-md-6 mb-2 pe-2" key={item.id}>
                   {activeTab === "tickets" ? (
                     // Custom card for tickets
@@ -247,6 +360,7 @@ const SalesManagement = () => {
                       className="card__ticket card bg-gradient bg-primary text-white d-flex flex-column align-items-center justify-content-center"
                       onClick={() => handleAddToCart(item)}
                       style={{ height: "80px", cursor: "pointer" }}
+                      title={item.name} // Thêm tooltip
                     >
                       <h6 className="card-title mb-1 text-center">
                         {item.name}
@@ -260,9 +374,10 @@ const SalesManagement = () => {
                       className="card__sales card d-flex flex-row bg-body-tertiary"
                       onClick={() => handleAddToCart(item)}
                       style={{ height: "80px", cursor: "pointer" }}
+                      title={item.name} // Thêm tooltip
                     >
                       <img
-                        src="https://boidat.com/wp-content/uploads/2024/04/z4610703450640_e29a9e4149977230a446f105682e6d71-2048x1536.jpg"
+                        src={item.image}
                         alt={item.name}
                         className="rounded-start object-fit-cover"
                         style={{ width: "70px", height: "100%" }}
@@ -284,13 +399,36 @@ const SalesManagement = () => {
               ))}
             </div>
           </div>
-          <div className="mt-3 ">
-            <button
-              className="btn btn-success fw-bold w-100 text-nowrap"
-              onClick={handlePayment1Click}
-            >
-              THANH TOÁN
-            </button>
+          <div className="row mt-3">
+            <div className="col-md-6 mb-3 mb-md-0">
+              <Select
+                options={listDiscountOption} // danh sách giảm giá
+                value={selectedDiscount}
+                onChange={handleDiscountChange}
+                placeholder="Mã giảm giá"
+                isClearable
+                isSearchable
+                isDisabled={cartItems.length === 0}
+                menuPlacement="top" // Mở menu lên trên
+                styles={{
+                  placeholder: (base) => ({
+                    ...base,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }),
+                }}
+              />
+            </div>
+            <div className="col-md-6">
+              <button
+                className="btn btn-success fw-bold w-100 text-nowrap"
+                onClick={handlePaymentClick}
+                disabled={cartItems.length === 0}
+              >
+                THANH TOÁN
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -302,21 +440,37 @@ const SalesManagement = () => {
         className="offcanvas-invoice"
       >
         <Offcanvas.Header closeButton>
-          <Offcanvas.Title className="fw-bold">
-            Hóa đơn thanh toán
+          <Offcanvas.Title className="fw-bold text-uppercase fs-6">
+            Thông tin thanh toán
           </Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
           {/* Thông tin khách hàng */}
           <div className="mb-3">
             <Row className="align-items-center">
-              <Col xs={8}>
-                <p className="mb-1">
-                  Khách hàng: <strong>Tên khách hàng</strong>
-                </p>
+              <Col xs={6}>
+                <Dropdown>
+                  <Dropdown.Toggle
+                    id="dropdown-basic"
+                    className="p-0 m-0 bg-transparent border-0 text-black"
+                  >
+                    {buyer.fullName}
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu>
+                    <Dropdown.Item
+                      onClick={() => setBuyer({ fullName: "Khách" })}
+                    >
+                      Khách
+                    </Dropdown.Item>
+                    <Dropdown.Item onClick={() => handleShowModal("modal1")}>
+                      Chọn người dùng
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
               </Col>
-              <Col xs={4} className="text-end">
-                <p className="text-muted mb-1">24/09/2024 - 14:17</p>
+              <Col xs={6} className="text-end">
+                <p className="text-muted mb-1">{new Date().toLocaleString()}</p>
               </Col>
             </Row>
           </div>
@@ -326,18 +480,30 @@ const SalesManagement = () => {
           <div className="mb-3">
             <h6 className="fw-bold">Chi tiết sản phẩm</h6>
             <ul className="list-unstyled">
-              <li className="d-flex justify-content-between align-items-center">
-                <span>Mũ bơi</span>
-                <span className="text-muted">Số lượng: 1 x 300,000</span>
-                <strong>300,000</strong>
-              </li>
-              <li className="d-flex justify-content-between align-items-center">
-                <span>Kính bơi</span>
-                <span className="text-muted">Số lượng: 2 x 450,000</span>
-                <strong>900,000</strong>
-              </li>
+              {cartItems.map((item) => (
+                <li
+                  key={item.id}
+                  className="d-flex justify-content-between align-items-center"
+                >
+                  <Row className="w-100 g-0">
+                    <Col xs={1} className="text-muted">
+                      {item.quantity}
+                    </Col>
+                    <Col xs={5} title={item.name}>
+                      {item.name}
+                    </Col>
+                    <Col xs={3} className="text-end">
+                      {item.price.toLocaleString()}đ
+                    </Col>
+                    <Col xs={3} className="text-end fw-bold">
+                      {(item.price * item.quantity).toLocaleString()}đ
+                    </Col>
+                  </Row>
+                </li>
+              ))}
             </ul>
           </div>
+
           <hr />
 
           {/* Tổng kết hóa đơn */}
@@ -345,43 +511,85 @@ const SalesManagement = () => {
             <Row>
               <Col xs={8}>Tổng tiền:</Col>
               <Col xs={4} className="text-end fw-bold">
-                1,200,000
+                {cartItems
+                  .reduce(
+                    (total, item) => total + item.price * item.quantity,
+                    0
+                  )
+                  .toLocaleString()}
+                đ
               </Col>
             </Row>
-            <Row>
-              <Col xs={8}>Giảm giá:</Col>
-              <Col xs={4} className="text-end fw-bold">
-                0
-              </Col>
-            </Row>
+            {selectedDiscount && (
+              <Row>
+                <Col xs={8}>Giảm giá ({selectedDiscount.label}):</Col>
+                <Col xs={4} className="text-end fw-bold text-success">
+                  {(
+                    cartItems.reduce(
+                      (total, item) => total + item.price * item.quantity,
+                      0
+                    ) *
+                    (selectedDiscount.percentage / 100)
+                  ).toLocaleString()}
+                  đ
+                </Col>
+              </Row>
+            )}
             <Row>
               <Col xs={8}>Khách cần trả:</Col>
               <Col xs={4} className="text-end text-primary fw-bold">
-                1,200,000
+                {calculateTotalPrice().toLocaleString()}đ
               </Col>
             </Row>
-            <Row className="mt-2">
-              <Col xs={8}>Khách thanh toán:</Col>
-              <Col xs={4} className="text-end fw-bold">
-                1,500,000
-              </Col>
-            </Row>
-            <Row>
-              <Col xs={8}>Tiền thừa trả khách:</Col>
-              <Col xs={4} className="text-end text-success fw-bold">
-                300,000
-              </Col>
-            </Row>
-          </div>
-
-          {/* Nút xác nhận thanh toán */}
-          <div className="text-center mt-4">
-            <Button variant="success" className="w-100 py-2">
-              Xác nhận thanh toán
-            </Button>
           </div>
         </Offcanvas.Body>
+        {/* Footer cố định */}
+        <div className="offcanvas-footer p-3 border-top">
+          <button className="btn btn-success fw-bold w-100 text-uppercase">
+            Xác nhận thanh toán
+          </button>
+        </div>
       </Offcanvas>
+
+      {/* Modal để nhập số điện thoại */}
+      <Modal show={modals.modal1} onHide={() => handleCloseModal("modal1")}>
+        <Modal.Header closeButton>
+          <Modal.Title>Chọn người dùng</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Group controlId="formPhoneNumber">
+            <Form.Label>
+              Số điện thoại <span className="text-danger">(*)</span>
+            </Form.Label>
+            <Form.Control
+              type="text"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              maxLength={15}
+              onChange={(e) =>
+                handleInputChange("phoneNumber", e.target.value.trim())
+              }
+              isInvalid={!!errorFields.phoneNumber}
+              placeholder="Nhập vào số điện thoại người mua"
+              required
+            />
+            <Form.Control.Feedback type="invalid">
+              {errorFields.phoneNumber}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => handleCloseModal("modal1")}
+          >
+            Đóng
+          </Button>
+          <Button variant="primary" onClick={() => handleCheckBuyer("modal1")}>
+            Kiểm tra
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </section>
   );
 };

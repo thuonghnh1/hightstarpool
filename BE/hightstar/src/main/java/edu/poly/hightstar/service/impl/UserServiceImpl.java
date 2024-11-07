@@ -99,6 +99,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDTO getUserByUsername(String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            Optional<UserProfile> userProfile = userProfileRepository.findByUser_UserId(user.get().getUserId());
+            if (userProfile.isPresent()) {
+                UserDTO userDto = new UserDTO();
+                BeanUtils.copyProperties(user.get(), userDto);
+                userDto.setFullName(userProfile.get().getFullName());
+                return userDto;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public UserDTO createUser(UserDTO userDto) {
         User user = new User();
         BeanUtils.copyProperties(userDto, user);

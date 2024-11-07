@@ -1,5 +1,6 @@
 import axios from "axios";
 import { formatDateTimeToDMY } from "../utils/FormatDate";
+import { toast } from "react-toastify";
 
 // Cấu hình axios với URL API chung
 const axiosInstance = axios.create({
@@ -10,6 +11,7 @@ const axiosInstance = axios.create({
 // Hàm xử lý lỗi chung
 const handleError = (error, message) => {
   console.error(message, error);
+  toast.error(message);
   throw error;
 };
 
@@ -43,7 +45,31 @@ const getUserById = async (id) => {
       lastLogin: formatDateTimeToDMY(user.lastLogin),
     };
   } catch (error) {
-    handleError(error, `Lỗi khi lấy người dùng với ID: ${id}`);
+    // Xử lý lỗi khi không tìm thấy người dùng hoặc có lỗi khác
+    handleError(error, `Lỗi khi lấy người dùng này`);
+  }
+};
+
+// Hàm lấy người dùng theo username
+const getUserByUsername = async (username) => {
+  try {
+    // Gọi API với tham số username
+    const response = await axiosInstance.get(
+      `/search-by-username?username=${username}`
+    );
+    const user = response.data;
+    return {
+      ...user,
+      registeredDate: formatDateTimeToDMY(user.registeredDate),
+      lastLogin: formatDateTimeToDMY(user.lastLogin),
+    };
+  } catch (error) {
+    // Xử lý lỗi khi không tìm thấy người dùng hoặc có lỗi khác
+    if (error.response && error.response.status === 404) {
+      handleError(error, "Người dùng này không tồn tại!");
+    } else {
+      handleError(error, `Lỗi khi lấy người dùng với username: ${username}`);
+    }
   }
 };
 
@@ -83,6 +109,7 @@ const UserService = {
   createUser,
   updateUser,
   deleteUser,
+  getUserByUsername,
 };
 
 export default UserService;

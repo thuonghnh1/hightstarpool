@@ -4,7 +4,7 @@ import studentService from "../../services/StudentService.js";
 import UserService from "../../services/UserService.js";
 import Page500 from "../pages/Page500";
 import { Spinner, Form } from "react-bootstrap";
-import { Bounce, ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import Select from "react-select"; // thư viện tạo select có hỗ trợ search
 
 const StudentManagement = () => {
@@ -450,20 +450,6 @@ const StudentManagement = () => {
             setFormData={setFormData}
             modalContent={modalContent}
             isLoading={isLoading}
-          />
-
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-            transition={Bounce}
           />
         </section>
       )}

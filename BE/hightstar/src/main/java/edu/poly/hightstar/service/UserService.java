@@ -21,4 +21,6 @@ public interface UserService {
 
     boolean isEmailExistsForUpdate(String email, Long userId);
 
+    UserDTO getUserByUsername(String username);
+
 }
