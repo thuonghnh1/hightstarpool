@@ -5,48 +5,48 @@ import backgroundAuth from "../../../assets/images/backgroundAuth.jpg";
 import iconFB from "../../../assets/images/icons/facebook.png";
 import iconGG from "../../../assets/images/icons/google.png";
 import iconTT from "../../../assets/images/icons/twitter.png";
+import { loginUser } from "../../services/LoginService"; // Đã sửa để import đúng
 
 function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   const validate = () => {
     const newErrors = {};
-
-    // Validate username as phone number only
     const phoneRegex = /^\d{10}$/;
     if (!username) {
       newErrors.username = "Vui lòng nhập số điện thoại.";
     } else if (!phoneRegex.test(username)) {
       newErrors.username = "Số điện thoại không đúng định dạng.";
     }
-
-    // Validate password length
     if (!password) {
       newErrors.password = "Vui lòng nhập mật khẩu.";
     } else if (password.length < 6) {
       newErrors.password = "Mật khẩu cần ít nhất 6 ký tự.";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (validate()) {
-      console.log("Signing in with", username, password, rememberMe);
-      // viết logic đăng nhập khi nhấn nút (gọi service LoginService để gọi api xác thực đăng nhập)
+      setIsLoading(true);
+      setLoginError("");
+      const loginData = { username, password };
 
-
-
-
-
-
-
-      
-
+      try {
+        const response = await loginUser(loginData); // Gọi API đăng nhập
+        console.log("Đăng nhập thành công:", response);
+      } catch (error) {
+        console.error("Đăng nhập thất bại:", error);
+        setLoginError(error || "Đăng nhập không thành công!");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -92,13 +92,11 @@ function LoginPage() {
                 type="text"
                 id="usernameField"
                 placeholder="Nhập vào số điện thoại của bạn"
-                className={`form-control py-2 ${
-                  errors.username ? "is-invalid" : ""
-                }`}
+                className={`form-control py-2 ${errors.username ? "is-invalid" : ""}`}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
-              <div className="invalid-feedback">{errors.username || ""}</div>{" "}
+              <div className="invalid-feedback">{errors.username || ""}</div>
             </div>
             <div className="mb-3">
               <label htmlFor="passwordField" className="form-label my-1">
@@ -108,9 +106,7 @@ function LoginPage() {
                 type="password"
                 id="passwordField"
                 placeholder="Nhập vào mật khẩu của bạn"
-                className={`form-control py-2 ${
-                  errors.password ? "is-invalid" : ""
-                }`}
+                className={`form-control py-2 ${errors.password ? "is-invalid" : ""}`}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -137,9 +133,11 @@ function LoginPage() {
                 background: "#2D5A8E",
               }}
               onClick={handleSignIn}
+              disabled={isLoading}
             >
-              Đăng nhập
+              {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
+            {loginError && <p className="text-danger text-center">{loginError}</p>}
             <div className="text-center mt-4">
               <div className="d-flex align-items-center justify-content-center border-top border-2">
                 <p

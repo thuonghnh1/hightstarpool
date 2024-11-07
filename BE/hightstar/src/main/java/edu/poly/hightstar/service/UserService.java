@@ -2,6 +2,9 @@ package edu.poly.hightstar.service;
 
 import java.util.List;
 
+import edu.poly.hightstar.domain.User;
+import edu.poly.hightstar.model.LoginDTO;
+import edu.poly.hightstar.model.RegisterDTO;
 import edu.poly.hightstar.model.UserDTO;
 
 public interface UserService {
@@ -21,4 +24,7 @@ public interface UserService {
 
     boolean isEmailExistsForUpdate(String email, Long userId);
 
+    User registerUser(RegisterDTO registerDTO);
+
+    UserDTO loginUser(LoginDTO loginDTO);
 }

@@ -13,5 +13,5 @@ public class RegisterDTO {
     private String phoneNumber;
     private String email;
     private String password;
-    private Role role; // mặc định là vai trong User
+    private Role role = Role.USER; // Mặc định giá trị là ROLE_USER
 }

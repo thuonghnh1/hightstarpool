@@ -49,15 +49,24 @@ function SignUpPage() {
   const handleSignUp = () => {
     if (validate()) {
       console.log("Signing up with", username, email, password);
-      // Thực hiện quá trình đăng ký tại đây
-      // Tương tự login
 
+      // Gọi API đăng ký
+      const userData = {
+        username,
+        email,
+        password,
+      };
 
-
-
-
-
-      
+      // Giả sử có một service gọi API đăng ký
+      // SignUpService.register(userData)
+      //   .then(response => {
+      //     console.log("User registered successfully", response);
+      //     // Redirect hoặc thông báo thành công
+      //   })
+      //   .catch(error => {
+      //     console.error("Registration failed", error);
+      //     // Hiển thị thông báo lỗi nếu cần
+      //   });
     }
   };
 
