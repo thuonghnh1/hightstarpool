@@ -29,6 +29,7 @@ public class UserServiceImpl implements UserService {
 
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    // Đây là phần của Nghị
     // Đăng ký người dùng mới
     public User registerUser(RegisterDTO registerDTO) {
         if (userRepository.findByEmail(registerDTO.getEmail()).isPresent()) {
