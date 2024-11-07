@@ -37,7 +37,16 @@ function LoginPage() {
   const handleSignIn = () => {
     if (validate()) {
       console.log("Signing in with", username, password, rememberMe);
-      // Thực hiện quá trình đăng nhập tại đây
+      // viết logic đăng nhập khi nhấn nút (gọi service LoginService để gọi api xác thực đăng nhập)
+
+
+
+
+
+
+
+      
+
     }
   };
 

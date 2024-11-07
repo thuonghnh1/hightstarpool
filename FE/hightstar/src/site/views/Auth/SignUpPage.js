@@ -50,6 +50,14 @@ function SignUpPage() {
     if (validate()) {
       console.log("Signing up with", username, email, password);
       // Thực hiện quá trình đăng ký tại đây
+      // Tương tự login
+
+
+
+
+
+
+      
     }
   };
 
