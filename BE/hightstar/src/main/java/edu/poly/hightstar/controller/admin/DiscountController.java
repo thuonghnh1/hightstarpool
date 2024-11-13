@@ -3,32 +3,30 @@ package edu.poly.hightstar.controller.admin;
 import edu.poly.hightstar.model.DiscountDTO;
 
 import edu.poly.hightstar.service.DiscountService;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/discounts")
+@RequestMapping("/api/admin/discounts")
+@RequiredArgsConstructor
 public class DiscountController {
 
         private final DiscountService discountService;
 
-        public DiscountController(DiscountService discountService) {
-                this.discountService = discountService;
-        }
-
+        @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
         @GetMapping
-
         public List<DiscountDTO> getAllDiscounts() {
-
                 return discountService.getAllDiscounts();
         }
 
+        @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
         @GetMapping("/{id}")
-
         public ResponseEntity<DiscountDTO> getDiscountById(@PathVariable Long id) {
                 DiscountDTO discountDTO = discountService.getDiscountById(id);
                 if (discountDTO == null) {

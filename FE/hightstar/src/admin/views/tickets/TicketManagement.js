@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import TableManagement from "../../components/common/TableManagement";
 import discountService from "../../services/DiscountService";
-import Page500 from "../pages/Page500";
+import Page500 from "../../../common/pages/Page500";
 import { formatDateToISO, formatDateToDMY } from "../../utils/FormatDate";
 import { Spinner, Form } from "react-bootstrap";
 import { Bounce, ToastContainer, toast } from "react-toastify";

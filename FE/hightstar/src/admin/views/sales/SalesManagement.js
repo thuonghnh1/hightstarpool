@@ -63,7 +63,7 @@ const SalesManagement = () => {
     modal2: false,
     modal3: false,
   });
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({ phoneNumber: "" });
   const [buyer, setBuyer] = useState({ fullName: "Khách" });
   const [errorFields, setErrorFields] = useState("");
 

@@ -1,2 +1,5 @@
-@import url("./Sidebar.css");
-@import url("./Header.css");
+/* @import url("./Header.css");  */
+
+.wrapper-loading{
+    background-color: rgba(0, 0, 0, 0.548);
+}

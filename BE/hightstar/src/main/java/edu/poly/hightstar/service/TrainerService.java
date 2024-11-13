@@ -15,10 +15,6 @@ public interface TrainerService {
 
     void deleteTrainer(Long id); // Xóa HLV
 
-    boolean isPhoneNumberExists(String phone);
-
-    boolean isEmailExists(String email);
-
     boolean isPhoneNumberExistsForUpdate(String phoneNumber, Long userId);
 
     boolean isEmailExistsForUpdate(String email, Long userId);

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,13 +18,14 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/students")
+@RequestMapping("/api/employee/students")
 @RequiredArgsConstructor
 public class StudentController {
 
     private final StudentService studentService;
     private final CloudinaryService cloudinaryService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')") // cho phép hlv có thể xem được danh sách học sinh.
     @GetMapping
     public ResponseEntity<List<StudentDTO>> getAllStudents() {
         List<StudentDTO> students = studentService.getAllStudents();
@@ -32,6 +34,7 @@ public class StudentController {
                 : ResponseEntity.ok(students);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')")
     @GetMapping("/{id}")
     public ResponseEntity<StudentDTO> getStudentById(@PathVariable Long id) {
         StudentDTO studentDTO = studentService.getStudentById(id);
@@ -97,7 +100,8 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-
+    
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteStudent(@PathVariable Long id) {
         StudentDTO studentDTO = studentService.getStudentById(id);

@@ -10,18 +10,20 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
-@RequestMapping("/api/courses")
+@RequestMapping("/api/admin/courses")
 @RequiredArgsConstructor
 public class CoursesController {
         private final CloudinaryService cloudinaryService;
         private final CourseService courseService;
 
+        @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')")
         @GetMapping
         public ResponseEntity<List<CourseDTO>> getAllCourses() {
                 List<CourseDTO> courses = courseService.getAllCourses();
@@ -30,6 +32,7 @@ public class CoursesController {
                                 : ResponseEntity.ok(courses);
         }
 
+        @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')")
         @GetMapping("/{id}")
         public ResponseEntity<CourseDTO> getCourseById(@PathVariable Long id) {
                 CourseDTO courseDTO = courseService.getCourseById(id);

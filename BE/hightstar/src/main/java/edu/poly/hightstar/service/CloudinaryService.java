@@ -21,6 +21,7 @@ public class CloudinaryService {
         String uniqueFileName = prefix + "_" + UUID.randomUUID().toString();
         
         // Upload ảnh lên Cloudinary
+        @SuppressWarnings("rawtypes")
         Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
                 ObjectUtils.asMap(
                         "public_id", uniqueFileName, // Đặt tên ảnh là uniqueFileName

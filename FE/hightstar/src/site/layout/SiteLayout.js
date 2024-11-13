@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import HomePage from "../views/home/HomePage";
-import { Page404 } from "../views";
+import "../css/style.css"
 
 const SiteLayout = () => {
   return (
@@ -10,7 +10,7 @@ const SiteLayout = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/home" element={<Navigate to={"/"} />} />
-        <Route path="*" element={<Page404 />} />
+        <Route path="*" element={<Navigate to={"/page404"} />} />
       </Routes>
       <Outlet /> {/* Để hiển thị các component con */}
     </div>

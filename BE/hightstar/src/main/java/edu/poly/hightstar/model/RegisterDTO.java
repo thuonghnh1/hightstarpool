@@ -1,6 +1,5 @@
 package edu.poly.hightstar.model;
 
-import edu.poly.hightstar.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,5 +12,4 @@ public class RegisterDTO {
     private String phoneNumber;
     private String email;
     private String password;
-    private Role role; // mặc định là vai trong User
 }

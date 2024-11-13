@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import TableManagement from "../../components/common/TableManagement";
 import DiscountService from "../../services/DiscountService";
-import Page500 from "../pages/Page500";
+import Page500 from "../../../common/pages/Page500";
 import { Helmet } from "react-helmet-async";
 import {
   formatDateTimeToISO,
@@ -16,9 +16,8 @@ const DiscountManagement = () => {
   const [discountData, setDiscountData] = useState([]);
   const [formData, setFormData] = useState({}); // State quản lý dữ liệu hiện tại
   const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
-  const [isEditing, setIsEditing] = useState(false); // Trạng thái để biết đang thêm mới hay chỉnh sửa
+  const [statusFunction, setStatusFunction] = useState({ isAdd: false, isEditing: false, isViewDetail: false }); // Trạng thái để biết đang thêm mới hay chỉnh sửa hay xem chi tiết
   // State để xử lý trạng thái tải dữ liệu và lỗi
-
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
   const [errorServer, setErrorServer] = useState(null);
@@ -139,6 +138,16 @@ const DiscountManagement = () => {
     validateField(key, value);
   };
 
+  const updateStatus = (newStatus) => {
+    setStatusFunction(prevStatus => ({
+      ...prevStatus,    // Giữ lại các thuộc tính trước đó
+      ...newStatus      // Cập nhật các thuộc tính mới
+    }));
+  };
+  const handleResetStatus = () => {
+    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false })
+  };
+
   // Hàm reset form khi thêm mới
   const handleReset = () => {
     setFormData({
@@ -148,7 +157,7 @@ const DiscountManagement = () => {
       endDate: "",
       description: "",
     });
-    setIsEditing(false);
+    handleResetStatus();
     setErrorFields({});
   };
 
@@ -159,7 +168,7 @@ const DiscountManagement = () => {
       startDate: formatDateTimeToISO(item.startDate),
       endDate: formatDateTimeToISO(item.endDate), //yyyy-MM-dd hh:mm:ss -> yyyy-DD-mmThh:mm
     });
-    setIsEditing(true);
+    updateStatus({ isEditing: true })
     setErrorFields({});
   };
 
@@ -169,7 +178,7 @@ const DiscountManagement = () => {
     setIsLoading(true);
 
     try {
-      if (isEditing) {
+      if (statusFunction.isEditing) {
         // Gọi API cập nhật sử dụng discountService
         const updatedDiscount = await DiscountService.updateDiscount(
           formData.id,
@@ -190,7 +199,7 @@ const DiscountManagement = () => {
 
         setDiscountData(updatedDiscounts);
         toast.success("Cập nhật thành công!");
-      } else {
+      } else if (statusFunction.isAdd) {
         // Nếu đang ở trạng thái thêm mới
         const newDiscount = await DiscountService.createDiscount(formData);
 
@@ -360,12 +369,13 @@ const DiscountManagement = () => {
             title={"Quản lý giảm giá"}
             defaultColumns={defaultColumns} // Truyền mảng cột đã lọc
             modalContent={modalContent}
-            isEditing={isEditing}
             handleReset={handleReset}
             onEdit={handleEdit}
             handleSaveItem={handleSaveItem}
             onDelete={handleDelete}
             isLoading={isLoading}
+            statusFunction={statusFunction}
+            onResetStatus={handleResetStatus}
           />
         </section>
       )}

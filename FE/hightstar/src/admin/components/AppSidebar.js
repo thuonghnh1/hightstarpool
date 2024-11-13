@@ -22,9 +22,8 @@ const AppSidebar = ({ isSidebarOpen }) => {
 
   return (
     <div
-      className={`sidebar ${isSidebarOpen ? "open" : "closed"}  p-0 ${
-        theme === "dark" ? "dark-theme" : "light-theme"
-      }`}
+      className={`sidebar ${isSidebarOpen ? "open" : "closed"}  p-0 ${theme === "dark" ? "dark-theme" : "light-theme"
+        }`}
     >
       <div
         className="logo d-flex justify-content-center align-items-center border-dark-subtle  border-bottom "
@@ -61,19 +60,17 @@ const AppSidebar = ({ isSidebarOpen }) => {
         {/* menu có menu con */}
         <li>
           <div
-            className={`d-flex justify-content-center align-items-center ${
-              menuState.ticket ? "active-link" : "inactive-link"
-            }`}
+            className={`d-flex justify-content-center align-items-center ${menuState.ticket ? "active-link" : "inactive-link"
+              }`}
             onClick={() => toggleMenu("ticket")}
             style={{ cursor: "pointer" }}
           >
             <i className="me-2 bi bi-ticket-perforated"></i> Vé bơi
             <i
-              className={`ms-auto bi ${
-                menuState.ticket
-                  ? "bi-chevron-compact-up"
-                  : "bi-chevron-compact-down"
-              }`}
+              className={`ms-auto bi ${menuState.ticket
+                ? "bi-chevron-compact-up"
+                : "bi-chevron-compact-down"
+                }`}
             ></i>
           </div>
           {/* Submenu collapse */}
@@ -166,22 +163,32 @@ const AppSidebar = ({ isSidebarOpen }) => {
         </li>
 
         <li>
+          <NavLink
+            to="/admin/order-management"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            <i className="me-2 fa-solid fa-receipt"></i> Đơn hàng
+          </NavLink>
+        </li>
+
+        <li>
           <div
-            className={`d-flex justify-content-center align-items-center ${
-              menuState.stock ? "active-link" : "inactive-link"
-            }`}
+            className={`d-flex justify-content-center align-items-center ${menuState.stock ? "active-link" : "inactive-link"
+              }`}
             onClick={() => toggleMenu("stock")}
             style={{ cursor: "pointer" }}
           >
             <i className="me-2 fa fa-archive"></i> Kho hàng
             <i
-              className={`ms-auto bi ${
-                menuState.stock
-                  ? "bi-chevron-compact-up"
-                  : "bi-chevron-compact-down"
-              }`}
+              className={`ms-auto bi ${menuState.stock
+                ? "bi-chevron-compact-up"
+                : "bi-chevron-compact-down"
+                }`}
             ></i>
           </div>
+
           {/* Submenu collapse */}
           <Collapse in={menuState.stock}>
             <ul className="list-unstyled ms-2">

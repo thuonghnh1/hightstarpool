@@ -2,28 +2,29 @@ package edu.poly.hightstar.controller.admin;
 
 import edu.poly.hightstar.model.TrainerDTO;
 import edu.poly.hightstar.service.TrainerService;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/trainers")
+@RequestMapping("/api/admin/trainers")
+@RequiredArgsConstructor
 public class TrainerController {
 
     private final TrainerService trainerService;
 
-    public TrainerController(TrainerService trainerService) {
-        this.trainerService = trainerService;
-    }
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')")
     @GetMapping
-
     public List<TrainerDTO> getAllTrainers() {
         return trainerService.getAllTrainers();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')")
     @GetMapping("/{id}")
     public ResponseEntity<TrainerDTO> getTrainerById(@PathVariable Long id) {
         TrainerDTO trainerDTO = trainerService.getTrainerById(id);
@@ -36,16 +37,8 @@ public class TrainerController {
 
     @PostMapping
     public ResponseEntity<?> createTrainer(@RequestBody TrainerDTO trainerDTO) {
-        if (trainerService.isPhoneNumberExists(trainerDTO.getPhoneNumber())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Số điện thoại này đã được sử dụng");
-        }
-
-        if (trainerService.isEmailExists(trainerDTO.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email này đã được sử dụng");
-        }
         TrainerDTO createdTrainer = trainerService.createTrainer(trainerDTO);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdTrainer);
+        return ResponseEntity.ok(createdTrainer);
     }
 
     @PutMapping("/{id}")

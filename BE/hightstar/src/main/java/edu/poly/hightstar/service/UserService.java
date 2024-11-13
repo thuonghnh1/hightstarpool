@@ -2,7 +2,11 @@ package edu.poly.hightstar.service;
 
 import java.util.List;
 
+import edu.poly.hightstar.model.LoginDTO;
+import edu.poly.hightstar.model.LoginResponse;
+import edu.poly.hightstar.model.RegisterDTO;
 import edu.poly.hightstar.model.UserDTO;
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface UserService {
     List<UserDTO> getAllUsers();
@@ -23,4 +27,9 @@ public interface UserService {
 
     UserDTO getUserByUsername(String username);
 
+    UserDTO registerUser(RegisterDTO registerDTO);
+
+    LoginResponse loginUser(LoginDTO loginDTO, HttpServletResponse response);
+
+    boolean resetPassword(String phoneNumber, String newPassword);
 }

@@ -4,57 +4,42 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import edu.poly.hightstar.model.UserDTO;
 import edu.poly.hightstar.service.UserService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/employee/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     @GetMapping
     public List<UserDTO> getAllUsers() {
         return userService.getAllUsers();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER' , 'USER')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         UserDTO userDto = userService.getUserById(id);
-        if (userDto == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng này");
-        }
         return ResponseEntity.ok(userDto);
     }
 
     @GetMapping("/search-by-username")
     public ResponseEntity<?> getUserByUsername(@RequestParam String username) {
         UserDTO userDto = userService.getUserByUsername(username);
-        if (userDto == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng này");
-        }
         return ResponseEntity.ok(userDto);
     }
 
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody UserDTO userDto) {
-        if (userService.isPhoneNumberExists(userDto.getPhoneNumber())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Số điện thoại này đã được sử dụng");
-        }
-
-        if (userService.isEmailExists(userDto.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email này đã được sử dụng");
-        }
-        UserDTO create = userService.createUser(userDto);
-        // trả về phản hồi với mã trạng thái(HTTP 201 created), body là phần thân p/hồi
-        return ResponseEntity.status(HttpStatus.CREATED).body(create);
-
+        UserDTO createDto = userService.createUser(userDto);
+        return ResponseEntity.ok(createDto);
     }
 
     @PutMapping("/{id}")
@@ -73,6 +58,7 @@ public class UserController {
         return ResponseEntity.ok(update);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);

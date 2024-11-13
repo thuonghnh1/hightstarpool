@@ -1,14 +1,20 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import { Image, Button } from "react-bootstrap";
-import { NavLink } from "react-router-dom";
-import avatar from "../../assets/images/avatars/1.jpg";
+import { NavLink, useNavigate } from "react-router-dom";
+import avatarDefault from "../../assets/images/avatars/user.png";
 import iconAddUser from "../../assets/images/icons/add-user.png";
 import iconBell from "../../assets/images/icons/notification.png";
 import { useTheme } from "./common/ThemeContext";
-
+// import { toast } from "react-toastify";
+import { logout } from "../../site/services/authService";
+import { UserContext } from "../../contexts/UserContext";
 const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+
+  const { user, updateUser } = useContext(UserContext);
+
   // Sử dụng state để lưu trữ danh sách thông báo
   const [messages, setMessages] = useState([
     {
@@ -92,6 +98,11 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
     );
     // // Gọi API để cập nhật trạng thái trong CSDL (ví dụ)
     // updateNotificationStatusAPI(id);
+  };
+  const handleLogout = async () => {
+    logout();
+    updateUser(null);
+    navigate("/login");
   };
 
   return (
@@ -351,7 +362,7 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
                 style={{ background: "none" }}
               >
                 <img
-                  src={avatar}
+                  src={user?.avatar || avatarDefault} // userData có tồn tại và userData.avatar không null thì lấy còn ng lại thì lấy mặc định
                   alt="User"
                   className="rounded-circle"
                   width={40}
@@ -366,9 +377,7 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
                 <Dropdown.Item as={NavLink} to="/settings">
                   Cài đặt
                 </Dropdown.Item>
-                <Dropdown.Item as={NavLink} to="/login">
-                  Đăng nhập
-                </Dropdown.Item>
+                <Dropdown.Item onClick={handleLogout}>Đăng xuất</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           </li>

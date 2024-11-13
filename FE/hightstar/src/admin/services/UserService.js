@@ -1,24 +1,17 @@
-import axios from "axios";
+import axiosInstance from "../../services/axiosInstance";
 import { formatDateTimeToDMY } from "../utils/FormatDate";
-import { toast } from "react-toastify";
 
-// Cấu hình axios với URL API chung
-const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080/api/users",
-  // headers: { Authorization: "Bearer <your_token>" }, // Nếu cần thêm mã thông báo
-});
-
+const API_URL = "/employee/users";
 // Hàm xử lý lỗi chung
 const handleError = (error, message) => {
   console.error(message, error);
-  toast.error(message);
   throw error;
 };
 
 // Hàm lấy tất cả người dùng
 const getUsers = async () => {
   try {
-    const response = await axiosInstance.get("");
+    const response = await axiosInstance.get(API_URL);
     const users = response.data;
 
     // Chuyển đổi định dạng ngày giờ cho từng phần tử
@@ -35,7 +28,7 @@ const getUsers = async () => {
 // Hàm lấy một người dùng theo ID
 const getUserById = async (id) => {
   try {
-    const response = await axiosInstance.get(`/${id}`);
+    const response = await axiosInstance.get(`${API_URL}/${id}`);
     const user = response.data;
 
     // Chuyển đổi định dạng ngày giờ
@@ -55,7 +48,7 @@ const getUserByUsername = async (username) => {
   try {
     // Gọi API với tham số username
     const response = await axiosInstance.get(
-      `/search-by-username?username=${username}`
+      `${API_URL}/search-by-username?username=${username}`
     );
     const user = response.data;
     return {
@@ -76,7 +69,7 @@ const getUserByUsername = async (username) => {
 // Hàm thêm mới người dùng
 const createUser = async (userData) => {
   try {
-    const response = await axiosInstance.post("", userData);
+    const response = await axiosInstance.post(API_URL, userData);
     return response.data;
   } catch (error) {
     handleError(error, "Lỗi khi thêm mới người dùng:");
@@ -86,7 +79,7 @@ const createUser = async (userData) => {
 // Hàm cập nhật người dùng
 const updateUser = async (id, userData) => {
   try {
-    const response = await axiosInstance.put(`/${id}`, userData);
+    const response = await axiosInstance.put(`${API_URL}/${id}`, userData);
     return response.data;
   } catch (error) {
     handleError(error, `Lỗi khi cập nhật người dùng với ID: ${id}`);
@@ -96,7 +89,7 @@ const updateUser = async (id, userData) => {
 // Hàm xóa người dùng
 const deleteUser = async (id) => {
   try {
-    await axiosInstance.delete(`/${id}`);
+    await axiosInstance.delete(`${API_URL}/${id}`);
   } catch (error) {
     handleError(error, `Lỗi khi xóa người dùng với ID: ${id}`);
   }

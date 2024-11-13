@@ -11,6 +11,9 @@ import edu.poly.hightstar.repository.UserRepository;
 import edu.poly.hightstar.repository.UserProfileRepository;
 import edu.poly.hightstar.service.EmailService;
 import edu.poly.hightstar.service.TrainerService;
+import edu.poly.hightstar.utils.exception.EmailAlreadyExistsException;
+import edu.poly.hightstar.utils.exception.NotFoundException;
+import edu.poly.hightstar.utils.exception.PhoneNumberAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -36,6 +39,13 @@ public class TrainerServiceImpl implements TrainerService {
                        // trong một giao dịch duy nhất
 
         public TrainerDTO createTrainer(TrainerDTO trainerDTO) {
+                if (userRepository.findByEmail(trainerDTO.getEmail()).isPresent()) {
+                        throw new EmailAlreadyExistsException("Email đã tồn tại!");
+                }
+                if (userRepository.findByUsername(trainerDTO.getPhoneNumber()).isPresent()) {
+                        throw new PhoneNumberAlreadyExistsException("Số điện thoại đã tồn tại!");
+                }
+
                 // Tạo mới đối tượng User
                 User newUser = new User();
                 newUser.setUsername(trainerDTO.getPhoneNumber()); // Sử dụng sđt làm username
@@ -124,7 +134,7 @@ public class TrainerServiceImpl implements TrainerService {
 
                 // Tìm Trainer theo id và chuyển đổi sang TrainerDto
                 Trainer trainer = trainerRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Trainer not found"));
+                                .orElseThrow(() -> new NotFoundException("HLV này không tồn tại trong hệ thống!"));
                 User user = trainer.getUser();
                 UserProfile userProfile = userProfileRepository.findByUser_UserId(user.getUserId())
                                 .orElseThrow(() -> new RuntimeException("UserProfile not found"));
@@ -135,25 +145,13 @@ public class TrainerServiceImpl implements TrainerService {
         @Transactional
         public void deleteTrainer(Long id) {
                 Trainer trainer = trainerRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Trainer not found"));
+                                .orElseThrow(() -> new NotFoundException("HLV này không tồn tại trong hệ thống!"));
 
                 // Xóa UserProfile và User liên quan
                 User user = trainer.getUser();
                 userProfileRepository.deleteByUser_UserId(user.getUserId());
                 userRepository.deleteById(user.getUserId());
                 trainerRepository.delete(trainer);
-        }
-
-        @Override
-        public boolean isPhoneNumberExists(String phoneNumber) {
-                // Kiểm tra xem số điện thoại có tồn tại trong database không
-                return userProfileRepository.existsByPhoneNumber(phoneNumber);
-        }
-
-        @Override
-        public boolean isEmailExists(String email) {
-                // Kiểm tra xem email có tồn tại trong database không
-                return userRepository.existsByEmail(email);
         }
 
         @Override
@@ -198,6 +196,10 @@ public class TrainerServiceImpl implements TrainerService {
                                 "</head>" +
                                 "<body>" +
                                 "    <div class='container'>" +
+                                "        <div style='text-align: center; margin-bottom: 20px;'>" +
+                                "            <img src='https://res.cloudinary.com/da0i2y1qu/image/upload/v1731420581/logoVertical_q1nbbl.png' alt='Hight Star Logo' style='width: 150px; height: auto;' />"
+                                +
+                                "        </div>" +
                                 "        <h1>Kính gửi " + trainerDTO.getFullName() + ",</h1>" +
                                 "        <p>Chúng tôi vui mừng thông báo rằng tài khoản HLV của bạn đã được tạo thành công. "
                                 +
@@ -223,5 +225,4 @@ public class TrainerServiceImpl implements TrainerService {
 
                 emailService.sendHtmlEmail(trainerDTO.getEmail(), emailSubject, emailBody);
         }
-
 }

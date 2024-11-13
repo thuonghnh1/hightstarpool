@@ -13,12 +13,15 @@ const TableManagement = ({
   title,
   defaultColumns,
   modalContent,
-  isEditing,
+  statusFunction,
   handleReset,
   onEdit,
+  onViewDetail,
   handleSaveItem,
   onDelete,
   isLoading,
+  buttonCustom,
+  onResetStatus
 }) => {
   // State management
   const [visibleColumns, setVisibleColumns] = useState(
@@ -35,26 +38,56 @@ const TableManagement = ({
   const [showModalImage, setShowModalImage] = useState(false); // Hiển thị modal hình ảnh lớn
   const [selectedImage, setSelectedImage] = useState(null);
 
-  const handleImageClick = (imageSrc) => {
-    // xử lý khi click vào hình ảnh trên bảng
-    setSelectedImage(imageSrc);
-    setShowModalImage(true);
-  };
+  const handleRenderBtn = () => {
+    // Danh sách button mặc định nếu button không được định nghĩa
+    const defaultButtonConfig = { btnAdd: true, btnEdit: true, btnDelete: true, btnDetail: false, btnFilter: true };
 
-  const handleCloseModalImage = () => setShowModalImage(false);
-
+    // Sử dụng buttonCustom nếu có, nếu không thì lấy defaultButtonConfig
+    const buttonConfig = buttonCustom ?? defaultButtonConfig;
+    return buttonConfig;
+  }
   // Hàm render custom cell dựa trên loại cột
   const renderCustomCell = (column, item) => {
     switch (column.key) {
       case "status":
+        let statusClass = "";
+        let statusText = "";
+
+        switch (item.status) {
+          case "ACTIVE":
+            statusClass = "text-bg-success";
+            statusText = "Hoạt động";
+            break;
+          case "DISABLED":
+            statusClass = "text-bg-secondary";
+            statusText = "Vô hiệu hóa";
+            break;
+          case "PENDING":
+            statusClass = "text-bg-warning";
+            statusText = "Đang chờ xử lý";
+            break;
+          case "ON_DELIVERY":
+            statusClass = "text-bg-info";
+            statusText = "Đang giao hàng";
+            break;
+          case "COMPLETED":
+            statusClass = "text-bg-primary";
+            statusText = "Hoàn thành";
+            break;
+          case "CANCELLED":
+            statusClass = "text-bg-danger";
+            statusText = "Đã hủy";
+            break;
+          default:
+            statusClass = "text-bg-muted"; // Trường hợp mặc định
+            statusText = "Không xác định";
+        }
+
         return (
-          <span
-            className={`rounded-3 fw-bold px-2 py-1 ${
-              item.status === "ACTIVE" ? "text-bg-success" : "text-bg-secondary"
-            }`}
+          <span className={`rounded-3 fw-bold px-2 py-1 ${statusClass}`}
             style={{ fontSize: "13px" }}
           >
-            {item.status === "ACTIVE" ? "Hoạt động" : "Vô hiệu hóa"}
+            {statusText}
           </span>
         );
       case "image":
@@ -75,9 +108,8 @@ const TableManagement = ({
           stars.push(
             <i
               key={i}
-              className={`bi ${
-                i <= item.averageRating ? "bi-star-fill" : "bi-star"
-              } text-warning me-1`}
+              className={`bi ${i <= item.averageRating ? "bi-star-fill" : "bi-star"
+                } text-warning me-1`}
             ></i>
           );
         }
@@ -151,13 +183,13 @@ const TableManagement = ({
         ? compareA > compareB
           ? 1
           : compareA < compareB
-          ? -1
-          : 0
+            ? -1
+            : 0
         : compareA < compareB
-        ? 1
-        : compareA > compareB
-        ? -1
-        : 0;
+          ? 1
+          : compareA > compareB
+            ? -1
+            : 0;
     }
     return 0;
   });
@@ -199,12 +231,23 @@ const TableManagement = ({
         : [...prevColumns, key]
     );
   };
+  const handleImageClick = (imageSrc) => {
+    // xử lý khi click vào hình ảnh trên bảng
+    setSelectedImage(imageSrc);
+    setShowModalImage(true);
+  };
+
+  const handleCloseModalImage = () => setShowModalImage(false);
 
   // Mở modal thêm/sửa
   const handleShowModal = () => setShowModal(true);
 
   // Đóng modal thêm/sửa
-  const handleCloseModal = () => setShowModal(false);
+  const handleCloseModal = () => {
+    onResetStatus() // cập nhật trạng thái các công việc
+    setShowModal(false); // Đóng modal
+  };
+
 
   // Xử lý lưu dữ liệu
   const handleSubmit = async () => {
@@ -248,18 +291,20 @@ const TableManagement = ({
           />
         </div>
         <div className="col-lg-4 col-12 d-flex justify-content-lg-end mt-3 mt-lg-0">
-          <button className="btn btn-success me-2 text-nowrap">
-            <i className="bi bi-filter"></i> Lọc
-          </button>
-          <button
-            className="btn btn-primary me-2 text-nowrap"
-            onClick={() => {
-              handleReset();
-              handleShowModal();
-            }}
-          >
-            <i className="bi bi-plus-circle"></i> Thêm
-          </button>
+          {handleRenderBtn().btnFilter &&
+            <button className="btn btn-success me-2 text-nowrap">
+              <i className="bi bi-filter"></i> Lọc
+            </button>}
+          {handleRenderBtn().btnAdd &&
+            <button
+              className="btn btn-primary me-2 text-nowrap"
+              onClick={() => {
+                handleReset();
+                handleShowModal();
+              }}
+            >
+              <i className="bi bi-plus-circle"></i> Thêm
+            </button>}
           <div className="dropdown text-nowrap">
             <DropdownButton
               id="dropdown-basic-button"
@@ -299,20 +344,18 @@ const TableManagement = ({
                       {column.label}
                       <span className="icon_sort ps-2 light__text">
                         <i
-                          className={`bi bi-arrow-up ${
-                            sortConfig.key === column.key &&
+                          className={`bi bi-arrow-up ${sortConfig.key === column.key &&
                             sortConfig.direction === "asc"
-                              ? "text-black"
-                              : "opacity-50"
-                          }`}
+                            ? "text-black"
+                            : "opacity-50"
+                            }`}
                         ></i>
                         <i
-                          className={`bi bi-arrow-down ${
-                            sortConfig.key === column.key &&
+                          className={`bi bi-arrow-down ${sortConfig.key === column.key &&
                             sortConfig.direction === "desc"
-                              ? "text-black"
-                              : "opacity-50"
-                          }`}
+                            ? "text-black"
+                            : "opacity-50"
+                            }`}
                         ></i>
                       </span>
                     </th>
@@ -369,26 +412,39 @@ const TableManagement = ({
                                 </li>
                               ))}
                             <li>
-                              <button
-                                className="btn btn__edit me-3 my-2"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onEdit(item);
-                                  handleShowModal();
-                                }}
-                              >
-                                <i className="bi bi-pencil-square"></i> Chỉnh
-                                sửa
-                              </button>
-                              <button
-                                className="btn btn__delete p-1 me-3"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleShowConfirmModal(item.id);
-                                }}
-                              >
-                                <i className="bi bi-trash-fill"></i> Xóa
-                              </button>
+                              {handleRenderBtn().btnEdit &&
+                                <button
+                                  className="btn btn__edit me-3 my-2"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEdit(item);
+                                    handleShowModal();
+                                  }}
+                                >
+                                  <i className="bi bi-pencil-square"></i> Chỉnh
+                                  sửa
+                                </button>}
+                              {handleRenderBtn().btnDelete &&
+                                <button
+                                  className="btn btn__delete p-1 me-3"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleShowConfirmModal(item.id);
+                                  }}
+                                >
+                                  <i className="bi bi-trash-fill"></i> Xóa
+                                </button>}
+                              {handleRenderBtn().btnDetail &&
+                                <button
+                                  className="btn btn__detail p-1 me-3"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onViewDetail(item)
+                                    handleShowModal();
+                                  }}
+                                >
+                                  <i className="bi bi-card-list"></i> Xem chi tiết
+                                </button>}
                             </li>
                           </ul>
                         </div>
@@ -442,28 +498,34 @@ const TableManagement = ({
         </Pagination>
       </div>
       {/* Modal Thêm Item */}
+
       <CustomModal
         show={showModal}
         handleClose={handleCloseModal}
         title={
-          isEditing ? (
+          statusFunction.isEditing ? (
             <>
               CẬP NHẬT BẢN GHI{" "}
               <i className="bi bi-arrow-repeat text-success fs-4"></i>
             </>
-          ) : (
+          ) : statusFunction.isAdd ? (
             <>
               THÊM MỚI BẢN GHI{" "}
               <i className="bi bi-plus-circle-dotted text-success ms-1 fs-4"></i>
             </>
-          )
+          ) : <>
+            XEM CHI TIẾT{" "}
+            <i className="bi bi-plus-circle-dotted text-success ms-1 fs-4"></i>
+          </>
         }
         onSubmit={handleSubmit}
         isLoading={isLoading}
+        statusFunction={statusFunction}
       >
         {/* Truyền children modal thông qua props */}
         {modalContent}
       </CustomModal>
+      <></>
       <DeleteModal
         show={showConfirmModal}
         onConfirm={handleConfirm}
@@ -476,7 +538,7 @@ const TableManagement = ({
         imageSrc={selectedImage}
         onClose={handleCloseModalImage}
       />
-    </div>
+    </div >
   );
 };
 

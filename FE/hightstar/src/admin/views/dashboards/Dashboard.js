@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import Page500 from "../pages/Page500";
+import Page500 from "../../../common/pages/Page500";
 import { Helmet } from "react-helmet-async";
 import { Spinner } from "react-bootstrap";
 import { Container, Row, Col, Card } from "react-bootstrap";
@@ -165,7 +165,7 @@ function Dashboard() {
                     <div className="bg-primary px-3 py-2 rounded-2">
                       <i className="bi bi-people display-6 text-white"></i>
                     </div>
-                    <div className="ms-3 d-flex flex-column justify-content-center align-items-start">
+                    <div className="ms-3 d-flex flex-column justify-content-center align-items-start text-truncate">
                       <span className="text-secondary fw-medium text-nowrap">
                         Tổng số học viên
                       </span>
@@ -180,7 +180,7 @@ function Dashboard() {
                     <div className="bg-success px-3 py-2 rounded-2">
                       <i className="bi bi-card-checklist display-6 text-white"></i>
                     </div>
-                    <div className="ms-3 d-flex flex-column justify-content-center align-items-start">
+                    <div className="ms-3 d-flex flex-column justify-content-center align-items-start text-truncate">
                       <span className="text-secondary fw-medium text-nowrap">
                         Tổng vé đã bán
                       </span>
@@ -210,7 +210,7 @@ function Dashboard() {
                     <div className="bg-primary px-3 py-2 rounded-2">
                       <i className="bi bi-cart-check display-6 text-white"></i>
                     </div>
-                    <div className="ms-3 d-flex flex-column justify-content-center align-items-start">
+                    <div className="ms-3 d-flex flex-column justify-content-center align-items-start text-truncate">
                       <span className="text-secondary fw-medium text-nowrap">
                         Tổng số đơn hàng
                       </span>
