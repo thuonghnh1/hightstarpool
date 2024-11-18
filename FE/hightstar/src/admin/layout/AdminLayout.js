@@ -9,6 +9,7 @@ import {
   TrainerManagement,
   TicketManagement,
   DiscountManagement,
+  UserProfile,
 } from "../views/index";
 import "../css/style.css";
 import { ThemeProvider } from "../components/common/ThemeContext";
@@ -81,6 +82,7 @@ const AdminLayout = () => {
                   path="ticket/ticket-management"
                   element={<TicketManagement />}
                 />
+                <Route path="user-profile/:userId" element={<UserProfile />} />
                 <Route path="*" element={<Page404 />} />
               </Routes>
               <Outlet /> {/* Để hiển thị các component con */}

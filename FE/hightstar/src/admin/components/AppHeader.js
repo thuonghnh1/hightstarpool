@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import { Image, Button } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
@@ -8,6 +8,7 @@ import iconBell from "../../assets/images/icons/notification.png";
 import { useTheme } from "./common/ThemeContext";
 
 const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
+  // const userId = localStorage.getItem("userId");
   const { theme, toggleTheme } = useTheme();
   // Sử dụng state để lưu trữ danh sách thông báo
   const [messages, setMessages] = useState([
@@ -93,6 +94,23 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
     // // Gọi API để cập nhật trạng thái trong CSDL (ví dụ)
     // updateNotificationStatusAPI(id);
   };
+
+  // lưu trữ tạm
+  // useEffect(() => {
+  //   if (!localStorage.getItem("userId")) {
+  //     localStorage.setItem("userId", "1"); // Đặt giá trị userId tạm thời
+  //   }
+  // }, []);
+  const [userId, setUserId] = useState(localStorage.getItem("userId") || "");
+
+  useEffect(() => {
+    if (!userId) {
+      // Đặt giá trị userId tạm thời nếu chưa có
+      localStorage.setItem("userId", "1");
+      setUserId("1");
+    }
+  }, [userId]);
+  localStorage.getItem("userId");
 
   return (
     <div
@@ -360,9 +378,15 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
               </Dropdown.Toggle>
 
               <Dropdown.Menu>
-                <Dropdown.Item as={NavLink} to="/profile">
+                <Dropdown.Item as={NavLink} to={`/user-profile/${userId}`}>
                   Thông tin cá nhân
                 </Dropdown.Item>
+                {/* <Dropdown.Item
+                  as={NavLink}
+                  to={`/user-profile/${localStorage.getItem("userId")}`}
+                >
+                  Thông tin cá nhân
+                </Dropdown.Item> */}
                 <Dropdown.Item as={NavLink} to="/settings">
                   Cài đặt
                 </Dropdown.Item>

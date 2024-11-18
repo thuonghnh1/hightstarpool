@@ -10,7 +10,11 @@ const Page404 = () => {
           </h1>
         </div>
         <h2>trang bạn yêu cầu không tìm thấy</h2>
-        <NavLink to={"/admin/dashboard"} type="button" className="btn btn-primary">
+        <NavLink
+          to={"/admin/dashboard"}
+          type="button"
+          className="btn btn-primary"
+        >
           <span>Go Back</span>
         </NavLink>
       </div>
