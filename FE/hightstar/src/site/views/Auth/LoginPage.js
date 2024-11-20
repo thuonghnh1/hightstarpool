@@ -79,16 +79,8 @@ function LoginPage() {
         // lưu nó vào context để context lưu vào localStorage và sử dụng chung cho toàn bộ ứng dụng
         updateUser(userDetail);
 
-        // Hiển thị thông báo đăng nhập thành công
-        toast.success(
-          `Xin chào ${userDetail.fullName}, bạn đã đăng nhập thành công!`
-        );
-
-        handleNavigate(userDetail.role);
-
-        setIsLoading(false);
+        handleNavigate(userDetail.role); // chuyển hướng theo vai trò
       } catch (error) {
-        setIsLoading(false);
         if (error.response?.data?.message) {
           setErrors({ form: error.response.data.message });
         } else {
@@ -96,6 +88,8 @@ function LoginPage() {
             "Không thể kết nối đến server. Vui lòng kiểm tra kết nối internet!"
           );
         }
+      } finally {
+        setIsLoading(false);
       }
     }
   };

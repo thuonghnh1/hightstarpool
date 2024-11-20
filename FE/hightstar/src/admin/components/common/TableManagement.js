@@ -6,6 +6,7 @@ import DeleteModal from "./DeleteModal";
 import "../../css/table-management.css";
 import iconTrainer from "../../../assets/images/icons/trainer.png";
 import defaultImage from "../../../assets/images/defaultImage.png";
+import { formatDateTimeToDMY } from "../../utils/FormatDate";
 
 const TableManagement = ({
   data,
@@ -21,7 +22,7 @@ const TableManagement = ({
   onDelete,
   isLoading,
   buttonCustom,
-  onResetStatus
+  onResetStatus,
 }) => {
   // State management
   const [visibleColumns, setVisibleColumns] = useState(
@@ -40,12 +41,18 @@ const TableManagement = ({
 
   const handleRenderBtn = () => {
     // Danh sách button mặc định nếu button không được định nghĩa
-    const defaultButtonConfig = { btnAdd: true, btnEdit: true, btnDelete: true, btnDetail: false, btnFilter: true };
+    const defaultButtonConfig = {
+      btnAdd: true,
+      btnEdit: true,
+      btnDelete: true,
+      btnDetail: false,
+      btnFilter: true,
+    };
 
     // Sử dụng buttonCustom nếu có, nếu không thì lấy defaultButtonConfig
     const buttonConfig = buttonCustom ?? defaultButtonConfig;
     return buttonConfig;
-  }
+  };
   // Hàm render custom cell dựa trên loại cột
   const renderCustomCell = (column, item) => {
     switch (column.key) {
@@ -84,7 +91,8 @@ const TableManagement = ({
         }
 
         return (
-          <span className={`rounded-3 fw-bold px-2 py-1 ${statusClass}`}
+          <span
+            className={`rounded-3 fw-bold px-2 py-1 ${statusClass}`}
             style={{ fontSize: "13px" }}
           >
             {statusText}
@@ -108,15 +116,16 @@ const TableManagement = ({
           stars.push(
             <i
               key={i}
-              className={`bi ${i <= item.averageRating ? "bi-star-fill" : "bi-star"
-                } text-warning me-1`}
+              className={`bi ${
+                i <= item.averageRating ? "bi-star-fill" : "bi-star"
+              } text-warning me-1`}
             ></i>
           );
         }
         return <div>{stars}</div>;
       case "gender":
         return (
-          <span className={`rounded-3 px-2 py-1 `}>
+          <span className={`rounded-3 px-1 py-1 `}>
             {item.gender === true ? (
               <>
                 <i className="bi bi-gender-male"></i> Nam
@@ -134,25 +143,52 @@ const TableManagement = ({
         return (
           <span className="d-flex align-items-center">
             {item.role === "ADMIN" && (
-              <i className="bi bi-shield-fill text-primary me-1"></i>
+              <>
+                <i className="bi bi-shield-fill text-danger fs-5 mx-1 me-1"></i>
+                Quản Lý
+              </>
+            )}
+            {item.role === "EMPLOYEE" && (
+              <>
+                <i className="fa-solid fa-user-tie fs-5 text-primary me-2 mx-1"></i>
+                Nhân Viên
+              </>
             )}
             {item.role === "USER" && (
-              <i className="bi bi-person-fill fs-5 text-info me-1"></i>
+              <>
+                <i className="bi bi-person-fill fs-4 text-info me-1"></i>Khách
+                Hàng
+              </>
             )}
             {item.role === "TRAINER" && (
-              <img
-                src={iconTrainer}
-                alt="Role hlv"
-                className="img-fluid rounded-circle"
-                style={{ width: "17px", height: "17px" }}
-              />
+              <>
+                <img
+                  src={iconTrainer}
+                  alt="Role hlv"
+                  className="img-fluid rounded-circle mx-1 me-1"
+                  style={{ width: "20px", height: "20px" }}
+                />
+                Huấn Luyện Viên
+              </>
             )}
-            {item.role}
           </span>
         );
 
+      case "total":
+      case "price":
+        const formattedPrice = new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND",
+          minimumFractionDigits: 0,
+        }).format(item[column.key]);
+        return <span>{formattedPrice}</span>;
+
+      case "percentage":
+        return <span>{item.percentage} %</span>;
+      case "orderDate":
+        return <span>{formatDateTimeToDMY(item.orderDate)}</span>;
       default:
-        return item[column.key]; // Trả về giá trị mặc định nếu không cần custom
+        return item[column.key] || "Không có"; // Trả về giá trị mặc định nếu không cần custom
     }
   };
 
@@ -183,13 +219,13 @@ const TableManagement = ({
         ? compareA > compareB
           ? 1
           : compareA < compareB
-            ? -1
-            : 0
+          ? -1
+          : 0
         : compareA < compareB
-          ? 1
-          : compareA > compareB
-            ? -1
-            : 0;
+        ? 1
+        : compareA > compareB
+        ? -1
+        : 0;
     }
     return 0;
   });
@@ -244,10 +280,9 @@ const TableManagement = ({
 
   // Đóng modal thêm/sửa
   const handleCloseModal = () => {
-    onResetStatus() // cập nhật trạng thái các công việc
+    onResetStatus(); // cập nhật trạng thái các công việc
     setShowModal(false); // Đóng modal
   };
-
 
   // Xử lý lưu dữ liệu
   const handleSubmit = async () => {
@@ -291,11 +326,12 @@ const TableManagement = ({
           />
         </div>
         <div className="col-lg-4 col-12 d-flex justify-content-lg-end mt-3 mt-lg-0">
-          {handleRenderBtn().btnFilter &&
+          {handleRenderBtn().btnFilter && (
             <button className="btn btn-success me-2 text-nowrap">
               <i className="bi bi-filter"></i> Lọc
-            </button>}
-          {handleRenderBtn().btnAdd &&
+            </button>
+          )}
+          {handleRenderBtn().btnAdd && (
             <button
               className="btn btn-primary me-2 text-nowrap"
               onClick={() => {
@@ -304,7 +340,8 @@ const TableManagement = ({
               }}
             >
               <i className="bi bi-plus-circle"></i> Thêm
-            </button>}
+            </button>
+          )}
           <div className="dropdown text-nowrap">
             <DropdownButton
               id="dropdown-basic-button"
@@ -344,18 +381,20 @@ const TableManagement = ({
                       {column.label}
                       <span className="icon_sort ps-2 light__text">
                         <i
-                          className={`bi bi-arrow-up ${sortConfig.key === column.key &&
+                          className={`bi bi-arrow-up ${
+                            sortConfig.key === column.key &&
                             sortConfig.direction === "asc"
-                            ? "text-black"
-                            : "opacity-50"
-                            }`}
+                              ? "text-black"
+                              : "opacity-50"
+                          }`}
                         ></i>
                         <i
-                          className={`bi bi-arrow-down ${sortConfig.key === column.key &&
+                          className={`bi bi-arrow-down ${
+                            sortConfig.key === column.key &&
                             sortConfig.direction === "desc"
-                            ? "text-black"
-                            : "opacity-50"
-                            }`}
+                              ? "text-black"
+                              : "opacity-50"
+                          }`}
                         ></i>
                       </span>
                     </th>
@@ -412,7 +451,7 @@ const TableManagement = ({
                                 </li>
                               ))}
                             <li>
-                              {handleRenderBtn().btnEdit &&
+                              {handleRenderBtn().btnEdit && (
                                 <button
                                   className="btn btn__edit me-3 my-2"
                                   onClick={(e) => {
@@ -423,8 +462,9 @@ const TableManagement = ({
                                 >
                                   <i className="bi bi-pencil-square"></i> Chỉnh
                                   sửa
-                                </button>}
-                              {handleRenderBtn().btnDelete &&
+                                </button>
+                              )}
+                              {handleRenderBtn().btnDelete && (
                                 <button
                                   className="btn btn__delete p-1 me-3"
                                   onClick={(e) => {
@@ -433,18 +473,21 @@ const TableManagement = ({
                                   }}
                                 >
                                   <i className="bi bi-trash-fill"></i> Xóa
-                                </button>}
-                              {handleRenderBtn().btnDetail &&
+                                </button>
+                              )}
+                              {handleRenderBtn().btnDetail && (
                                 <button
                                   className="btn btn__detail p-1 me-3"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    onViewDetail(item)
+                                    onViewDetail(item);
                                     handleShowModal();
                                   }}
                                 >
-                                  <i className="bi bi-card-list"></i> Xem chi tiết
-                                </button>}
+                                  <i className="bi bi-card-list"></i> Xem chi
+                                  tiết
+                                </button>
+                              )}
                             </li>
                           </ul>
                         </div>
@@ -513,10 +556,12 @@ const TableManagement = ({
               THÊM MỚI BẢN GHI{" "}
               <i className="bi bi-plus-circle-dotted text-success ms-1 fs-4"></i>
             </>
-          ) : <>
-            XEM CHI TIẾT{" "}
-            <i className="bi bi-plus-circle-dotted text-success ms-1 fs-4"></i>
-          </>
+          ) : (
+            <>
+              XEM CHI TIẾT{" "}
+              <i className="bi bi-plus-circle-dotted text-success ms-1 fs-4"></i>
+            </>
+          )
         }
         onSubmit={handleSubmit}
         isLoading={isLoading}
@@ -538,7 +583,7 @@ const TableManagement = ({
         imageSrc={selectedImage}
         onClose={handleCloseModalImage}
       />
-    </div >
+    </div>
   );
 };
 

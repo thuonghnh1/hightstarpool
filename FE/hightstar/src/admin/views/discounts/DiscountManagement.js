@@ -16,7 +16,11 @@ const DiscountManagement = () => {
   const [discountData, setDiscountData] = useState([]);
   const [formData, setFormData] = useState({}); // State quản lý dữ liệu hiện tại
   const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
-  const [statusFunction, setStatusFunction] = useState({ isAdd: false, isEditing: false, isViewDetail: false }); // Trạng thái để biết đang thêm mới hay chỉnh sửa hay xem chi tiết
+  const [statusFunction, setStatusFunction] = useState({
+    isAdd: false,
+    isEditing: false,
+    isViewDetail: false,
+  }); // Trạng thái để biết đang thêm mới hay chỉnh sửa hay xem chi tiết
   // State để xử lý trạng thái tải dữ liệu và lỗi
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
@@ -139,13 +143,13 @@ const DiscountManagement = () => {
   };
 
   const updateStatus = (newStatus) => {
-    setStatusFunction(prevStatus => ({
-      ...prevStatus,    // Giữ lại các thuộc tính trước đó
-      ...newStatus      // Cập nhật các thuộc tính mới
+    setStatusFunction((prevStatus) => ({
+      ...prevStatus, // Giữ lại các thuộc tính trước đó
+      ...newStatus, // Cập nhật các thuộc tính mới
     }));
   };
   const handleResetStatus = () => {
-    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false })
+    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false });
   };
 
   // Hàm reset form khi thêm mới
@@ -168,7 +172,7 @@ const DiscountManagement = () => {
       startDate: formatDateTimeToISO(item.startDate),
       endDate: formatDateTimeToISO(item.endDate), //yyyy-MM-dd hh:mm:ss -> yyyy-DD-mmThh:mm
     });
-    updateStatus({ isEditing: true })
+    updateStatus({ isEditing: true });
     setErrorFields({});
   };
 
@@ -219,35 +223,26 @@ const DiscountManagement = () => {
       handleReset();
       return true;
     } catch (error) {
-      if (error.response) {
-        toast.error(error.response.data + "!"); // Hiển thị thông điệp lỗi từ server
-      } else {
-        toast.error("Đã xảy ra lỗi không xác định. Vui lòng thử lại sau!"); // Thông báo lỗi chung
-      }
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Hàm xóa một discount
-  const handleDelete = (deleteId) => {
-    if (deleteId) {
-      setIsLoading(true);
-      DiscountService
-        .deleteDiscount(deleteId)
-        .then(() => {
-          setDiscountData(
-            discountData.filter((discount) => discount.id !== deleteId)
-          );
-          toast.success("Xóa thành công!");
-        })
-        .catch(() => {
-          toast.error("Đã xảy ra lỗi khi xóa.");
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+  const handleDelete = async (deleteId) => {
+    if (!deleteId) return; // kiểm tra sớm
+
+    setIsLoading(true);
+    try {
+      await DiscountService.deleteDiscount(deleteId); // Thực hiện xóa
+      setDiscountData((prevData) =>
+        prevData.filter((discount) => discount.id !== deleteId)
+      );
+      toast.success("Xóa thành công!");
+    } catch (error) {
+      toast.error("Đã xảy ra lỗi khi xóa.");
+    } finally {
+      setIsLoading(false); // Đảm bảo tắt loading trong mọi trường hợp
     }
   };
 
@@ -256,7 +251,9 @@ const DiscountManagement = () => {
       <div className="row">
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formName">
-            <Form.Label>Tên giảm giá <span className="text-danger">(*)</span></Form.Label>
+            <Form.Label>
+              Tên giảm giá <span className="text-danger">(*)</span>
+            </Form.Label>
             <Form.Control
               type="text"
               name="discountName"
@@ -277,7 +274,9 @@ const DiscountManagement = () => {
 
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formPercentage">
-            <Form.Label>Tỷ lệ giảm giá (%) <span className="text-danger">(*)</span></Form.Label>
+            <Form.Label>
+              Tỷ lệ giảm giá (%) <span className="text-danger">(*)</span>
+            </Form.Label>
             <Form.Control
               type="number"
               name="percentage"
@@ -298,7 +297,9 @@ const DiscountManagement = () => {
       <div className="row">
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formStartDate">
-            <Form.Label>Ngày bắt đầu <span className="text-danger">(*)</span></Form.Label>
+            <Form.Label>
+              Ngày bắt đầu <span className="text-danger">(*)</span>
+            </Form.Label>
             <Form.Control
               type="datetime-local"
               name="startDate"
@@ -315,7 +316,9 @@ const DiscountManagement = () => {
 
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formEndDate">
-            <Form.Label>Ngày kết thúc <span className="text-danger">(*)</span></Form.Label>
+            <Form.Label>
+              Ngày kết thúc <span className="text-danger">(*)</span>
+            </Form.Label>
             <Form.Control
               type="datetime-local"
               name="endDate"

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Button,
   Form,
@@ -17,6 +17,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../../css/sales/salesManagement.css";
 import SalesService from "../../services/SalesService";
 import UserService from "../../services/UserService";
+import ModalConfirmInfo from "./ModalConfirmInfo";
+import Invoice from "./Invoice";
+import PrintComponent from "../../components/common/PrintComponent";
 
 const SalesManagement = () => {
   const [activeTab, setActiveTab] = useState("tickets");
@@ -59,13 +62,17 @@ const SalesManagement = () => {
   const [searchTerm, setSearchTerm] = useState(""); // State cho tìm kiếm
   // State dùng để quản lý trạng thái hiển thị của các modal
   const [modals, setModals] = useState({
-    modal1: false,
-    modal2: false,
+    modalEnterPhone: false,
+    modalConfirmInfo: false,
     modal3: false,
   });
   const [formData, setFormData] = useState({ phoneNumber: "" });
-  const [buyer, setBuyer] = useState({ fullName: "Khách" });
+  const [buyer, setBuyer] = useState({});
+  const [invoiceData, setInvoiceData] = useState(null); // lưu thông tin hóa đơn
   const [errorFields, setErrorFields] = useState("");
+  const [notes, setNotes] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const printRef = useRef();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -106,18 +113,27 @@ const SalesManagement = () => {
 
   const handleAddToCart = (item) => {
     setCartItems((prevItems) => {
+      const isCourse = item.id.includes("KH");
       const existingItem = prevItems.find(
         (cartItem) => cartItem.id === item.id
       );
+
+      if (isCourse && existingItem) {
+        setTimeout(() => {
+          toast.error("Khóa học này đã có trong giỏ hàng!", { toastId: item.id });
+        }, 0);
+        return prevItems;
+      }
+
       if (existingItem) {
         return prevItems.map((cartItem) =>
           cartItem.id === item.id
             ? { ...cartItem, quantity: cartItem.quantity + 1 }
             : cartItem
         );
-      } else {
-        return [...prevItems, { ...item, quantity: 1 }];
       }
+
+      return [...prevItems, { ...item, quantity: 1 }];
     });
   };
 
@@ -196,6 +212,92 @@ const SalesManagement = () => {
       }
     }
   };
+
+  const prepareOrderData = (cartItems, buyer, discountId, paymentMethod) => {
+    // Dữ liệu cho Order
+    const orderData = {
+      total: calculateTotalPrice(),
+      paymentMethod, // Phương thức thanh toán (VD: "CASH", "MOMO")
+      notes,
+      shippingAddress: null, // Địa chỉ giao hàng
+      discountId,
+      userId: buyer.id || null, // null nếu là khách
+    };
+
+    // Dữ liệu cho OrderDetails
+    const orderDetails = cartItems.map((item) => {
+      const detail = {
+        quantity: item.quantity,
+        unitPrice: item.price * item.quantity,
+      };
+
+      if (item.id.includes("SP")) {
+        detail.productId = item.id.substring(2); // Lấy phần còn lại sau tiền tố
+      } else if (item.id.includes("KH")) {
+        detail.courseId = item.id.substring(2);
+      } else if (item.id.includes("VB")) {
+        detail.ticketId = item.id.substring(2);
+      }
+
+      return detail;
+    });
+
+    // Kết hợp dữ liệu Order và OrderDetails
+    const invoiceObj = {
+      order: orderData,
+      orderDetails: orderDetails,
+    };
+    setInvoiceData(invoiceObj); // lưu vào state
+
+    return invoiceObj;
+  };
+
+  const handleConfirmPayment = async () => {
+    // Kiểm tra nếu giỏ hàng chứa khóa học
+    const hasCourse = cartItems.some((item) => item.id.includes("KH"));
+    if (hasCourse) {
+      // Hiển thị modal
+      handleShowModal("modalConfirmInfo"); // hiển thị modal xác nhận trước khi thanh toán.
+      return;
+    }
+
+    const invoice = prepareOrderData(
+      cartItems,
+      buyer,
+      selectedDiscount ? selectedDiscount.value : null,
+      "CASH"
+    );
+
+    // Gọi API để tạo hóa đơn
+    try {
+      setIsLoading(true);
+      const orderResponse = await SalesService.createInvoice(invoice);
+      if (orderResponse && orderResponse.id) {
+        const updatedInvoice = {
+          ...invoice,
+          order: {
+            ...invoice.order, // Giữ nguyên dữ liệu của `order`
+            orderCode: orderResponse.id, // Thêm mã hóa đơn từ API
+          },
+        };
+
+        // Lưu lại invoiceObj với mã hóa đơn
+        setInvoiceData(updatedInvoice);
+
+        toast.success("Thanh toán thành công!");
+        // Gọi in hóa đơn
+        if (printRef.current) {
+          printRef.current.print();
+        }
+      }
+    } catch (error) {
+      // đã xử lý ở service
+      return;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <section className="row m-0 p-0 bg-white rounded-3 h-100">
       <div className="row g-0">
@@ -310,6 +412,7 @@ const SalesManagement = () => {
               <Form.Control
                 placeholder="Ghi chú đơn hàng"
                 className="shadow-none"
+                onChange={(e) => setNotes(e.target.value)}
               />
             </InputGroup>
             <div className="text-end">
@@ -454,16 +557,16 @@ const SalesManagement = () => {
                     id="dropdown-basic"
                     className="p-0 m-0 bg-transparent border-0 text-black"
                   >
-                    {buyer.fullName}
+                    {buyer.fullName || "Khách"}
                   </Dropdown.Toggle>
 
                   <Dropdown.Menu>
-                    <Dropdown.Item
-                      onClick={() => setBuyer({ fullName: "Khách" })}
-                    >
+                    <Dropdown.Item onClick={() => setBuyer({})}>
                       Khách
                     </Dropdown.Item>
-                    <Dropdown.Item onClick={() => handleShowModal("modal1")}>
+                    <Dropdown.Item
+                      onClick={() => handleShowModal("modalEnterPhone")}
+                    >
                       Chọn người dùng
                     </Dropdown.Item>
                   </Dropdown.Menu>
@@ -509,7 +612,7 @@ const SalesManagement = () => {
           {/* Tổng kết hóa đơn */}
           <div className="mb-3">
             <Row>
-              <Col xs={8}>Tổng tiền:</Col>
+              <Col xs={8}>Tạm tính:</Col>
               <Col xs={4} className="text-end fw-bold">
                 {cartItems
                   .reduce(
@@ -521,8 +624,10 @@ const SalesManagement = () => {
               </Col>
             </Row>
             {selectedDiscount && (
-              <Row>
-                <Col xs={8}>Giảm giá ({selectedDiscount.label}):</Col>
+              <Row className="mt-1">
+                <Col xs={8}>
+                  Giảm giá: <br />({selectedDiscount.label})
+                </Col>
                 <Col xs={4} className="text-end fw-bold text-success">
                   {(
                     cartItems.reduce(
@@ -535,8 +640,10 @@ const SalesManagement = () => {
                 </Col>
               </Row>
             )}
-            <Row>
-              <Col xs={8}>Khách cần trả:</Col>
+            <Row className="mt-3">
+              <Col xs={8} className="fw-bold">
+                Thành tiền:
+              </Col>
               <Col xs={4} className="text-end text-primary fw-bold">
                 {calculateTotalPrice().toLocaleString()}đ
               </Col>
@@ -545,14 +652,29 @@ const SalesManagement = () => {
         </Offcanvas.Body>
         {/* Footer cố định */}
         <div className="offcanvas-footer p-3 border-top">
-          <button className="btn btn-success fw-bold w-100 text-uppercase">
-            Xác nhận thanh toán
+          <button
+            className="btn btn-success fw-bold w-100 text-uppercase"
+            onClick={handleConfirmPayment}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <span
+                className="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+            ) : (
+              "Xác nhận thanh toán"
+            )}
           </button>
         </div>
       </Offcanvas>
 
       {/* Modal để nhập số điện thoại */}
-      <Modal show={modals.modal1} onHide={() => handleCloseModal("modal1")}>
+      <Modal
+        show={modals.modalEnterPhone}
+        onHide={() => handleCloseModal("modalEnterPhone")}
+      >
         <Modal.Header closeButton>
           <Modal.Title>Chọn người dùng</Modal.Title>
         </Modal.Header>
@@ -581,15 +703,39 @@ const SalesManagement = () => {
         <Modal.Footer>
           <Button
             variant="secondary"
-            onClick={() => handleCloseModal("modal1")}
+            onClick={() => handleCloseModal("modalEnterPhone")}
           >
             Đóng
           </Button>
-          <Button variant="primary" onClick={() => handleCheckBuyer("modal1")}>
+          <Button
+            variant="primary"
+            onClick={() => handleCheckBuyer("modalEnterPhone")}
+          >
             Kiểm tra
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* Modal Xác Nhận Thông Tin Người Mua */}
+      <ModalConfirmInfo
+        show={modals.modalConfirmInfo}
+        onHide={() => handleCloseModal("modalConfirmInfo")}
+        invoiceData={invoiceData}
+      ></ModalConfirmInfo>
+
+      {/* Component in */}
+      {invoiceData && (
+        <PrintComponent ref={printRef} documentTitle="Hóa Đơn Bán Hàng">
+          <Invoice
+            buyer={buyer}
+            cartItems={cartItems}
+            totalPrice={invoiceData.order.total}
+            discount={selectedDiscount}
+            date={new Date().toLocaleString()}
+            invoiceCode={invoiceData.order.orderCode}
+          />
+        </PrintComponent>
+      )}
     </section>
   );
 };

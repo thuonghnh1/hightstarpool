@@ -5,6 +5,7 @@ import logoVertical from "../../../assets/brand/logoVertical.png";
 import backgroundAuth from "../../../assets/images/backgroundAuth.jpg";
 import { toast } from "react-toastify";
 import { Spinner } from "react-bootstrap";
+import { Helmet } from "react-helmet-async";
 
 function ForgotPasswordPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -48,6 +49,9 @@ function ForgotPasswordPage() {
 
   return (
     <>
+      <Helmet>
+        <title>Quên mật khẩu - Hight Star</title>
+      </Helmet>
       <section
         className="container-fluid p-0 min-vh-100 d-flex align-items-center justify-content-center"
         style={{

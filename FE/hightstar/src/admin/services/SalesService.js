@@ -1,11 +1,11 @@
 // services/apiService.js
-import axios from "axios";
 import CourseService from "./CourseService";
 import DiscountService from "./DiscountService";
 import TicketService from "./TicketService";
 import ProductService from "./ProductService";
+import axiosInstance from "../../services/axiosInstance";
 
-const API_URL = "http://localhost:8080/api/sales"; // Thay bằng URL thật của bạn
+const API_URL = "/employee/sales";
 
 // Các hàm chuyển đổi dữ liệu
 const formatProductData = (data) => {
@@ -20,7 +20,7 @@ const formatProductData = (data) => {
 
 const formatTicketData = (data) => {
   return data.map((item) => ({
-    id: `VB${item.id}`, 
+    id: `VB${item.id}`,
     code: item.ticketCode,
     name:
       item.ticketType === "ONETIME_TICKET"
@@ -44,7 +44,7 @@ const formatCourseData = (data) => {
 
 const formatDiscountData = (data) => {
   return data.map((item) => ({
-    value: `GG${item.id}`,
+    value: item.id,
     label: item.discountName,
     percentage: item.percentage,
   }));
@@ -91,11 +91,21 @@ const fetchDiscounts = async () => {
   }
 };
 
+const createInvoice = async (invoiceData) => {
+  try {
+    const response = await axiosInstance.post(`${API_URL}/createInvoice`, invoiceData);
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi khi tạo đơn hàng: "+error)
+  }
+};
+
 const SalesService = {
   fetchProducts,
   fetchTickets,
   fetchCourses,
   fetchDiscounts,
+  createInvoice,
 };
 
 export default SalesService;

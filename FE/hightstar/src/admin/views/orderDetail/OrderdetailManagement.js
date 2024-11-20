@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Table } from "react-bootstrap";
 import orderService from "../../services/OrderService";
-import { toast } from "react-toastify";
 import { Helmet } from "react-helmet-async";
 
 const OrderDetailManagement = ({ orderId }) => {
@@ -19,9 +18,6 @@ const OrderDetailManagement = ({ orderId }) => {
       setDetails(data);
     } catch (error) {
       console.error("Có lỗi xảy ra khi lấy details", error);
-      toast.error(
-        "Đã xảy ra lỗi khi lấy đơn hàng chi tiết. Vui lòng thử lại sau!"
-      );
     }
   };
 
@@ -37,7 +33,6 @@ const OrderDetailManagement = ({ orderId }) => {
             <th>Hình ảnh</th>
             <th>Tên sản phẩm</th>
             <th>Số lượng</th>
-            <th>Giá</th>
             <th>Tổng tiền</th>
           </tr>
         </thead>
@@ -56,16 +51,9 @@ const OrderDetailManagement = ({ orderId }) => {
               <td>{detail.name}</td>
               <td>{detail.quantity}</td>
               <td>
-                {detail.unitPrice
+              {detail.unitPrice
                   ? new Intl.NumberFormat("vi-VN").format(detail.unitPrice) +
                     "đ"
-                  : "N/A"}
-              </td>
-              <td>
-                {detail.quantity * (detail.unitPrice || 0)
-                  ? new Intl.NumberFormat("vi-VN").format(
-                      detail.quantity * (detail.unitPrice || 0)
-                    ) + "đ"
                   : "N/A"}
               </td>
             </tr>
