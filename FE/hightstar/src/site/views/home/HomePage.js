@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import { UserContext } from "../../../contexts/UserContext";
-import { logout } from "../../services/authService";
+import { logout } from "../../services/AuthService";
 import { Button } from "react-bootstrap";
 import { Helmet } from "react-helmet-async";
 

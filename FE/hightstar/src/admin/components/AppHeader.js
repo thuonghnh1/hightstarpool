@@ -7,7 +7,7 @@ import iconAddUser from "../../assets/images/icons/add-user.png";
 import iconBell from "../../assets/images/icons/notification.png";
 import { useTheme } from "./common/ThemeContext";
 // import { toast } from "react-toastify";
-import { logout } from "../../site/services/authService";
+import { logout } from "../../site/services/AuthService";
 import { UserContext } from "../../contexts/UserContext";
 const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();

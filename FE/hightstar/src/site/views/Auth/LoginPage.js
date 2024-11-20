@@ -2,7 +2,7 @@ import { useState, useContext, useEffect, useCallback } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { toast } from "react-toastify";
-import { login } from "../../services/authService"; // Import getUserDetails
+import { login } from "../../services/AuthService"; // Import getUserDetails
 import { UserContext } from "../../../contexts/UserContext";
 import logoVertical from "../../../assets/brand/logoVertical.png";
 import backgroundAuth from "../../../assets/images/backgroundAuth.jpg";

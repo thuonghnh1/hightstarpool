@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
-import { sendOtp } from "../../services/authService";
+import { sendOtp } from "../../services/AuthService";
 import logoVertical from "../../../assets/brand/logoVertical.png";
 import backgroundAuth from "../../../assets/images/backgroundAuth.jpg";
 import { toast } from "react-toastify";

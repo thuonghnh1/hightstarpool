@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, NavLink } from "react-router-dom";
-import { resetPassword } from "../../services/authService"; // Thêm service cho reset mật khẩu
+import { resetPassword } from "../../services/AuthService"; // Thêm service cho reset mật khẩu
 import logoVertical from "../../../assets/brand/logoVertical.png";
 import backgroundAuth from "../../../assets/images/backgroundAuth.jpg";
 import { toast } from "react-toastify";

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, NavLink } from "react-router-dom";
-import { verifyOtp, resendOtp, register } from "../../services/authService";
+import { verifyOtp, resendOtp, register } from "../../services/AuthService";
 import logoVertical from "../../../assets/brand/logoVertical.png";
 import backgroundAuth from "../../../assets/images/backgroundAuth.jpg";
 import { toast } from "react-toastify";

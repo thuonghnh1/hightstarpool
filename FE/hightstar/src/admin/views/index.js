@@ -7,6 +7,7 @@ import DiscountManagement from "./discounts/DiscountManagement";
 import TrainerManagement from "./trainers/TrainerManagement";
 import SalesManagement from "./sales/SalesManagement";
 import OrderManagement from "./orders/OrderManagement";
+import TimeSlotManagement from "./timeslots/TimeSlotManagement";
 
 export {
   Dashboard,
@@ -18,4 +19,5 @@ export {
   DiscountManagement,
   SalesManagement,
   OrderManagement,
+  TimeSlotManagement,
 };

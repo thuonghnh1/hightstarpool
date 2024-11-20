@@ -1,7 +1,7 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
-import { refreshToken } from "../site/services/authService"; // Hàm gọi API để làm mới token
+import { refreshToken } from "../site/services/AuthService"; // Hàm gọi API để làm mới token
 
 // Tạo một instance của axios
 const axiosInstance = axios.create({
@@ -94,7 +94,7 @@ axiosInstance.interceptors.response.use(
         //   break;
         case 403:
           console.error("Lỗi ở axiosInstance:", error);
-          window.location.href = "/page403"; 
+          window.location.href = "/page403";
           break;
         case 404:
           console.error("Lỗi ở axiosInstance:", error);

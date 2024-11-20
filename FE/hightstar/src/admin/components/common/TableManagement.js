@@ -128,7 +128,22 @@ const TableManagement = ({
             )}
           </span>
         );
-      // Thêm các case khác nếu cần cho các cột tuỳ chỉnh khác
+
+      case "dayOfWeek":
+        const dayLabels = {
+          MONDAY: "Thứ Hai",
+          TUESDAY: "Thứ Ba",
+          WEDNESDAY: "Thứ Tư",
+          THURSDAY: "Thứ Năm",
+          FRIDAY: "Thứ Sáu",
+          SATURDAY: "Thứ Bảy",
+          SUNDAY: "Chủ Nhật"
+        };
+        return (
+          <span className={`rounded-3 px-2 py-1`}>
+            <i className={`bi bi-calendar-week`} /> {dayLabels[item.dayOfWeek] || "N/A"}
+          </span>
+        );
 
       case "role":
         return (

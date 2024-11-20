@@ -174,6 +174,17 @@ const AppSidebar = ({ isSidebarOpen }) => {
         </li>
 
         <li>
+          <NavLink
+            to="/admin/timeSlot-management"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            <i className="me-2 fa-solid fa-receipt"></i> Suất học
+          </NavLink>
+        </li>
+
+        <li>
           <div
             className={`d-flex justify-content-center align-items-center ${menuState.stock ? "active-link" : "inactive-link"
               }`}

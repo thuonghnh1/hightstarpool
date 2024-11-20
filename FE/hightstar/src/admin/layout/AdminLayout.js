@@ -11,6 +11,7 @@ import {
   TicketManagement,
   DiscountManagement,
   OrderManagement,
+  TimeSlotManagement,
 } from "../views/index";
 import "../css/style.css";
 import { ThemeProvider } from "../components/common/ThemeContext";
@@ -49,9 +50,8 @@ const AdminLayout = () => {
       <div className="container__admin overflow-hidden">
         <AppSidebar className="" isSidebarOpen={isSidebarOpen} />
         <div
-          className={`right__box d-flex flex-column ${
-            isSidebarOpen ? "with-sidebar" : ""
-          }`}
+          className={`right__box d-flex flex-column ${isSidebarOpen ? "with-sidebar" : ""
+            }`}
         >
           <AppHeader
             toggleSidebar={toggleSidebar}
@@ -85,6 +85,10 @@ const AdminLayout = () => {
                   element={<TicketManagement />}
                 />
                 <Route path="order-management" element={<OrderManagement />} />
+                <Route
+                  path="timeSlot-management"
+                  element={<TimeSlotManagement />}
+                />
                 <Route path="*" element={<Navigate to={"/page404"} />} />
               </Routes>
               <Outlet /> {/* Để hiển thị các component con */}

@@ -223,6 +223,7 @@ const DiscountManagement = () => {
         toast.error(error.response.data + "!"); // Hiển thị thông điệp lỗi từ server
       } else {
         toast.error("Đã xảy ra lỗi không xác định. Vui lòng thử lại sau!"); // Thông báo lỗi chung
+       
       }
       return false;
     } finally {

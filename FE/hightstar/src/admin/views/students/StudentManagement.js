@@ -6,6 +6,8 @@ import Page500 from "../../../common/pages/Page500";
 import { Spinner, Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Select from "react-select"; // thư viện tạo select có hỗ trợ search
+import { Helmet } from "react-helmet-async";
+
 
 const StudentManagement = () => {
   // State để lưu trữ dữ liệu giảm giá từ API
@@ -439,6 +441,9 @@ const StudentManagement = () => {
     <>
       {/* Những cái bên dưới truyền prop cho đúng tên của những cái m đổi rồi là đc */}
       {/* Hiển thị loader khi đang tải trang */}
+      <Helmet>
+        <title>Quản lý Học viên - Hight Star</title>
+      </Helmet>
       {loadingPage ? (
         <div className="w-100 h-100 d-flex justify-content-center align-items-center">
           <Spinner animation="border" variant="primary" className=""></Spinner>

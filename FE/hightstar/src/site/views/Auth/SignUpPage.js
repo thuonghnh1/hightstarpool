@@ -6,7 +6,7 @@ import backgroundAuth from "../../../assets/images/backgroundAuth.jpg";
 import iconFB from "../../../assets/images/icons/facebook.png";
 import iconGG from "../../../assets/images/icons/google.png";
 import iconTT from "../../../assets/images/icons/twitter.png";
-import { sendOtp } from "../../services/authService";
+import { sendOtp } from "../../services/AuthService";
 import { Helmet } from "react-helmet-async";
 import { Spinner } from "react-bootstrap";
 
@@ -129,9 +129,8 @@ function SignUpPage() {
                   type="text"
                   id="fullNameField"
                   placeholder="Nhập họ và tên"
-                  className={`form-control py-2 ${
-                    errors.fullName ? "is-invalid" : ""
-                  }`}
+                  className={`form-control py-2 ${errors.fullName ? "is-invalid" : ""
+                    }`}
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                 />
@@ -146,9 +145,8 @@ function SignUpPage() {
                     type="text"
                     id="usernameField"
                     placeholder="Nhập vào số điện thoại"
-                    className={`form-control py-2 ${
-                      errors.username ? "is-invalid" : ""
-                    }`}
+                    className={`form-control py-2 ${errors.username ? "is-invalid" : ""
+                      }`}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                   />
@@ -164,9 +162,8 @@ function SignUpPage() {
                     type="email"
                     id="emailField"
                     placeholder="Nhập vào email"
-                    className={`form-control py-2 ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
+                    className={`form-control py-2 ${errors.email ? "is-invalid" : ""
+                      }`}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -182,9 +179,8 @@ function SignUpPage() {
                     type="password"
                     id="passwordField"
                     placeholder="Mật khẩu"
-                    className={`form-control py-2 ${
-                      errors.password ? "is-invalid" : ""
-                    }`}
+                    className={`form-control py-2 ${errors.password ? "is-invalid" : ""
+                      }`}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -203,9 +199,8 @@ function SignUpPage() {
                     type="password"
                     id="confirmPasswordField"
                     placeholder="Xác nhận mật khẩu"
-                    className={`form-control py-2 ${
-                      errors.confirmPassword ? "is-invalid" : ""
-                    }`}
+                    className={`form-control py-2 ${errors.confirmPassword ? "is-invalid" : ""
+                      }`}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                   />
