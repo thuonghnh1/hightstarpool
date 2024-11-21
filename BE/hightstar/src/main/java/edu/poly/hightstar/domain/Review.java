@@ -35,6 +35,11 @@ public class Review {
     private Course course;
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "trainerId", nullable = true)
+    private Trainer trainer;
+
+    @ManyToOne
+    @JoinColumn(name = "userId")
     private User user;
+
 }

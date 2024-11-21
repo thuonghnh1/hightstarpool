@@ -166,6 +166,28 @@ const AppSidebar = ({ isSidebarOpen }) => {
         </li>
 
         <li>
+          <NavLink
+            to="/admin/review-management"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            <i className="me-2 fa fa-gift"></i> Đánh giá
+          </NavLink>
+        </li>
+
+        <li>
+          <NavLink
+            to="/admin/category-management"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            <i className="me-2 fa fa-gift"></i> Phân loại
+          </NavLink>
+        </li>
+
+        <li>
           <div
             className={`d-flex justify-content-center align-items-center ${
               menuState.stock ? "active-link" : "inactive-link"
