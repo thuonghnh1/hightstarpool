@@ -10,7 +10,11 @@ const TrainerManagement = () => {
   const [trainerData, setTrainerData] = useState([]);
   const [formData, setFormData] = useState({});
   const [errorFields, setErrorFields] = useState({});
-  const [statusFunction, setStatusFunction] = useState({ isAdd: false, isEditing: false, isViewDetail: false });
+  const [statusFunction, setStatusFunction] = useState({
+    isAdd: false,
+    isEditing: false,
+    isViewDetail: false,
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
   const [errorServer, setErrorServer] = useState(null);
@@ -57,6 +61,8 @@ const TrainerManagement = () => {
       case "fullName":
         if (!value || value.trim() === "") {
           error = "Tên không được để trống.";
+        } else if (/\d/.test(value)) {
+          error = "Tên không được chứa số.";
         }
         break;
       case "phoneNumber":
@@ -102,7 +108,10 @@ const TrainerManagement = () => {
 
     if (!formData.fullName || formData.fullName.trim() === "") {
       newErrors.fullName = "Tên không được để trống.";
+    } else if (/\d/.test(formData.fullName)) {
+      newErrors.fullName = "Tên không được chứa số.";
     }
+
     if (!formData.phoneNumber || !/^\d{10}$/.test(formData.phoneNumber)) {
       newErrors.phoneNumber = "Số điện thoại không hợp lệ.";
     }
@@ -138,14 +147,14 @@ const TrainerManagement = () => {
   };
 
   const updateStatus = (newStatus) => {
-    setStatusFunction(prevStatus => ({
-      ...prevStatus,    // Giữ lại các thuộc tính trước đó
-      ...newStatus      // Cập nhật các thuộc tính mới
+    setStatusFunction((prevStatus) => ({
+      ...prevStatus, // Giữ lại các thuộc tính trước đó
+      ...newStatus, // Cập nhật các thuộc tính mới
     }));
   };
 
   const handleResetStatus = () => {
-    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false })
+    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false });
   };
 
   const handleReset = () => {
@@ -165,7 +174,7 @@ const TrainerManagement = () => {
 
   const handleEdit = (item) => {
     setFormData(item);
-    updateStatus({ isEditing: true })
+    updateStatus({ isEditing: true });
     setErrorFields({});
   };
 
@@ -193,11 +202,6 @@ const TrainerManagement = () => {
       handleReset();
       return true;
     } catch (error) {
-      if (error.response) {
-        toast.error(error.response.data + "!"); // Hiển thị thông điệp lỗi
-      } else {
-        toast.error("Đã xảy ra lỗi không xác định. Vui lòng thử lại sau !"); // Thông báo lỗi chung
-      }
       return false;
     } finally {
       setIsLoading(false);

@@ -1,10 +1,10 @@
 package edu.poly.hightstar.model;
 
-import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import edu.poly.hightstar.enums.DayOfWeek;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -23,45 +23,32 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER' , 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER', 'USER')")
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Long id) {
-        UserDTO userDto = userService.getUserById(id);
-        return ResponseEntity.ok(userDto);
+    public UserDTO getUserById(@PathVariable Long id) {
+        return userService.getUserById(id);
     }
 
     @GetMapping("/search-by-username")
-    public ResponseEntity<?> getUserByUsername(@RequestParam String username) {
-        UserDTO userDto = userService.getUserByUsername(username);
-        return ResponseEntity.ok(userDto);
+    public UserDTO getUserByUsername(@RequestParam String username) {
+        return userService.getUserByUsername(username);
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody UserDTO userDto) {
+    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDto) {
         UserDTO createDto = userService.createUser(userDto);
-        return ResponseEntity.ok(createDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserDTO userDto) {
-
-        UserDTO update = userService.updateUser(id, userDto);
-        if (update == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // Kiểm tra email trong User của các User khác
-        if (userService.isEmailExistsForUpdate(userDto.getEmail(), userDto.getUserId())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email này đã được sử dụng");
-        }
-
-        return ResponseEntity.ok(update);
+    public UserDTO updateUser(@PathVariable Long id, @RequestBody UserDTO userDto) {
+        return userService.updateUser(id, userDto);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return ResponseEntity.ok("User deleted successfully."); // 200 OK với thông điệp
+        return ResponseEntity.ok("Xóa người dùng thành công.");
     }
 }

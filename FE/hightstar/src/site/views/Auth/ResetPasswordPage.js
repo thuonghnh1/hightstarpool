@@ -5,6 +5,7 @@ import logoVertical from "../../../assets/brand/logoVertical.png";
 import backgroundAuth from "../../../assets/images/backgroundAuth.jpg";
 import { toast } from "react-toastify";
 import { Spinner } from "react-bootstrap";
+import { Helmet } from "react-helmet-async";
 
 function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -53,6 +54,9 @@ function ResetPasswordPage() {
 
   return (
     <>
+      <Helmet>
+        <title>Đặt lại mật khẩu - Hight Star</title>
+      </Helmet>
       <section
         className="container-fluid p-0 min-vh-100 d-flex align-items-center justify-content-center"
         style={{
@@ -77,7 +81,7 @@ function ResetPasswordPage() {
                 Nhập mật khẩu mới của bạn để hoàn tất quá trình đặt lại mật
                 khẩu.
               </p>
-            </div>
+            </div>r
           </div>
           <div className="col-lg-6 col-md-8 mx-auto bg-body-secondary p-4 py-5 p-sm-5">
             <h3 className="mb-4 text-center text-uppercase fw-bold">

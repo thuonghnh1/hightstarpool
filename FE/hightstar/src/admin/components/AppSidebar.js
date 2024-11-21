@@ -180,7 +180,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
               isActive ? "active-link" : "inactive-link"
             }
           >
-            <i className="me-2 fa-solid fa-receipt"></i> Suất học
+            <i className="me-1 bi bi-palette-fill"></i> Suất học
           </NavLink>
         </li>
 

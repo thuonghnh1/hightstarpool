@@ -40,7 +40,6 @@ public class User {
     @Column(updatable = false)
     private LocalDateTime registeredDate;
 
-    // Thời gian cập nhật cuối cùng, tự động cập nhật khi có thay đổi
     @UpdateTimestamp
     private LocalDateTime lastLogin;
 

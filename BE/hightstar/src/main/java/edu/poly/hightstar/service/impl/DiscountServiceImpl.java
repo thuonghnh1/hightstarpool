@@ -4,11 +4,13 @@ import edu.poly.hightstar.domain.Discount;
 import edu.poly.hightstar.model.DiscountDTO;
 import edu.poly.hightstar.repository.DiscountRepository;
 import edu.poly.hightstar.service.DiscountService;
+import edu.poly.hightstar.utils.exception.AppException;
+import edu.poly.hightstar.utils.exception.ErrorCode;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,50 +26,49 @@ public class DiscountServiceImpl implements DiscountService {
     public List<DiscountDTO> getAllDiscounts() {
         return discountRepository.findAll().stream().map(discount -> {
             DiscountDTO dto = new DiscountDTO();
-            BeanUtils.copyProperties(discount, dto); // Chuyển từ entity sang DTO
+            BeanUtils.copyProperties(discount, dto);
             return dto;
         }).collect(Collectors.toList());
     }
 
     @Override
     public DiscountDTO getDiscountById(Long id) {
-        Optional<Discount> discount = discountRepository.findById(id);
-        if (discount.isPresent()) {
-            DiscountDTO discountDTO = new DiscountDTO();
-            BeanUtils.copyProperties(discount.get(), discountDTO);
-            return discountDTO;
-        }
-        return null;
+        Discount discount = discountRepository.findById(id)
+                .orElseThrow(() -> new AppException("Giảm giá này không tồn tại!", ErrorCode.DISCOUNT_NOT_FOUND));
+
+        DiscountDTO discountDTO = new DiscountDTO();
+        BeanUtils.copyProperties(discount, discountDTO);
+        return discountDTO;
     }
 
     @Override
     public DiscountDTO createDiscount(DiscountDTO discountDTO) {
         Discount discount = new Discount();
-        BeanUtils.copyProperties(discountDTO, discount); // Chuyển từ DTO sang entity
+        BeanUtils.copyProperties(discountDTO, discount);
         Discount createdDiscount = discountRepository.save(discount);
 
         DiscountDTO createdDiscountDTO = new DiscountDTO();
-        BeanUtils.copyProperties(createdDiscount, createdDiscountDTO); // Trả về DTO sau khi tạo
+        BeanUtils.copyProperties(createdDiscount, createdDiscountDTO);
         return createdDiscountDTO;
     }
 
     @Override
     public DiscountDTO updateDiscount(Long id, DiscountDTO discountDTO) {
-        Optional<Discount> discountOptional = discountRepository.findById(id);
-        if (discountOptional.isPresent()) {
-            Discount discountDetails = discountOptional.get();
-            BeanUtils.copyProperties(discountDTO, discountDetails);
-            Discount updatedDiscount = discountRepository.save(discountDetails);
+        Discount discount = discountRepository.findById(id)
+                .orElseThrow(() -> new AppException("Giảm giá này không tồn tại!", ErrorCode.DISCOUNT_NOT_FOUND));
+        BeanUtils.copyProperties(discountDTO, discount);
+        Discount updatedDiscount = discountRepository.save(discount);
 
-            DiscountDTO updatedDiscountDto = new DiscountDTO();
-            BeanUtils.copyProperties(updatedDiscount, updatedDiscountDto);
-            return updatedDiscountDto;
-        }
-        return null; // Hoặc xử lý lỗi nếu không tìm thấy
+        DiscountDTO updatedDiscountDto = new DiscountDTO();
+        BeanUtils.copyProperties(updatedDiscount, updatedDiscountDto);
+        return updatedDiscountDto;
     }
 
     @Override
     public void deleteDiscount(Long id) {
+        if (!discountRepository.existsById(id)) {
+            throw new AppException("Giảm giá này không tồn tại!", ErrorCode.DISCOUNT_NOT_FOUND);
+        }
         discountRepository.deleteById(id);
     }
 }

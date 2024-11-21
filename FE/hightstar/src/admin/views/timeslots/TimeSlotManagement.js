@@ -64,9 +64,9 @@ const TimeSlotManagement = () => {
     };
 
     // Gọi API khi component mount
-    // useEffect(() => {
-    //     fetchTimeSlotData();
-    // }, []);
+    useEffect(() => {
+        fetchTimeSlotData();
+    }, []);
 
     // Hàm validate cho từng trường input
     const validateField = (key, value) => {
@@ -116,7 +116,7 @@ const TimeSlotManagement = () => {
 
         if (!formData.endTime) {
             newErrors.endTime = "Thời gian kết thúc không được để trống.";
-        } else if (formData.endTime <= formData.startDateDate) {
+        } else if (formData.startTime && formData.endTime <= formData.startTime) {
             newErrors.endTime = "Thời gian kết thúc phải sau thời gian bắt đầu.";
         }
 
@@ -192,11 +192,6 @@ const TimeSlotManagement = () => {
             handleReset();
             return true;
         } catch (error) {
-            if (error.response) {
-                toast.error(error.response.data + "!"); // Hiển thị thông điệp lỗi từ server
-            } else {
-                toast.error("Đã xảy ra lỗi không xác định. Vui lòng thử lại sau!"); // Thông báo lỗi chung
-            }
             return false;
         } finally {
             setIsLoading(false);

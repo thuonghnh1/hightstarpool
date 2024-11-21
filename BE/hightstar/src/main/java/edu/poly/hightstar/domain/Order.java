@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 
 import edu.poly.hightstar.enums.OrderStatus;
+import edu.poly.hightstar.enums.PaymentMethod;
 
 @Data
 @Entity
@@ -24,8 +25,9 @@ public class Order {
     @Column(nullable = false)
     private double total;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String paymentMethod;
+    private PaymentMethod paymentMethod;
 
     @Column(length = 500) // Đặt độ dài tùy ý
     private String notes;
@@ -38,7 +40,7 @@ public class Order {
     private String shippingAddress;
 
     @ManyToOne
-    @JoinColumn(name = "discountId", referencedColumnName = "discountId", nullable = true)
+    @JoinColumn(name = "discountId", referencedColumnName = "discountId")
     private Discount discount;
 
     @ManyToOne

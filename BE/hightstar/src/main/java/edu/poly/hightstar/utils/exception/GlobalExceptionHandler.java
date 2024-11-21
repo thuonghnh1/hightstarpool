@@ -9,36 +9,35 @@ import org.springframework.web.context.request.WebRequest;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<Object> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex,
-            WebRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), HttpStatus.CONFLICT.value());
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    // Xử lý AppException tổng quát với ErrorCode
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ErrorResponse> handleAppException(AppException ex, WebRequest request) {
+        HttpStatus status = getStatusByErrorCode(ex.getErrorCode());
+        ErrorResponse errorResponse = new ErrorResponse(
+                status.value(),
+                ex.getMessage(),
+                ex.getErrorCode());
+        return new ResponseEntity<>(errorResponse, status);
     }
 
-    @ExceptionHandler(PhoneNumberAlreadyExistsException.class)
-    public ResponseEntity<Object> handlePhoneNumberAlreadyExistsException(PhoneNumberAlreadyExistsException ex,
-            WebRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), HttpStatus.CONFLICT.value());
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    // Xử lý ngoại lệ không mong đợi
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception ex, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.",
+                ErrorCode.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(InvalidLoginException.class)
-    public ResponseEntity<Object> handleInvalidLoginException(InvalidLoginException ex, WebRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED.value());
-        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Object> handlerNotFoundException(NotFoundException ex, WebRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND.value());
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-    }    
-
-    // Xử lý các ngoại lệ chung chung
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Object> handleRuntimeException(RuntimeException ex, WebRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    // Xác định HttpStatus dựa trên ErrorCode
+    private HttpStatus getStatusByErrorCode(ErrorCode errorCode) {
+        return switch (errorCode) {
+            case INVALID_LOGIN, UNAUTHORIZED_ACCESS -> HttpStatus.UNAUTHORIZED;
+            case EMAIL_ALREADY_EXISTS, PHONE_NUMBER_ALREADY_EXISTS, CONFLICT_ERROR, DUPLICATE_ENTRY -> HttpStatus.CONFLICT;
+            case USER_NOT_FOUND, RESOURCE_NOT_FOUND, ORDER_NOT_FOUND, PRODUCT_NOT_FOUND, COURSE_NOT_FOUND, STUDENT_NOT_FOUND, TRAINER_NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case INVALID_INPUT -> HttpStatus.BAD_REQUEST;
+            default -> HttpStatus.INTERNAL_SERVER_ERROR;
+        };
     }
 }

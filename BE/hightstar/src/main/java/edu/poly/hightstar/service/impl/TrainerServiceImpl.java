@@ -11,9 +11,8 @@ import edu.poly.hightstar.repository.UserRepository;
 import edu.poly.hightstar.repository.UserProfileRepository;
 import edu.poly.hightstar.service.EmailService;
 import edu.poly.hightstar.service.TrainerService;
-import edu.poly.hightstar.utils.exception.EmailAlreadyExistsException;
-import edu.poly.hightstar.utils.exception.NotFoundException;
-import edu.poly.hightstar.utils.exception.PhoneNumberAlreadyExistsException;
+import edu.poly.hightstar.utils.exception.ErrorCode;
+import edu.poly.hightstar.utils.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -40,10 +39,12 @@ public class TrainerServiceImpl implements TrainerService {
 
         public TrainerDTO createTrainer(TrainerDTO trainerDTO) {
                 if (userRepository.findByEmail(trainerDTO.getEmail()).isPresent()) {
-                        throw new EmailAlreadyExistsException("Email đã tồn tại!");
+                        throw new AppException("Email này đã được sử dụng!", ErrorCode.EMAIL_ALREADY_EXISTS);
                 }
                 if (userRepository.findByUsername(trainerDTO.getPhoneNumber()).isPresent()) {
-                        throw new PhoneNumberAlreadyExistsException("Số điện thoại đã tồn tại!");
+                        throw new AppException("Số điện thoại này đã được sử dụng!",
+                                        ErrorCode.PHONE_NUMBER_ALREADY_EXISTS);
+
                 }
 
                 // Tạo mới đối tượng User
@@ -86,8 +87,19 @@ public class TrainerServiceImpl implements TrainerService {
 
                 // Tìm Trainer theo id
                 Trainer trainer = trainerRepository.findById(trainerId)
-                                .orElseThrow(() -> new RuntimeException("Trainer not found"));
+                                .orElseThrow(() -> new AppException("Không tìm thấy HLV này trong hệ thống!",
+                                                ErrorCode.TRAINER_NOT_FOUND));
 
+                // Kiểm tra số điện thoại đã tồn tại
+                if (isPhoneNumberExistsForUpdate(trainerDTO.getPhoneNumber(), trainerId)) {
+                        throw new AppException("Số điện thoại này đã được sử dụng!",
+                                        ErrorCode.PHONE_NUMBER_ALREADY_EXISTS);
+                }
+
+                // Kiểm tra email đã tồn tại
+                if (isEmailExistsForUpdate(trainerDTO.getEmail(), trainerId)) {
+                        throw new AppException("Email này đã được sử dụng!", ErrorCode.EMAIL_ALREADY_EXISTS);
+                }
                 // Cập nhật Trainer
                 trainer.setSpecialty(trainerDTO.getSpecialty());
                 trainer.setExperienceYears(trainerDTO.getExperienceYears());
@@ -97,13 +109,16 @@ public class TrainerServiceImpl implements TrainerService {
 
                 // Cập nhật User và UserProfile liên quan
                 User user = userRepository.findById(trainerDTO.getUserId())
-                                .orElseThrow(() -> new RuntimeException("User not found"));
+                                .orElseThrow(() -> new AppException(
+                                                "Không tìm thấy tài khoản của HLV này trong hệ thống!",
+                                                ErrorCode.USER_NOT_FOUND));
                 user.setEmail(trainerDTO.getEmail());
                 user.setStatus(trainerDTO.getStatus());
                 userRepository.save(user);
 
                 UserProfile userProfile = userProfileRepository.findByUser_UserId(trainerDTO.getUserId())
-                                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+                                .orElseThrow(() -> new AppException("Không tìm thấy hồ sơ của HLV này trong hệ thống!",
+                                                ErrorCode.USER_PROFILE_NOT_FOUND));
                 userProfile.setFullName(trainerDTO.getFullName());
                 userProfile.setPhoneNumber(trainerDTO.getPhoneNumber());
                 userProfile.setGender(trainerDTO.isGender());
@@ -122,8 +137,9 @@ public class TrainerServiceImpl implements TrainerService {
                                         User user = trainer.getUser();
                                         UserProfile userProfile = userProfileRepository
                                                         .findByUser_UserId(user.getUserId())
-                                                        .orElseThrow(() -> new RuntimeException(
-                                                                        "UserProfile not found"));
+                                                        .orElseThrow(() -> new AppException(
+                                                                        "Không tìm thấy HLV này trong hệ thống!",
+                                                                        ErrorCode.TRAINER_NOT_FOUND));
                                         return convertToDto(trainer, user, userProfile);
                                 })
                                 .collect(Collectors.toList());
@@ -134,10 +150,12 @@ public class TrainerServiceImpl implements TrainerService {
 
                 // Tìm Trainer theo id và chuyển đổi sang TrainerDto
                 Trainer trainer = trainerRepository.findById(id)
-                                .orElseThrow(() -> new NotFoundException("HLV này không tồn tại trong hệ thống!"));
+                                .orElseThrow(() -> new AppException("Không tìm thấy HLV này trong hệ thống!",
+                                                ErrorCode.TRAINER_NOT_FOUND));
                 User user = trainer.getUser();
                 UserProfile userProfile = userProfileRepository.findByUser_UserId(user.getUserId())
-                                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+                                .orElseThrow(() -> new AppException("Không tìm thấy HLV này trong hệ thống!",
+                                                ErrorCode.TRAINER_NOT_FOUND));
                 return convertToDto(trainer, user, userProfile);
         }
 
@@ -145,8 +163,8 @@ public class TrainerServiceImpl implements TrainerService {
         @Transactional
         public void deleteTrainer(Long id) {
                 Trainer trainer = trainerRepository.findById(id)
-                                .orElseThrow(() -> new NotFoundException("HLV này không tồn tại trong hệ thống!"));
-
+                                .orElseThrow(() -> new AppException("Không tìm thấy HLV này trong hệ thống!",
+                                                ErrorCode.TRAINER_NOT_FOUND));
                 // Xóa UserProfile và User liên quan
                 User user = trainer.getUser();
                 userProfileRepository.deleteByUser_UserId(user.getUserId());

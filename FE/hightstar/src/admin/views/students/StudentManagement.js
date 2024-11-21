@@ -17,14 +17,18 @@ const StudentManagement = () => {
   const [listUserOption, setListUserOption] = useState([]);
 
   const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
-  const [statusFunction, setStatusFunction] = useState({ isAdd: false, isEditing: false, isViewDetail: false }); // Trạng thái để biết đang thêm mới hay chỉnh sửa hay xem chi tiết
+  const [statusFunction, setStatusFunction] = useState({
+    isAdd: false,
+    isEditing: false,
+    isViewDetail: false,
+  }); // Trạng thái để biết đang thêm mới hay chỉnh sửa hay xem chi tiết
   // State để xử lý trạng thái tải dữ liệu và lỗi
 
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
   const [errorServer, setErrorServer] = useState(null);
 
-  // Mảng cột của bảng 
+  // Mảng cột của bảng
   const studentColumns = [
     { key: "id", label: "ID" },
     { key: "avatar", label: "Ảnh" },
@@ -53,19 +57,19 @@ const StudentManagement = () => {
       setLoadingPage(false);
     }
     try {
-      // Lấy danh sách người dùng từ API
       let users = await UserService.getUsers();
+      // Lọc danh sách người dùng để chỉ lấy những người có vai trò USER
+      const filteredUsers = users.filter((user) => user.role === "USER");
 
-      // Chuyển đổi danh sách người dùng thành định dạng phù hợp cho Select
-      const userOptions = users.map((user) => ({
-        value: user.id, // giả sử user có thuộc tính id
-        label: user.id, // giả sử user có thuộc tính name
+      // Chuyển đổi danh sách người dùng đã lọc thành định dạng phù hợp cho Select
+      const userOptions = filteredUsers.map((user) => ({
+        value: user.id,
+        label: `#${user.id} - ${user.username}`,
       }));
-
       // Cập nhật trạng thái danh sách tùy chọn cho Select
       setListUserOption(userOptions);
     } catch (error) {
-      toast.error("Lỗi khi lấy danh sách người dùng:", error);
+      toast.error("Lỗi khi lấy danh sách người dùng");
     }
   };
 
@@ -82,7 +86,9 @@ const StudentManagement = () => {
       case "fullName":
         if (!value || value.trim() === "") {
           error = "Tên không được để trống.";
-        }
+        }else if (/\d/.test(value)) {
+          error = "Tên không được chứa chữ số.";
+        } 
         break;
 
       case "age":
@@ -114,7 +120,9 @@ const StudentManagement = () => {
 
     if (!formData.fullName || formData.fullName.trim() === "") {
       newErrors.fullName = "Tên không được để trống.";
-    }
+    } else if (/\d/.test(formData.fullName)) {
+      newErrors.fullName = "Tên không được chứa chữ số.";
+    }    
 
     if (formData.age === "" || formData.age === null) {
       newErrors.age = "Tuổi không được để trống.";
@@ -136,13 +144,13 @@ const StudentManagement = () => {
   };
 
   const updateStatus = (newStatus) => {
-    setStatusFunction(prevStatus => ({
-      ...prevStatus,    // Giữ lại các thuộc tính trước đó
-      ...newStatus      // Cập nhật các thuộc tính mới
+    setStatusFunction((prevStatus) => ({
+      ...prevStatus, // Giữ lại các thuộc tính trước đó
+      ...newStatus, // Cập nhật các thuộc tính mới
     }));
   };
   const handleResetStatus = () => {
-    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false })
+    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false });
   };
 
   // Hàm reset form khi thêm mới
@@ -151,7 +159,7 @@ const StudentManagement = () => {
       fullName: "",
       avatar: "",
       nickname: "",
-      age: "",
+      age: 0,
       gender: true,
       note: "",
     });
@@ -163,7 +171,7 @@ const StudentManagement = () => {
     setFormData({
       ...item,
     });
-    updateStatus({ isEditing: true })
+    updateStatus({ isEditing: true });
     setErrorFields({});
   };
 
@@ -189,7 +197,10 @@ const StudentManagement = () => {
         toast.success("Cập nhật thành công!");
       } else if (statusFunction.isAdd) {
         // Gọi API thêm mới sử dụng studentService
-        const newStudent = await studentService.createStudent(formData, imageFile);
+        const newStudent = await studentService.createStudent(
+          formData,
+          imageFile
+        );
         // Cập nhật mảng studentData với item vừa được thêm
         setStudentData([...studentData, newStudent]);
         toast.success("Thêm mới thành công!");
@@ -197,11 +208,6 @@ const StudentManagement = () => {
       handleReset();
       return true;
     } catch (error) {
-      if (error.response) {
-        toast.error(error.response.data + "!"); // Hiển thị thông điệp lỗi chi tiết từ server nếu có
-      } else {
-        toast.error("Đã xảy ra lỗi không xác định. Vui lòng thử lại sau !"); // Thông báo lỗi chung
-      }
       return false;
     } finally {
       setIsLoading(false);
@@ -335,9 +341,7 @@ const StudentManagement = () => {
         {/* Ảnh Đại Diện */}
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formImage">
-            <Form.Label>
-              Ảnh đại diện
-            </Form.Label>
+            <Form.Label>Ảnh đại diện</Form.Label>
             <div style={{ display: "flex", alignItems: "center" }}>
               <Form.Control
                 type="file"

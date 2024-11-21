@@ -6,10 +6,8 @@ import edu.poly.hightstar.repository.UserProfileRepository;
 import edu.poly.hightstar.repository.UserRepository;
 import edu.poly.hightstar.service.EmailService;
 import edu.poly.hightstar.service.UserService;
-import edu.poly.hightstar.utils.exception.EmailAlreadyExistsException;
-import edu.poly.hightstar.utils.exception.InvalidLoginException;
-import edu.poly.hightstar.utils.exception.PhoneNumberAlreadyExistsException;
-import edu.poly.hightstar.utils.exception.NotFoundException;
+import edu.poly.hightstar.utils.exception.AppException;
+import edu.poly.hightstar.utils.exception.ErrorCode;
 import edu.poly.hightstar.utils.jwt.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -43,10 +42,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO registerUser(RegisterDTO registerDTO) {
         if (userRepository.findByEmail(registerDTO.getEmail()).isPresent()) {
-            throw new EmailAlreadyExistsException("Email đã tồn tại!");
+            throw new AppException("Email này đã được sử dụng!", ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         if (userRepository.findByUsername(registerDTO.getPhoneNumber()).isPresent()) {
-            throw new PhoneNumberAlreadyExistsException("Số điện thoại đã tồn tại!");
+            throw new AppException("Số điện thoại này đã được sử dụng!", ErrorCode.PHONE_NUMBER_ALREADY_EXISTS);
         }
 
         User newUser = new User();
@@ -76,7 +75,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOptional = userRepository.findByUsername(loginDTO.getUsername());
         if (!userOptional.isPresent()
                 || !passwordEncoder.matches(loginDTO.getPassword(), userOptional.get().getPassword())) {
-            throw new InvalidLoginException("Thông tin đăng nhập không chính xác!");
+            throw new AppException("Thông tin đăng nhập không chính xác!", ErrorCode.INVALID_LOGIN);
         }
 
         User user = userOptional.get();
@@ -85,36 +84,39 @@ public class UserServiceImpl implements UserService {
         }
 
         Optional<UserProfile> userProfile = userProfileRepository.findByUser_UserId(user.getUserId());
-        UserProfile profile = userProfile.orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ người dùng!"));
+        UserProfile profile = userProfile.orElseThrow(
+                () -> new AppException("Không tìm thấy hồ sơ người dùng!", ErrorCode.USER_PROFILE_NOT_FOUND));
 
-        // Tạo access token và refresh token
         String accessToken = jwtTokenProvider.generateToken(user.getUsername(), List.of(user.getRole()),
                 user.getUserId());
         String refreshToken = "Bearer " + jwtTokenProvider.generateRefreshToken(user.getUsername());
 
-        // Set access token vào header của response
         response.setHeader("Authorization", "Bearer " + accessToken);
 
-        // Tạo đối tượng response để trả về FE
         LoginResponse loginResponse = new LoginResponse(user.getUserId(), profile.getFullName(),
                 user.getEmail(), profile.getAvatar(), user.getRole(), accessToken, refreshToken);
-
+        user.setLastLogin(LocalDateTime.now());
+        userRepository.save(user);
         return loginResponse;
     }
 
-    // // Đặt lại mật khẩu
-    // public boolean resetPassword(String email, String newPassword) {
-    // Optional<User> userOpt = userRepository.findByEmail(email);
-    // if (userOpt.isPresent()) {
-    // User user = userOpt.get();
-    // user.setPassword(passwordEncoder.encode(newPassword));
-    // userRepository.save(user);
-    // return true;
-    // }
-    // return false;
-    // }
+    @Override
+    public boolean resetPassword(String phoneNumber, String newPassword) {
+        // Tìm người dùng theo số điện thoại
+        Optional<User> userOptional = userRepository.findByUsername(phoneNumber);
 
-    // THUONG
+        // Kiểm tra người dùng có tồn tại không
+        if (!userOptional.isPresent()) {
+            return false;
+        }
+        User user = new User();
+        user = userOptional.get();
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
+        SendEmailNotification(user); // gửi email thông báo
+        return true;
+    }
 
     @Override
     public List<UserDTO> getAllUsers() {
@@ -134,7 +136,7 @@ public class UserServiceImpl implements UserService {
             BeanUtils.copyProperties(user.get(), userDto);
             return userDto;
         }
-        throw new NotFoundException("Người dùng này không tồn tại trong hệ thống!");
+        throw new AppException("Người dùng này không tồn tại trong hệ thống!", ErrorCode.USER_NOT_FOUND);
     }
 
     @Override
@@ -150,16 +152,16 @@ public class UserServiceImpl implements UserService {
                 return userDto;
             }
         }
-        throw new NotFoundException("Người dùng này không tồn tại trong hệ thống!");
+        throw new AppException("Người dùng này không tồn tại trong hệ thống!", ErrorCode.USER_NOT_FOUND);
     }
 
     @Override
     public UserDTO createUser(UserDTO userDto) {
         if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
-            throw new EmailAlreadyExistsException("Email đã tồn tại!");
+            throw new AppException("Email đã tồn tại!", ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         if (userRepository.findByUsername(userDto.getPhoneNumber()).isPresent()) {
-            throw new PhoneNumberAlreadyExistsException("Số điện thoại đã tồn tại!");
+            throw new AppException("Số điện thoại đã tồn tại!", ErrorCode.PHONE_NUMBER_ALREADY_EXISTS);
         }
 
         User user = new User();
@@ -198,30 +200,12 @@ public class UserServiceImpl implements UserService {
             BeanUtils.copyProperties(updatedUser, updatedUserDto);
             return updatedUserDto;
         }
-        return null;
+        throw new AppException("Người dùng này không tồn tại trong hệ thống!", ErrorCode.USER_NOT_FOUND);
     }
 
     @Override
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
-    }
-
-    @Override
-    public boolean resetPassword(String phoneNumber, String newPassword) {
-        // Tìm người dùng theo số điện thoại
-        Optional<User> userOptional = userRepository.findByUsername(phoneNumber);
-
-        // Kiểm tra người dùng có tồn tại không
-        if (!userOptional.isPresent()) {
-            return false;
-        }
-        User user = new User();
-        user = userOptional.get();
-        String encodedPassword = passwordEncoder.encode(newPassword);
-        user.setPassword(encodedPassword);
-        userRepository.save(user);
-
-        return true;
     }
 
     public boolean checkUserExists(Long id) {
@@ -293,4 +277,48 @@ public class UserServiceImpl implements UserService {
 
         emailService.sendHtmlEmail(userDTO.getEmail(), emailSubject, emailBody);
     }
+
+    private void SendEmailNotification(User user) {
+
+        String emailSubject = "Mật khẩu của bạn đã được thay đổi thành công";
+
+        String emailBody = "<html>" +
+                "<head>" +
+                "<style>" +
+                "    body { font-family: Arial, sans-serif; line-height: 1.6; }" +
+                "    .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }"
+                +
+                "    h1 { color: #333; }" +
+                "    .info { background-color: #f9f9f9; padding: 15px; border: 1px solid #e1e1e1; border-radius: 5px; }"
+                +
+                "    .footer { margin-top: 20px; font-size: 0.9em; color: #666; text-align: center; }" +
+                "    .footer strong { color: #333; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "    <div class='container'>" +
+                "        <div style='text-align: center; margin-bottom: 20px;'>" +
+                "            <img src='https://res.cloudinary.com/da0i2y1qu/image/upload/v1731420581/logoVertical_q1nbbl.png' alt='Hight Star Logo' style='width: 150px; height: auto;' />"
+                +
+                "        </div>" +
+                "        <h1>Kính gửi bạn,</h1>" +
+                "        <p>Chúng tôi xin thông báo rằng mật khẩu tài khoản của bạn đã được thay đổi thành công. Nếu bạn không yêu cầu thay đổi mật khẩu này, vui lòng liên hệ ngay với chúng tôi để đảm bảo an toàn cho tài khoản của bạn.</p>"
+                +
+                "        <div class='info'>" +
+                "            <p><strong>Tên đăng nhập:</strong> " + user.getUsername() + "</p>" +
+                "        </div>" +
+                "        <p>Nếu bạn cần hỗ trợ thêm, đừng ngần ngại liên hệ với chúng tôi qua thông tin bên dưới.</p>" +
+                "        <div class='footer'>" +
+                "            <p>Chân thành cảm ơn bạn,<br><strong>Đội ngũ hỗ trợ khách hàng</strong></p>" +
+                "            <p><strong>Hight Star</strong><br>" +
+                "            Email: support@hightstar.com | Hotline: 0888-372-325</p>" +
+                "            <p>Đây là email tự động từ phần mềm Hight Star. Vui lòng không trả lời email này.</p>" +
+                "        </div>" +
+                "    </div>" +
+                "</body>" +
+                "</html>";
+
+        emailService.sendHtmlEmail(user.getEmail(), emailSubject, emailBody);
+    }
+
 }

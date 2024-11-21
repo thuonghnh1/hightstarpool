@@ -4,22 +4,22 @@ import edu.poly.hightstar.repository.CourseRepository;
 import edu.poly.hightstar.service.CourseService;
 import edu.poly.hightstar.domain.Course;
 import edu.poly.hightstar.model.CourseDTO;
+import edu.poly.hightstar.utils.exception.AppException;
+import edu.poly.hightstar.utils.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
 
-    public CourseServiceImpl(CourseRepository courseRepository){
-        this.courseRepository = courseRepository;
-    }
-
     @Override
-    public List<CourseDTO> getAllCourses(){
+    public List<CourseDTO> getAllCourses() {
         return courseRepository.findAll().stream().map(course -> {
             CourseDTO dto = new CourseDTO();
             BeanUtils.copyProperties(course, dto);
@@ -29,43 +29,43 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CourseDTO getCourseById(Long id) {
-       Optional<Course> course = courseRepository.findById(id);
-       if (course.isPresent()){
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new AppException("Không tìm thấy khóa học này!", ErrorCode.COURSE_NOT_FOUND));
         CourseDTO courseDTO = new CourseDTO();
-       BeanUtils.copyProperties(course.get(), courseDTO);
-       return courseDTO;
-       }
-       return null;
+        BeanUtils.copyProperties(course, courseDTO);
+        return courseDTO;
     }
-    
 
     @Override
-    public CourseDTO createCourse(CourseDTO courseDTO){
+    public CourseDTO createCourse(CourseDTO courseDTO) {
         Course course = new Course();
-        BeanUtils.copyProperties(courseDTO, course); //chuyển tử dto sang entity
-        Course createCourse = courseRepository.save(course);
+        BeanUtils.copyProperties(courseDTO, course);
+        Course createdCourse = courseRepository.save(course);
 
-        CourseDTO createCourseDTO = new CourseDTO();
-        BeanUtils.copyProperties(createCourse, createCourseDTO); //trả về dto sau khi tạo
-        return createCourseDTO;
+        CourseDTO createdCourseDTO = new CourseDTO();
+        BeanUtils.copyProperties(createdCourse, createdCourseDTO);
+        return createdCourseDTO;
     }
-    
+
     @Override
-    public CourseDTO updateCourse(Long id, CourseDTO courseDTO){
-        Optional<Course> courseOptional = courseRepository.findById(id);
-        if (courseOptional.isPresent()){
-            Course courseDetails = courseOptional.get();
-            BeanUtils.copyProperties(courseDTO, courseDetails);
-            Course updatCourse = courseRepository.save(courseDetails);
+    public CourseDTO updateCourse(Long id, CourseDTO courseDTO) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(
+                        () -> new AppException("Không tìm thấy khóa học với ID " + id, ErrorCode.COURSE_NOT_FOUND));
 
-            CourseDTO updateCourseDTO = new CourseDTO();
-            BeanUtils.copyProperties(updatCourse, updateCourseDTO);
-            return updateCourseDTO;
-        }
-        return null; //Hoặc xử lí lỗi nếu ko đc tìm thấy
+        BeanUtils.copyProperties(courseDTO, course);
+        Course updatedCourse = courseRepository.save(course);
+
+        CourseDTO updatedCourseDTO = new CourseDTO();
+        BeanUtils.copyProperties(updatedCourse, updatedCourseDTO);
+        return updatedCourseDTO;
     }
-    @Override 
-    public void deleteCourse (Long id){
+
+    @Override
+    public void deleteCourse(Long id) {
+        if (!courseRepository.existsById(id)) {
+            throw new AppException("Không tìm thấy khóa học này", ErrorCode.COURSE_NOT_FOUND);
+        }
         courseRepository.deleteById(id);
     }
 }

@@ -1,22 +1,14 @@
 package edu.poly.hightstar.controller.admin;
 
-import java.util.List;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import edu.poly.hightstar.model.OrderDTO;
 import edu.poly.hightstar.model.OrderDetailDTO;
 import edu.poly.hightstar.service.OrderDetailService;
 import edu.poly.hightstar.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/employee/orders")
@@ -34,28 +26,15 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrderDTO> getOrderById(@PathVariable Long id) {
-        OrderDTO orderDTO = orderService.getOrderById(id);
-        return orderDTO != null
-                ? ResponseEntity.ok(orderDTO)
-                : ResponseEntity.notFound().build();
+    public OrderDTO getOrderById(@PathVariable Long id) {
+        return orderService.getOrderById(id);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OrderDTO> updateOrder(
-            @PathVariable Long id, @RequestBody OrderDTO orderDTO) {
-        try {
-            // Gọi phương thức updateOrder của service để lưu lại thay đổi
-            OrderDTO updatedOrder = orderService.updateOrder(id, orderDTO);
-            return ResponseEntity.ok(updatedOrder);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+    public OrderDTO updateOrder(@PathVariable Long id, @RequestBody OrderDTO orderDTO) {
+        return orderService.updateOrder(id, orderDTO);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{orderId}/details")
     public ResponseEntity<List<OrderDetailDTO>> getOrderDetails(@PathVariable Long orderId) {
         List<OrderDetailDTO> orderDetails = orderDetailService.getOrderDetailsByOrderId(orderId);

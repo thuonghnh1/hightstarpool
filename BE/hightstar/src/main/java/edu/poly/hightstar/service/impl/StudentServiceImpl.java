@@ -1,7 +1,6 @@
 package edu.poly.hightstar.service.impl;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
@@ -13,7 +12,8 @@ import edu.poly.hightstar.model.StudentDTO;
 import edu.poly.hightstar.repository.StudentRepository;
 import edu.poly.hightstar.repository.UserRepository;
 import edu.poly.hightstar.service.StudentService;
-import jakarta.persistence.EntityNotFoundException;
+import edu.poly.hightstar.utils.exception.AppException;
+import edu.poly.hightstar.utils.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -26,26 +26,22 @@ public class StudentServiceImpl implements StudentService {
     public List<StudentDTO> getAllStudents() {
         return studentRepository.findAll().stream().map(student -> {
             StudentDTO dto = new StudentDTO();
-
-            // Kiểm tra null trước khi gọi getUserId()
             if (student.getUser() != null) {
                 dto.setUserId(student.getUser().getUserId());
             }
-
-            BeanUtils.copyProperties(student, dto); // Chuyển từ entity sang DTO
+            BeanUtils.copyProperties(student, dto);
             return dto;
         }).collect(Collectors.toList());
     }
 
     @Override
     public StudentDTO getStudentById(Long id) {
-        Optional<Student> student = studentRepository.findById(id);
-        if (student.isPresent()) {
-            StudentDTO studentDTO = new StudentDTO();
-            BeanUtils.copyProperties(student.get(), studentDTO);
-            return studentDTO;
-        }
-        return null;
+        Student student = studentRepository.findById(id)
+                .orElseThrow(
+                        () -> new AppException("Không tìm thấy học viên này!", ErrorCode.STUDENT_NOT_FOUND));
+        StudentDTO studentDTO = new StudentDTO();
+        BeanUtils.copyProperties(student, studentDTO);
+        return studentDTO;
     }
 
     @Override
@@ -53,51 +49,46 @@ public class StudentServiceImpl implements StudentService {
         Student student = new Student();
         BeanUtils.copyProperties(studentDTO, student);
 
-        Optional<User> user = userRepository.findById(studentDTO.getUserId());
-        if (user.isPresent()) {
-            student.setUser(user.get());
-        }
+        User user = userRepository.findById(studentDTO.getUserId())
+                .orElseThrow(() -> new AppException("Không tìm thấy người dùng với ID " + studentDTO.getUserId(),
+                        ErrorCode.USER_NOT_FOUND));
+        student.setUser(user);
 
         Student createdStudent = studentRepository.save(student);
 
         StudentDTO createdStudentDTO = new StudentDTO();
         BeanUtils.copyProperties(createdStudent, createdStudentDTO);
-        if (createdStudent.getUser() != null) {
-            createdStudentDTO.setUserId(createdStudent.getUser().getUserId());
-        }
+        createdStudentDTO.setUserId(createdStudent.getUser().getUserId());
 
         return createdStudentDTO;
     }
 
     @Override
     public StudentDTO updateStudent(Long id, StudentDTO studentDTO) {
-        Optional<Student> studentOptional = studentRepository.findById(id);
-        if (studentOptional.isEmpty()) {
-            throw new EntityNotFoundException("Không tìm thấy học viên này");
-        }
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new AppException("Không tìm thấy học viên với này", ErrorCode.STUDENT_NOT_FOUND));
 
-        Student studentDetails = studentOptional.get();
-        BeanUtils.copyProperties(studentDTO, studentDetails);
+        BeanUtils.copyProperties(studentDTO, student);
 
-        Optional<User> user = userRepository.findById(studentDTO.getUserId());
-        if (user.isPresent()) {
-            studentDetails.setUser(user.get());
-        }
+        User user = userRepository.findById(studentDTO.getUserId())
+                .orElseThrow(() -> new AppException("Không tìm thấy người dùng với ID " + studentDTO.getUserId(),
+                        ErrorCode.USER_NOT_FOUND));
+        student.setUser(user);
 
-        Student updatedStudent = studentRepository.save(studentDetails);
+        Student updatedStudent = studentRepository.save(student);
 
         StudentDTO updatedStudentDTO = new StudentDTO();
         BeanUtils.copyProperties(updatedStudent, updatedStudentDTO);
-        if (updatedStudent.getUser() != null) {
-            updatedStudentDTO.setUserId(updatedStudent.getUser().getUserId());
-        }
+        updatedStudentDTO.setUserId(updatedStudent.getUser().getUserId());
 
         return updatedStudentDTO;
     }
 
     @Override
     public void deleteStudent(Long id) {
+        if (!studentRepository.existsById(id)) {
+            throw new AppException("Không tìm thấy học viên để xóa với ID " + id, ErrorCode.COURSE_NOT_FOUND);
+        }
         studentRepository.deleteById(id);
     }
-
 }

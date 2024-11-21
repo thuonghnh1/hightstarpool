@@ -14,7 +14,11 @@ const UserManagement = () => {
   const [userData, setUserData] = useState([]);
   const [formData, setFormData] = useState({});
   const [errorFields, setErrorFields] = useState({});
-  const [statusFunction, setStatusFunction] = useState({ isAdd: false, isEditing: false, isViewDetail: false });
+  const [statusFunction, setStatusFunction] = useState({
+    isAdd: false,
+    isEditing: false,
+    isViewDetail: false,
+  });
 
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
@@ -58,6 +62,8 @@ const UserManagement = () => {
       case "fullName":
         if (!value || value.trim() === "") {
           error = "Tên không được để trống.";
+        }else if(/\d/.test(formData.fullName)){
+          error = "Tên không được chứa số.";
         }
         break;
       case "phoneNumber":
@@ -86,11 +92,19 @@ const UserManagement = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!statusFunction.isEditing && (!formData.fullName || formData.fullName.trim() === "")) { // nếu là edit thì sẽ không validate trường này
-      newErrors.fullName = "Tên không được để trống.";
+    if (!statusFunction.isEditing) {
+      // nếu là edit thì sẽ không validate trường này
+      if (!formData.fullName || formData.fullName.trim() === "") {
+        newErrors.fullName = "Tên không được để trống.";
+      } else if (/\d/.test(formData.fullName)) {
+        newErrors.fullName = "Tên không được chứa chữ số.";
+      }
     }
 
-    if (!statusFunction.isEditing && (!formData.phoneNumber || !/^\d{10}$/.test(formData.phoneNumber))) {
+    if (
+      !statusFunction.isEditing &&
+      (!formData.phoneNumber || !/^\d{10}$/.test(formData.phoneNumber))
+    ) {
       newErrors.phoneNumber = "Số điện thoại không hợp lệ.";
     }
 
@@ -110,14 +124,14 @@ const UserManagement = () => {
   };
 
   const updateStatus = (newStatus) => {
-    setStatusFunction(prevStatus => ({
-      ...prevStatus,    // Giữ lại các thuộc tính trước đó
-      ...newStatus      // Cập nhật các thuộc tính mới
+    setStatusFunction((prevStatus) => ({
+      ...prevStatus, // Giữ lại các thuộc tính trước đó
+      ...newStatus, // Cập nhật các thuộc tính mới
     }));
   };
 
   const handleResetStatus = () => {
-    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false })
+    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false });
   };
 
   const handleReset = () => {
@@ -129,7 +143,7 @@ const UserManagement = () => {
       password: "",
       status: "ACTIVE",
     });
-    handleResetStatus()
+    handleResetStatus();
     setErrorFields({});
   };
 
@@ -139,12 +153,11 @@ const UserManagement = () => {
       registeredDate: formatDateTimeToISO(item.registeredDate),
       lastLogin: formatDateTimeToISO(item.lastLogin),
     });
-    updateStatus({ isEditing: true })
+    updateStatus({ isEditing: true });
     setErrorFields({});
   };
 
   const handleSaveItem = async () => {
-
     if (!validateForm()) return false;
     setIsLoading(true);
 
@@ -166,7 +179,6 @@ const UserManagement = () => {
         toast.success("Cập nhật thành công!");
       } else if (statusFunction.isAdd) {
         const newUser = await userService.createUser(formData);
-        console.log(formData.fullName);
         const formattedUser = {
           ...newUser,
           registeredDate: formatDateTimeToDMY(newUser.registeredDate),
@@ -180,11 +192,6 @@ const UserManagement = () => {
       handleReset();
       return true;
     } catch (error) {
-      if (error.response) {
-        toast.error(error.response.data + "!");
-      } else {
-        toast.error("Đã xảy ra lỗi không xác định. Vui lòng thử lại sau!");
-      }
       return false;
     } finally {
       setIsLoading(false);
@@ -289,10 +296,13 @@ const UserManagement = () => {
               required
               disabled={statusFunction.isEditing}
             >
-              <option value="ADMIN">Quản trị</option>
-              <option value="USER">Người dùng</option>
+              <option value="ADMIN">Quản Trị</option>
+              <option value="EMPLOYEE">Nhân Viên</option>
               {/* Nếu là tạo mới thì không tạo HLV ở user */}
-              {statusFunction.isEditing && <option value="TRAINER">Huấn luyện viên</option>}
+              {statusFunction.isEditing && (
+                <option value="TRAINER">Huấn Luyện Viên</option>
+              )}
+              <option value="USER">Người Dùng</option>
             </Form.Select>
             <Form.Control.Feedback type="invalid">
               {errorFields.role}

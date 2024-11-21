@@ -27,6 +27,7 @@ public class TimeSlotController {
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')")
     @GetMapping
     public List<TimeSlotDTO> getAllTimeSlots() {
+        System.out.println(timeSlotService.getAllTimeSlots());
         return timeSlotService.getAllTimeSlots();
     }
 

@@ -10,16 +10,21 @@ import edu.poly.hightstar.enums.DayOfWeek;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "timeslots")
+@Table(name = "timeslots", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "dayOfWeek", "startTime", "endTime" })
+})
 public class TimeSlot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long slotId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private DayOfWeek dayOfWeek;
+
     @Column(nullable = false)
     private LocalTime startTime;
+
     @Column(nullable = false)
     private LocalTime endTime;
 }
