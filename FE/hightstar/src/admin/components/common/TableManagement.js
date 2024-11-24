@@ -153,6 +153,18 @@ const TableManagement = ({
           </span>
         );
 
+      case "ticketType":
+        const ticketTypeLabels = {
+          ONETIME_TICKET: "Vé một lần",
+          WEEKLY_TICKET: "Vé tuần",
+          MONTHLY_TICKET: "Vé tháng"
+        };
+        return (
+          <span className={`rounded-3 px-2 py-1`}>
+            {ticketTypeLabels[item.ticketType]}
+          </span>
+        );
+
       case "role":
         return (
           <span className="d-flex align-items-center">
@@ -426,16 +438,16 @@ const TableManagement = ({
                         </td>
                       ))}
                     <td className="align-middle">
-                        <button
-                          className="btn btn__show p-1"
-                          onClick={() => handleRowToggle(item.id)}
-                        >
-                          {expandedRows.includes(item.id) ? (
-                            <i className="bi bi-dash-circle"></i>
-                          ) : (
-                            <i className="bi bi-plus-circle"></i>
-                          )}
-                        </button>
+                      <button
+                        className="btn btn__show p-1"
+                        onClick={() => handleRowToggle(item.id)}
+                      >
+                        {expandedRows.includes(item.id) ? (
+                          <i className="bi bi-dash-circle"></i>
+                        ) : (
+                          <i className="bi bi-plus-circle"></i>
+                        )}
+                      </button>
                     </td>
                   </tr>
                   {expandedRows.includes(item.id) && (

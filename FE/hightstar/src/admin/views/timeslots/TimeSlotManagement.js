@@ -224,7 +224,7 @@ const TimeSlotManagement = () => {
         <>
             <div className="row">
                 <div className="col-md-6 mb-3">
-                    <Form.Group controlId="formUserId">
+                    <Form.Group controlId="formOfDayWeek">
                         <Form.Label>
                             Ngày trong tuần <span className="text-danger">(*)</span>
                         </Form.Label>
