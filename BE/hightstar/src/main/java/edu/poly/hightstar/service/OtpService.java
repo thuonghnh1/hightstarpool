@@ -86,10 +86,10 @@ public class OtpService {
                 "        <p>Nếu bạn không yêu cầu mã OTP, vui lòng bỏ qua email này hoặc liên hệ với chúng tôi để được hỗ trợ.</p>"
                 +
                 "        <div class='footer'>" +
-                "            <p>Trân trọng,<br><strong>Đội ngũ Hỗ trợ Hight Star</strong></p>" +
-                "            <p><strong>Hight Star</strong><br>" +
+                "            <p>Trân trọng,<br><strong>Đội ngũ Hỗ trợ HightStarPoolCompany</strong></p>" +
+                "            <p><strong>HightStarPoolCompany</strong><br>" +
                 "            Email: hightstarpoolcompany@gmail.com | Hotline: 0888-372-325</p>" +
-                "            <p>Đây là email tự động từ hệ thống Hight Star. Vui lòng không trả lời email này.</p>" +
+                "            <p>Đây là email tự động từ hệ thống Hight Star. Đây là mail tự động vui lòng không trả lời email này.</p>" +
                 "        </div>" +
                 "    </div>" +
                 "</body>" +
