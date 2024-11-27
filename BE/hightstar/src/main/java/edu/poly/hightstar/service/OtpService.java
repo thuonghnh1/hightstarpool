@@ -88,7 +88,7 @@ public class OtpService {
                 "        <div class='footer'>" +
                 "            <p>Trân trọng,<br><strong>Đội ngũ Hỗ trợ Hight Star</strong></p>" +
                 "            <p><strong>Hight Star</strong><br>" +
-                "            Email: support@hightstar.com | Hotline: 0888-372-325</p>" +
+                "            Email: hightstarpoolcompany@gmail.com | Hotline: 0888-372-325</p>" +
                 "            <p>Đây là email tự động từ hệ thống Hight Star. Vui lòng không trả lời email này.</p>" +
                 "        </div>" +
                 "    </div>" +
