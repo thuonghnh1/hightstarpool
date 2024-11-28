@@ -1,25 +1,30 @@
 import { useEffect, useState } from "react";
 import TableManagement from "../../components/common/TableManagement";
-import ticketService from "../../services/TicketService";
+import TicketService from "../../services/TicketService";
 import Page500 from "../../../common/pages/Page500";
 import { formatDateToISO, formatDateToDMY } from "../../utils/FormatDate";
 import { Spinner, Form } from "react-bootstrap";
-import { Bounce, ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import { Helmet } from "react-helmet-async";
 import Select from "react-select";
+import studentService from "../../services/StudentService";
+import { NumericFormat } from "react-number-format";
 
 const TicketManagement = () => {
   // State để lưu trữ dữ liệu giảm giá từ API
   const [ticketData, setTicketData] = useState([]);
   const [formData, setFormData] = useState({}); // State quản lý dữ liệu hiện tại
   const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
-  const [isEditing, setIsEditing] = useState(false); // Trạng thái để biết đang thêm mới hay chỉnh sửa
+  const [statusFunction, setStatusFunction] = useState({
+    isAdd: false,
+    isEditing: false,
+    isViewDetail: false,
+  }); // Trạng thái để biết đang thêm mới hay chỉnh sửa hay xem chi tiết
   // State để xử lý trạng thái tải dữ liệu và lỗi
-
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
   const [errorServer, setErrorServer] = useState(null);
-
+  const [listStudentOption, setListStudentOption] = useState([]);
   const listTicketTypeOption = [{
     value: "ONETIME_TICKET",
     label: "Vé một lần",
@@ -29,7 +34,24 @@ const TicketManagement = () => {
   }, {
     value: "MONTHLY_TICKET",
     label: "Vé tháng",
-  }]; // Lưu danh sách type
+  }, {
+    value: "STUDENT_TICKET",
+    label: "Vé học viên",
+  }];
+
+  const listTicketStatus = [{
+    value: "ACTIVE",
+    label: "Còn hiệu lực",
+  }, {
+    value: "EXPIRED",
+    label: "Đã hết hạn",
+  }, {
+    value: "USED",
+    label: "Đã sử dụng",
+  }, {
+    value: "CANCELED",
+    label: "Đã hủy",
+  }];
 
   // Mảng cột của bảng
   const ticketColumns = [
@@ -52,30 +74,40 @@ const TicketManagement = () => {
   const fetchTicketData = async () => {
     setLoadingPage(true);
     try {
-      const data = await ticketService.getTickets();
+      const data = await TicketService.getTickets();
       setTicketData(data); // Lưu dữ liệu vào state
     } catch (err) {
       setErrorServer(err.message); // Lưu lỗi vào state nếu có
+      console.log(err)
     } finally {
       setLoadingPage(false);
+    }
+
+    try {
+      let students = await studentService.getStudents();
+      // Chuyển đổi danh sách học viên đã lọc thành định dạng phù hợp cho Select
+      const studentOptions = students.map((student) => ({
+        value: student.id,
+        label: `#${student.id} - ${student.fullName}`,
+      }));
+      // Cập nhật trạng thái danh sách tùy chọn cho Select
+      setListStudentOption(studentOptions);
+    } catch (error) {
+      toast.error("Lỗi khi lấy danh sách học viên");
+      console.log(error)
     }
   };
 
   // Gọi API khi component mount
-  // useEffect(() => {
-  //   fetchTicketData();
-  // }, []);
+  useEffect(() => {
+    fetchTicketData();
+  }, []);
 
   // Hàm validate cho từng trường input
   const validateField = (key, value) => {
     let error = "";
 
     switch (key) {
-      case "ticketCode":
-        if (!value || value.trim() === "") {
-          error = "Mã vé không được để trống.";
-        }
-        break;
 
       case "issueDate":
         if (!value) {
@@ -120,10 +152,6 @@ const TicketManagement = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.ticketCode || formData.ticketCode.trim() === "") {
-      newErrors.ticketCode = "Mã vé không được để trống.";
-    }
-
     if (!formData.issueDate) {
       newErrors.issueDate = "Ngày phát hành không được để trống.";
     }
@@ -147,15 +175,54 @@ const TicketManagement = () => {
       newErrors.ticketPrice =
         "Giá vé phải là một số và không âm.";
     }
-
+    console.log(newErrors)
     setErrorFields(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  const calculateExpiryDate = (issueDate, ticketType) => {
+    const date = new Date(issueDate);
+
+    if (ticketType === "ONETIME_TICKET") {
+      date.setDate(date.getDate()); // lấy ngày hiện tại
+    } else if (ticketType === "WEEKLY_TICKET") {
+      date.setDate(date.getDate() + 7); // Cộng thêm 7 ngày
+    } else if (ticketType === "MONTHLY_TICKET") {
+      date.setMonth(date.getMonth() + 1); // Cộng thêm 1 tháng
+    } else if (ticketType === "STUDENT_TICKET") {
+      date.setMonth(date.getMonth() + 2); // Cộng thêm 2 tháng
+    }
+
+    return date.toISOString().split("T")[0]; // Trả về định dạng YYYY-MM-DD
+  };
+
   // Hàm xử lý khi thay đổi giá trị input
   const handleInputChange = (key, value) => {
-    setFormData({ ...formData, [key]: value });
-    validateField(key, value);
+    let updatedFormData = { ...formData, [key]: value };
+
+    if (key === "issueDate" && formData.ticketType) {
+      // Tự động tính ngày hết hạn khi thay đổi ngày phát hành
+      updatedFormData.expiryDate = calculateExpiryDate(value, formData.ticketType);
+    }
+
+    if (key === "ticketType" && formData.issueDate) {
+      // Tự động tính ngày hết hạn khi thay đổi loại vé
+      updatedFormData.expiryDate = calculateExpiryDate(formData.issueDate, value);
+    }
+
+    setFormData(updatedFormData);
+    validateField(key, value); // Gọi validateField nếu cần
+  };
+
+
+  const updateStatus = (newStatus) => {
+    setStatusFunction((prevStatus) => ({
+      ...prevStatus, // Giữ lại các thuộc tính trước đó
+      ...newStatus, // Cập nhật các thuộc tính mới
+    }));
+  };
+  const handleResetStatus = () => {
+    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false });
   };
 
   // Hàm reset form khi thêm mới
@@ -164,10 +231,11 @@ const TicketManagement = () => {
       ticketCode: "",
       issueDate: new Date().toISOString().split("T")[0], // Ngày hiện tại
       expiryDate: "",
-      ticketType: "ONETIME_TICKET",
+      ticketType: "",
       ticketPrice: "",
     });
-    setIsEditing(false);
+    console.log(new Date())
+    handleResetStatus();
     setErrorFields({});
   };
 
@@ -178,156 +246,87 @@ const TicketManagement = () => {
       issueDate: formatDateToISO(item.issueDate),
       expiryDate: formatDateToISO(item.expiryDate),
     });
-    setIsEditing(true);
+    updateStatus({ isEditing: true });
     setErrorFields({});
   };
 
-  // Hàm lưu thông tin sau khi thêm hoặc sửa
-  const handleSaveItem = () => {
+  const handleSaveItem = async () => {
+
     if (!validateForm()) return false;
 
-    setIsLoading(true); // Bắt đầu quá trình tải
+    setIsLoading(true);
 
-    if (isEditing) {
-      // Tìm vé đang chỉnh sửa dựa vào `id`
-      const updatedTickets = ticketData.map((ticket) => {
-        if (ticket.id === formData.id) {
-          return {
-            ...formData,
-            issueDate: formatDateToDMY(formData.issueDate),
-            expiryDate: formatDateToDMY(formData.expiryDate),
-          };
-        } else {
-          return ticket;
-        }
-      });
+    try {
+      if (statusFunction.isEditing) {
+        // Gọi API cập nhật sử dụng TicketService
+        const updatedTicket = await TicketService.updateTicket(
+          formData.id,
+          formData
+        );
 
-      // Cập nhật mảng ticketData
-      setTicketData(updatedTickets);
+        // Đổi định dạng ngày trước khi lưu vào mảng
+        const formattedTicket = {
+          ...updatedTicket,
+          issueDate: formatDateToDMY(updatedTicket.issueDate),
+          expiryDate: formatDateToDMY(updatedTicket.expiryDate),
+        };
 
-      // Gọi API cập nhật sử dụng ticketService
-      ticketService
-        .updateTicket(formData.id, formData)
-        .then(() => {
-          toast.success("Cập nhật thành công!");
-          handleReset();
-        })
-        .catch((error) => {
-          console.error("Lỗi khi cập nhật", error);
-          toast.error("Đã xảy ra lỗi khi cập nhật. Vui lòng thử lại sau.");
-        })
-        .finally(() => {
-          setIsLoading(false); // Kết thúc quá trình tải
-        });
-    } else {
-      // Nếu đang ở trạng thái thêm mới
-      const newTicket = {
-        ...formData,
-        issueDate: formatDateToDMY(formData.issueDate),
-        expiryDate: formatDateToDMY(formData.expiryDate),
-        id: Date.now().toString(), // tạo id tạm thời để gửi lên server
-      };
+        // Cập nhật state ticketData với ticket đã được sửa
+        const updatedTickets = ticketData.map((ticket) =>
+          ticket.id === formattedTicket.id ? formattedTicket : ticket
+        );
 
-      // Cập nhật mảng ticketData
-      setTicketData([...ticketData, newTicket]);
+        setTicketData(updatedTickets);
+        toast.success("Cập nhật thành công!");
+      } else if (statusFunction.isAdd) {
+        // Nếu đang ở trạng thái thêm mới
+        const newTicket = await TicketService.createTicket(formData);
 
-      // Gọi API thêm mới sử dụng ticketService
-      ticketService
-        .createTicket(newTicket)
-        .then((response) => {
-          fetchTicketData(); // Gọi lại để lấy dữ liệu mới nhất từ server
-          toast.success("Thêm mới thành công!");
-          handleReset();
-        })
-        .catch((error) => {
-          console.error("Lỗi khi thêm mới", error);
-          toast.error("Đã xảy ra lỗi khi thêm mới. Vui lòng thử lại sau.");
-        })
-        .finally(() => {
-          setIsLoading(false); // Kết thúc quá trình tải
-        });
+        // Đổi định dạng ngày trước khi lưu vào mảng
+        const formattedTicket = {
+          ...newTicket,
+          issueDate: formatDateToDMY(newTicket.issueDate),
+          expiryDate: formatDateToDMY(newTicket.expiryDate),
+        };
+
+        // Cập nhật mảng ticketData với ticket vừa được thêm
+        setTicketData([...ticketData, formattedTicket]);
+        toast.success("Thêm mới thành công!");
+      }
+      handleReset(); // Reset form
+      return true;
+    } catch (error) {
+      console.error("Lỗi xử lý ticket:", error);
+      toast.error("Đã xảy ra lỗi. Vui lòng thử lại.");
+      return false;
+    } finally {
+      setIsLoading(false); // Kết thúc quá trình tải
     }
   };
 
   // Hàm xóa một ticket
-  const handleDelete = (deleteId) => {
+  const handleDelete = async (deleteId) => {
     if (deleteId) {
       setIsLoading(true);
-      ticketService
-        .deleteTicket(deleteId)
-        .then(() => {
-          setTicketData(
-            ticketData.filter((ticket) => ticket.id !== deleteId)
-          );
-          toast.success("Xóa thành công!");
-        })
-        .catch(() => {
-          toast.error("Đã xảy ra lỗi khi xóa.");
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+      try {
+        // Gọi API xóa ticket
+        await TicketService.deleteTicket(deleteId);
+
+        // Cập nhật state sau khi xóa
+        setTicketData(ticketData.filter((ticket) => ticket.id !== deleteId));
+        toast.success("Xóa thành công!");
+      } catch (error) {
+        console.error("Lỗi khi xóa ticket:", error);
+        toast.error("Đã xảy ra lỗi khi xóa. Vui lòng thử lại.");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const modalContent = (
     <>
       <div className="row">
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formName">
-            <Form.Label>Mã Vé</Form.Label>
-            <Form.Control
-              type="text"
-              name="ticketCode"
-              value={formData.ticketCode}
-              onChange={(e) => handleInputChange("ticketCode", e.target.value)}
-              isInvalid={!!errorFields.ticketCode}
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              {errorFields.ticketCode}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </div>
-
-
-        <div className="row">
-          <div className="col-md-6 mb-3">
-            <Form.Group controlId="formIssueDate">
-              <Form.Label>Ngày Phát Hành</Form.Label>
-              <Form.Control
-                type="datetime-local"
-                name="issueDate"
-                value={formData.issueDate}
-                onChange={(e) => handleInputChange("issueDate", e.target.value)}
-                isInvalid={!!errorFields.issueDate}
-                required
-              />
-              <Form.Control.Feedback type="invalid">
-                {errorFields.issueDate}
-              </Form.Control.Feedback>
-            </Form.Group>
-          </div>
-
-          <div className="col-md-6 mb-3">
-            <Form.Group controlId="formExpiryDate">
-              <Form.Label>Ngày Hết Hạn</Form.Label>
-              <Form.Control
-                type="date"
-                name="expiryDate"
-                value={formData.expiryDate}
-                onChange={(e) => handleInputChange("expiryDate", e.target.value)}
-                isInvalid={!!errorFields.expiryDate}
-                required
-              />
-              <Form.Control.Feedback type="invalid">
-                {errorFields.expiryDate}
-              </Form.Control.Feedback>
-            </Form.Group>
-          </div>
-        </div>
-
-
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formTicketType">
             <Form.Label>
@@ -359,14 +358,18 @@ const TicketManagement = () => {
 
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formTicketPrice">
-            <Form.Label>Giá Vé</Form.Label>
-            <Form.Control
-              type="number"
-              name="ticketPrice"
-              min={0}
+            <Form.Label>Giá Vé <span className="text-danger">(*)</span></Form.Label>
+            <NumericFormat
+              thousandSeparator={true}
+              suffix=" VNĐ"
+              decimalScale={0} // Không cho phép số thập phân
               value={formData.ticketPrice}
-              onChange={(e) => handleInputChange("ticketPrice", e.target.value)}
-              isInvalid={!!errorFields.ticketPrice}
+              onValueChange={(values) => {
+                const { floatValue } = values;
+                handleInputChange("ticketPrice", floatValue); // Lấy giá trị số thực (floatValue là giá trị số thực không có dấu phân cách hay định dạng   )
+              }}
+              className="form-control"
+              placeholder="Nhập giá (VNĐ)"
               required
             />
             <Form.Control.Feedback type="invalid">
@@ -374,9 +377,93 @@ const TicketManagement = () => {
             </Form.Control.Feedback>
           </Form.Group>
         </div>
+
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formIssueDate">
+            <Form.Label>Ngày Phát Hành <span className="text-danger">(*)</span></Form.Label>
+            <Form.Control
+              type="date"
+              name="issueDate"
+              value={formData.issueDate}
+              onChange={(e) => handleInputChange("issueDate", e.target.value)}
+              isInvalid={!!errorFields.issueDate}
+              required
+            />
+            <Form.Control.Feedback type="invalid">
+              {errorFields.issueDate}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </div>
+
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formExpiryDate">
+            <Form.Label>Ngày Hết Hạn <span className="text-danger">(*)</span></Form.Label>
+            <Form.Control
+              type="date"
+              name="expiryDate"
+              value={formData.expiryDate}
+              onChange={(e) => handleInputChange("expiryDate", e.target.value)}
+              isInvalid={!!errorFields.expiryDate}
+              required
+            />
+            <Form.Control.Feedback type="invalid">
+              {errorFields.expiryDate}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </div>
+
+
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formStudentId">
+            <Form.Label>
+              Mã học viên <span className="text-danger">(*)</span>
+            </Form.Label>
+            <Select
+              options={listStudentOption}
+              value={listStudentOption.find(
+                (option) => option.value === formData.studentId
+              )}
+              onChange={(selectedOption) =>
+                handleInputChange(
+                  "studentId",
+                  selectedOption ? selectedOption.value : ""
+                )
+              }
+              placeholder="Chọn học viên"
+              isClearable // Cho phép xóa chọn lựa
+              isSearchable // Bật tính năng tìm kiếm
+
+            />
+            {errorFields.studentId && (
+              <div className="invalid-feedback d-block">
+                {errorFields.studentId}
+              </div>
+            )}
+          </Form.Group>
+        </div>
+        {statusFunction.isEditing &&
+          <div className="col-md-6 mb-3">
+            <Form.Group controlId="formStatus">
+              <Form.Label>Trạng thái vé<span className="text-danger">(*)</span></Form.Label>
+              <Form.Select
+                name="status"
+                value={formData.status}
+                onChange={(e) => handleInputChange("status", e.target.value)}
+                isInvalid={!!errorFields.status}
+                required
+              >
+                {listTicketStatus.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                {errorFields.status}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </div>}
       </div>
-
-
     </>
   );
 
@@ -400,26 +487,13 @@ const TicketManagement = () => {
             title={"Quản lý vé"}
             defaultColumns={defaultColumns} // Truyền mảng cột đã lọc
             modalContent={modalContent}
-            isEditing={isEditing}
             handleReset={handleReset}
             onEdit={handleEdit}
             handleSaveItem={handleSaveItem}
             onDelete={handleDelete}
             isLoading={isLoading}
-          />
-
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-            transition={Bounce}
+            statusFunction={statusFunction}
+            onResetStatus={handleResetStatus}
           />
         </section>
       )}

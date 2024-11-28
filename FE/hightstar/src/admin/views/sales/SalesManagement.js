@@ -255,11 +255,11 @@ const SalesManagement = () => {
   const handleConfirmPayment = async () => {
     // Kiểm tra nếu giỏ hàng chứa khóa học
     const hasCourse = cartItems.some((item) => item.id.includes("KH"));
-    if (hasCourse) {
-      // Hiển thị modal
-      handleShowModal("modalConfirmInfo"); // hiển thị modal xác nhận trước khi thanh toán.
-      return;
-    }
+    // if (hasCourse) {
+    //   // Hiển thị modal
+    //   handleShowModal("modalConfirmInfo"); // hiển thị modal xác nhận trước khi thanh toán.
+    //   return;
+    // }
 
     const invoice = prepareOrderData(
       cartItems,

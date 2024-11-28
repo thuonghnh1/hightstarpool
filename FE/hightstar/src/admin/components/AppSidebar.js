@@ -185,6 +185,17 @@ const AppSidebar = ({ isSidebarOpen }) => {
         </li>
 
         <li>
+          <NavLink
+            to="/admin/attendance-management"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            <i className="me-2 fa-solid fa-people-roof"></i> Điểm danh
+          </NavLink>
+        </li>
+
+        <li>
           <div
             className={`d-flex justify-content-center align-items-center ${menuState.stock ? "active-link" : "inactive-link"
               }`}

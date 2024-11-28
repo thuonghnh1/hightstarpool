@@ -348,7 +348,7 @@ const StudentManagement = () => {
                 name="avatar"
                 accept="avatar/*"
                 onChange={(e) => {
-                  const file = e.target.files[0];
+                  const file = e.target.files[0]; 
                   if (file) {
                     setImageFile(file); // lưu file vào imgFile để guwỉ lên server
                     const fileUrl = URL.createObjectURL(file);
@@ -385,7 +385,7 @@ const StudentManagement = () => {
 
         {/* Mã Người Dùng với Select có tìm kiếm */}
         <div className="col-md-6 mb-3">
-          <Form.Group controlId="formUserId">
+          <Form.Group controlId="formUser">
             <Form.Label>
               Mã Người Dùng <span className="text-danger">(*)</span>
             </Form.Label>

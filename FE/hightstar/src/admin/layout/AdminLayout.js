@@ -12,6 +12,7 @@ import {
   DiscountManagement,
   OrderManagement,
   TimeSlotManagement,
+  AttendanceManagement,
 } from "../views/index";
 import "../css/style.css";
 import { ThemeProvider } from "../components/common/ThemeContext";
@@ -88,6 +89,10 @@ const AdminLayout = () => {
                 <Route
                   path="timeSlot-management"
                   element={<TimeSlotManagement />}
+                />
+                <Route
+                  path="attendance-management"
+                  element={<AttendanceManagement />}
                 />
                 <Route path="*" element={<Navigate to={"/page404"} />} />
               </Routes>

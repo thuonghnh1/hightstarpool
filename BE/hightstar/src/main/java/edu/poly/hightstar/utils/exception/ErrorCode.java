@@ -24,6 +24,7 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND("CATEGORY_NOT_FOUND"), // Không tìm thấy danh mục
     TICKET_NOT_FOUND("TICKET_NOT_FOUND"), // Không tìm thấy vé
     TIMESLOT_NOT_FOUND("TIMESLOT_NOT_FOUND"), // Không tìm thấy suất học 
+    ATTENDANCE_NOT_FOUND("ATTENDANCE_NOT_FOUND"),//không tìm thấy điểm danh
 
 
     // Lỗi do dữ liệu xung đột (Conflict Errors)

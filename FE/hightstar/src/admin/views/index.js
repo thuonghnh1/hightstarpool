@@ -8,6 +8,7 @@ import TrainerManagement from "./trainers/TrainerManagement";
 import SalesManagement from "./sales/SalesManagement";
 import OrderManagement from "./orders/OrderManagement";
 import TimeSlotManagement from "./timeslots/TimeSlotManagement";
+import AttendanceManagement from "./attendances/AttendanceManagement";
 
 export {
   Dashboard,
@@ -20,4 +21,5 @@ export {
   SalesManagement,
   OrderManagement,
   TimeSlotManagement,
+  AttendanceManagement,
 };

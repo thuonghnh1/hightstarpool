@@ -81,15 +81,23 @@ const TableManagement = ({
             statusClass = "text-bg-primary";
             statusText = "Hoàn thành";
             break;
-          case "CANCELLED":
+          case "CANCELED":
             statusClass = "text-bg-danger";
             statusText = "Đã hủy";
+            break;
+          case "EXPIRED":
+            statusClass = "text-bg-secondary";
+            statusText = "Đã hết hạn";
+            break;
+          case "USED":
+            statusClass = "text-bg-info";
+            statusText = "Đã sử dụng";
             break;
           default:
             statusClass = "text-bg-muted"; // Trường hợp mặc định
             statusText = "Không xác định";
         }
-
+    
         return (
           <span
             className={`rounded-3 fw-bold px-2 py-1 ${statusClass}`}

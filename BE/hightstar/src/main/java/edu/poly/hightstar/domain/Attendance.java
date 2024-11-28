@@ -2,9 +2,7 @@ package edu.poly.hightstar.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
-import java.util.Date;
+import java.time.LocalTime;
 
 @Data
 @Entity
@@ -16,8 +14,8 @@ public class Attendance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long attendanceId;
 
-    private LocalDateTime checkInTime;
-    private Date checkOutTime;
+    private LocalTime checkInTime;
+    private LocalTime checkOutTime;
 
     @ManyToOne
     @JoinColumn(name = "studentId", referencedColumnName = "studentId")
@@ -27,5 +25,5 @@ public class Attendance {
     @JoinColumn(name = "ticketId", referencedColumnName = "ticketId")
     private Ticket ticket;
 
-    private double PenaltyAmount;
+    private Double penaltyAmount;
 }

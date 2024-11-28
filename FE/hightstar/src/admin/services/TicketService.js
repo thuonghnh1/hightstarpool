@@ -1,5 +1,5 @@
 import axiosInstance from "../../services/axiosInstance";
-import { formatDateTimeToDMY } from "../utils/FormatDate";
+import { formatDateToDMY } from "../utils/FormatDate";
 
 const API_URL = "/admin/tickets";
 
@@ -10,8 +10,8 @@ const getTickets = async () => {
 
   return tickets.map((ticket) => ({
     ...ticket,
-    startDate: formatDateTimeToDMY(ticket.startDate),
-    endDate: formatDateTimeToDMY(ticket.endDate),
+    issueDate: formatDateToDMY(ticket.issueDate),
+    expiryDate: formatDateToDMY(ticket.expiryDate),
   }));
 };
 
@@ -22,8 +22,8 @@ const getTicketById = async (id) => {
 
   return {
     ...ticket,
-    startDate: formatDateTimeToDMY(ticket.startDate),
-    endDate: formatDateTimeToDMY(ticket.endDate),
+    issueDate: formatDateToDMY(ticket.issueDate),
+    expiryDate: formatDateToDMY(ticket.expiryDate),
   };
 };
 
