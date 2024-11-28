@@ -1,5 +1,6 @@
 import { useRef, forwardRef, useImperativeHandle } from "react";
 import qz from "qz-tray";
+import { toast } from "react-toastify";
 
 const PrintComponent = forwardRef(
   ({ children, documentTitle = "Hóa Đơn Bán Hàng" }, ref) => {
@@ -12,6 +13,7 @@ const PrintComponent = forwardRef(
         console.log("Đã kết nối QZ Tray!");
       } catch (error) {
         console.error("Lỗi kết nối QZ Tray:", error);
+        toast.error("Lỗi khi kết nối với QZ Tray!")
       }
     };
 

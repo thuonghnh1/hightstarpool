@@ -124,7 +124,7 @@ const OrderManagement = () => {
                 <option value="PENDING">Đang chờ xử lý</option>
                 <option value="ON_DELIVERY">Đang giao hàng</option>
                 <option value="COMPLETED">Hoàn thành</option>
-                <option value="CANCELLED">Đã hủy</option>
+                <option value="CANCELED">Đã hủy</option>
             </Form.Select>
         </Form.Group>
     );

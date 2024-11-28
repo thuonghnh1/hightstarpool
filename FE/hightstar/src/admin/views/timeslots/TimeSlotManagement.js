@@ -230,42 +230,42 @@ const TimeSlotManagement = () => {
     }
   };
 
-  const modalContent = (
-    <>
-      <div className="row">
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formDayOfweek">
-            <Form.Label>
-              Ngày trong tuần <span className="text-danger">(*)</span>
-            </Form.Label>
-            <Select
-              options={listDayOfWeekOption}
-              value={listDayOfWeekOption.find(
-                (option) => option.value === formData.dayOfWeek
-              )}
-              onChange={(selectedOption) =>
-                handleInputChange(
-                  "dayOfWeek",
-                  selectedOption ? selectedOption.value : ""
-                )
-              }
-              placeholder="Vd: Thứ Hai"
-              isInvalid={!!errorFields.dayOfWeek}
-              isClearable // Cho phép xóa chọn lựa
-              isSearchable // Bật tính năng tìm kiếm
-              styles={{
-                menu: (provided) => ({
-                  ...provided,
-                }),
-              }}
-            />
-            {errorFields.dayOfWeek && (
-              <div className="invalid-feedback d-block">
-                {errorFields.dayOfWeek}
-              </div>
-            )}
-          </Form.Group>
-        </div>
+    const modalContent = (
+        <>
+            <div className="row">
+                <div className="col-md-6 mb-3">
+                    <Form.Group controlId="formOfDayWeek">
+                        <Form.Label>
+                            Ngày trong tuần <span className="text-danger">(*)</span>
+                        </Form.Label>
+                        <Select
+                            options={listDayOfWeekOption}
+                            value={listDayOfWeekOption.find(
+                                (option) => option.value === formData.dayOfWeek
+                            )}
+                            onChange={(selectedOption) =>
+                                handleInputChange(
+                                    "dayOfWeek",
+                                    selectedOption ? selectedOption.value : ""
+                                )
+                            }
+                            placeholder="Vd: Thứ Hai"
+                            isInvalid={!!errorFields.dayOfWeek}
+                            isClearable // Cho phép xóa chọn lựa
+                            isSearchable // Bật tính năng tìm kiếm
+                            styles={{
+                                menu: (provided) => ({
+                                    ...provided,
+                                }),
+                            }}
+                        />
+                        {errorFields.dayOfWeek && (
+                            <div className="invalid-feedback d-block">
+                                {errorFields.dayOfWeek}
+                            </div>
+                        )}
+                    </Form.Group>
+                </div>
 
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formStartTime">

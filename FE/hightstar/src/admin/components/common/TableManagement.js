@@ -81,15 +81,23 @@ const TableManagement = ({
             statusClass = "text-bg-primary";
             statusText = "Hoàn thành";
             break;
-          case "CANCELLED":
+          case "CANCELED":
             statusClass = "text-bg-danger";
             statusText = "Đã hủy";
+            break;
+          case "EXPIRED":
+            statusClass = "text-bg-secondary";
+            statusText = "Đã hết hạn";
+            break;
+          case "USED":
+            statusClass = "text-bg-info";
+            statusText = "Đã sử dụng";
             break;
           default:
             statusClass = "text-bg-muted"; // Trường hợp mặc định
             statusText = "Không xác định";
         }
-
+    
         return (
           <span
             className={`rounded-3 fw-bold px-2 py-1 ${statusClass}`}
@@ -150,6 +158,18 @@ const TableManagement = ({
         return (
           <span className={`rounded-3 px-2 py-1`}>
             {dayLabels[item.dayOfWeek]}
+          </span>
+        );
+
+      case "ticketType":
+        const ticketTypeLabels = {
+          ONETIME_TICKET: "Vé một lần",
+          WEEKLY_TICKET: "Vé tuần",
+          MONTHLY_TICKET: "Vé tháng"
+        };
+        return (
+          <span className={`rounded-3 px-2 py-1`}>
+            {ticketTypeLabels[item.ticketType]}
           </span>
         );
 
@@ -426,16 +446,16 @@ const TableManagement = ({
                         </td>
                       ))}
                     <td className="align-middle">
-                        <button
-                          className="btn btn__show p-1"
-                          onClick={() => handleRowToggle(item.id)}
-                        >
-                          {expandedRows.includes(item.id) ? (
-                            <i className="bi bi-dash-circle"></i>
-                          ) : (
-                            <i className="bi bi-plus-circle"></i>
-                          )}
-                        </button>
+                      <button
+                        className="btn btn__show p-1"
+                        onClick={() => handleRowToggle(item.id)}
+                      >
+                        {expandedRows.includes(item.id) ? (
+                          <i className="bi bi-dash-circle"></i>
+                        ) : (
+                          <i className="bi bi-plus-circle"></i>
+                        )}
+                      </button>
                     </td>
                   </tr>
                   {expandedRows.includes(item.id) && (

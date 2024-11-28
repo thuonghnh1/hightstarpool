@@ -107,9 +107,8 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
 
   return (
     <div
-      className={`header navbar navbar-expand bg-body py-1 shadow-none border-dark-subtle  border-bottom ${
-        theme === "dark" ? "dark-theme" : "light-theme"
-      }`}
+      className={`header navbar navbar-expand bg-body py-1 shadow-none border-dark-subtle  border-bottom ${theme === "dark" ? "dark-theme" : "light-theme"
+        }`}
       style={{ height: "66px", left: isSidebarOpen ? "250px" : "0px" }}
     >
       <div className="container-fluid d-flex align-items-center px-2">
@@ -187,9 +186,8 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
                   {notifications.map((notif, index) => (
                     <div
                       key={index}
-                      className={`box__item d-flex align-items-center border-bottom p-2 ${
-                        notif.status && "new"
-                      }`}
+                      className={`box__item d-flex align-items-center border-bottom p-2 ${notif.status && "new"
+                        }`}
                       style={{ cursor: "pointer", position: "relative" }}
                       onClick={() => markNotificationAsRead(notif.id)}
                     >
@@ -286,9 +284,8 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
                   {messages.map((msg, index) => (
                     <div
                       key={index}
-                      className={`box__item d-flex align-items-center border-bottom p-2 ${
-                        msg.status && "new"
-                      }`}
+                      className={`box__item d-flex align-items-center border-bottom p-2 ${msg.status && "new"
+                        }`}
                       style={{ cursor: "pointer", position: "relative" }}
                       onClick={() => markMessageAsRead(msg.id)}
                     >

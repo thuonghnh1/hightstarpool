@@ -23,7 +23,9 @@ public class Ticket {
     @Temporal(TemporalType.DATE)
     private Date expiryDate;
     @Column(length = 20)
+    @Enumerated(EnumType.STRING)
     private TicketType ticketType; // OneTime_ticket, Weekly_ticket ,Monthly_ticket.
+    @Enumerated(EnumType.STRING)
     private TicketStatus status; // Còn hiệu lực, hết hiệu lực
     private Double ticketPrice;
     @ManyToOne
