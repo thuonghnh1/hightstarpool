@@ -233,7 +233,7 @@ public class TrainerServiceImpl implements TrainerService {
                                 "            <p>Chân thành cảm ơn bạn,<br><strong>Đội ngũ hỗ trợ khách hàng</strong></p>"
                                 +
                                 "            <p><strong>Hight Star</strong><br>" +
-                                "            Email: support@hightstar.com | Hotline: 0888-372-325</p>" +
+                                "            Email: hightstarpoolcompany@gmail.com | Hotline: 0888-372-325</p>" +
                                 "            <p>Đây là email tự động từ phần mềm Hight Star. Vui lòng không trả lời email này.</p>"
                                 +
                                 "        </div>" +

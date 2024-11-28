@@ -1,5 +1,557 @@
 /* @import url("./Header.css");  */
+/********** Template CSS **********/
+:root {
+  --primary: blue;
+  --secondary: rgb(63, 63, 255);
+  --light: #f5f5f5;
+  --dark: #14141f;
+}
 
-.wrapper-loading{
-    background-color: rgba(0, 0, 0, 0.548);
+html {
+  scroll-behavior: smooth;
+}
+
+.fw-medium {
+  font-weight: 600 !important;
+}
+
+.fw-semi-bold {
+  font-weight: 700 !important;
+}
+
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3,
+h4,
+.h4,
+h5,
+.h5,
+h6,
+.h6 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-family: "Nunito", sans-serif;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #2c3e50;
+}
+
+.back-to-top {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #000000;
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  right: 45px;
+  bottom: 45px;
+  z-index: 9999;
+}
+
+.back-to-top:hover {
+  background-color: blue;
+  color: #ffffff;
+}
+
+/*** Button ***/
+.btn {
+  font-family: "Nunito", sans-serif;
+  font-weight: 600;
+  transition: 0.5s;
+}
+
+.btn.btn-primary,
+.btn.btn-secondary {
+  color: #ffffff;
+}
+
+.btn-square {
+  width: 38px;
+  height: 38px;
+}
+
+.btn-sm-square {
+  width: 32px;
+  height: 32px;
+}
+
+.btn-lg-square {
+  width: 48px;
+  height: 48px;
+}
+
+.btn-square,
+.btn-sm-square,
+.btn-lg-square {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: normal;
+  border-radius: 0px;
+}
+
+/*** Navbar ***/
+.navbar-light .navbar-nav .nav-link {
+  font-family: "Nunito", sans-serif;
+  position: relative;
+  margin-right: 25px;
+  padding: 35px 0;
+  color: #ffffff !important;
+  font-size: 18px;
+  font-weight: 600;
+  outline: none;
+  transition: 0.5s;
+}
+
+.sticky-top.navbar-light .navbar-nav .nav-link {
+  padding: 20px 0;
+  color: var(--dark) !important;
+}
+
+.navbar-light .navbar-nav .nav-link:hover,
+.navbar-light .navbar-nav .nav-link.active {
+  color: var(--primary) !important;
+}
+
+.navbar-light .navbar-brand img {
+  max-height: 60px;
+  transition: 0.5s;
+}
+
+.sticky-top.navbar-light .navbar-brand img {
+  max-height: 45px;
+}
+
+/* Dropdown */
+.custom-toggle::after {
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  .sticky-top.navbar-light {
+    position: relative;
+    background: #ffffff;
+  }
+
+  .navbar-light .navbar-collapse {
+    margin-top: 15px;
+    border-top: 1px solid #dddddd;
+  }
+
+  .navbar-light .navbar-nav .nav-link,
+  .sticky-top.navbar-light .navbar-nav .nav-link {
+    padding: 10px 0;
+    margin-left: 0;
+    color: var(--dark) !important;
+  }
+
+  .navbar-light .navbar-brand img {
+    max-height: 45px;
+  }
+}
+
+@media (min-width: 992px) {
+  .navbar-light {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
+    border-bottom: 1px solid rgba(256, 256, 256, 0.1);
+    z-index: 999;
+  }
+
+  .sticky-top.navbar-light {
+    position: fixed;
+    background: #ffffff;
+  }
+
+  .navbar-light .navbar-nav .nav-link::before {
+    position: absolute;
+    content: "";
+    width: 0;
+    height: 2px;
+    bottom: -1px;
+    left: 50%;
+    background: var(--primary);
+    transition: 0.5s;
+  }
+
+  .navbar-light .navbar-nav .nav-link:hover::before,
+  .navbar-light .navbar-nav .nav-link.active::before {
+    width: calc(100% - 2px);
+    left: 1px;
+  }
+
+  .navbar-light .navbar-nav .nav-link.nav-contact::before {
+    display: none;
+  }
+}
+
+/*** Hero Header ***/
+.hero-header {
+  background: linear-gradient(rgba(20, 20, 31, 0.7), rgba(20, 20, 31, 0.7)),
+    url(../../assets/images/img_sites/bg-hero.jpg);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/*** Section Title ***/
+.section-title {
+  position: relative;
+  display: inline-block;
+  text-transform: uppercase;
+}
+
+.section-title::before {
+  position: absolute;
+  content: "";
+  width: calc(100% + 80px);
+  height: 2px;
+  top: 4px;
+  left: -40px;
+  background: var(--primary);
+  z-index: -1;
+}
+
+.section-title::after {
+  position: absolute;
+  content: "";
+  width: calc(100% + 120px);
+  height: 2px;
+  bottom: 5px;
+  left: -60px;
+  background: var(--primary);
+  z-index: -1;
+}
+
+.section-title.text-start::before {
+  width: calc(100% + 40px);
+  left: 0;
+}
+
+.section-title.text-start::after {
+  width: calc(100% + 60px);
+  left: 0;
+}
+
+/* Benefit */
+
+.benefit-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #f8f9fa; /* Màu nền nhẹ nhàng */
+  border: 1px solid #e7e7e7; /* Viền mỏng */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+  transition: transform 0.3s, box-shadow 0.3s; /* Hiệu ứng hover */
+}
+
+.benefit-item:hover {
+  transform: translateY(-5px); /* Hiệu ứng nổi lên */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.benefit-item .p-4 {
+  flex-grow: 1; /* Đảm bảo phần nội dung luôn căn giữa */
+}
+
+.benefit-item i {
+  color: #0d6efd;
+}
+
+h5 {
+  font-weight: 600;
+}
+
+p {
+  margin-bottom: 0;
+}
+
+/*** Destination ***/
+.destination img {
+  transition: 0.5s;
+}
+
+.destination a:hover img {
+  transform: scale(1.1);
+}
+
+/*** Package ***/
+.course-item {
+  box-shadow: 0 0 45px rgba(0, 0, 0, 0.08);
+}
+
+.course-item img {
+  transition: 0.5s;
+}
+
+.course-item:hover img {
+  transform: scale(1.1);
+}
+
+/*** Booking ***/
+.booking {
+  background: linear-gradient(rgba(15, 23, 43, 0.7), rgba(15, 23, 43, 0.7)),
+    url(../../assets/images/img_sites/booking.jpg);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.booking input::placeholder {
+  color: #beb2b2; /* Màu placeholder cho input và textarea */
+}
+
+.booking textarea::placeholder {
+  color: #beb2b2; /* Màu placeholder cho input và textarea */
+}
+
+.booking select {
+  color: #ffffff; /* Màu chữ trong select */
+  background-color: #333333; /* Màu nền của select khi không xổ xuống */
+  border: 1px solid rgba(255, 255, 255, 0.6); /* Đường viền của select */
+}
+
+/* Khi mở dropdown (xổ xuống), thay đổi màu nền */
+.booking select:focus,
+.booking select:hover {
+  background-color: #444444; /* Màu nền đậm hơn khi xổ xuống */
+  border-color: #ffffff; /* Đổi màu border khi focus */
+}
+
+/* Thay đổi màu của các option trong dropdown */
+.booking select option {
+  background-color: #333333; /* Màu nền của option trong dropdown */
+  color: #ffffff; /* Màu chữ của option */
+}
+
+/* Thay đổi màu của option khi được chọn */
+.booking select option:checked {
+  background-color: #555555; /* Màu nền của option khi được chọn */
+  color: #ffffff; /* Màu chữ của option khi được chọn */
+}
+
+/*  Process */
+.step-item {
+  transition: 0.3s;
+}
+.step-item:hover {
+  transform: scale(1.015);
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/*** Team ***/
+.team-item {
+  box-shadow: 0 0 45px rgba(0, 0, 0, 0.08);
+}
+
+.team-item img {
+  transition: 0.5s;
+}
+
+.team-item:hover img {
+  transform: scale(1.1);
+}
+
+.team-item .btn {
+  background: #ffffff;
+  color: var(--primary);
+  border-radius: 20px;
+  border-bottom: 1px solid var(--primary);
+}
+
+.team-item .btn:hover {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+/*** Testimonial ***/
+.testimonial-carousel::before {
+  position: absolute;
+  content: "";
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  z-index: 1;
+}
+
+.testimonial-carousel::after {
+  position: absolute;
+  content: "";
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(
+    to left,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  z-index: 1;
+}
+
+@media (min-width: 768px) {
+  .testimonial-carousel::before,
+  .testimonial-carousel::after {
+    width: 200px;
+  }
+}
+
+@media (min-width: 992px) {
+  .testimonial-carousel::before,
+  .testimonial-carousel::after {
+    width: 300px;
+  }
+}
+
+.testimonial-carousel .owl-item .testimonial-item,
+.testimonial-carousel .owl-item.center .testimonial-item * {
+  transition: 0.5s;
+}
+
+.testimonial-carousel .owl-item.center .testimonial-item {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+.testimonial-carousel .owl-item.center .testimonial-item * {
+  color: #ffffff !important;
+}
+
+.testimonial-carousel .owl-dots {
+  margin-top: 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.testimonial-carousel .owl-dot {
+  position: relative;
+  display: inline-block;
+  margin: 0 5px;
+  width: 15px;
+  height: 15px;
+  border: 1px solid #cccccc;
+  border-radius: 15px;
+  transition: 0.5s;
+}
+
+.testimonial-carousel .owl-dot.active {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+/*** Footer ***/
+
+.footer .btn-social {
+  margin-right: 5px;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 50%;
+  transition: 0.3s ease;
+}
+
+.footer .btn-social:hover {
+  color: #007bff; /* Thay đổi thành màu chính (primary) */
+  border-color: #007bff;
+}
+
+.footer .btn-link {
+  display: block;
+  margin-bottom: 5px;
+  padding: 0;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 400;
+  text-transform: capitalize;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.footer .btn-link:hover {
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+
+.footer .btn-link::before {
+  content: "\f105"; /* Font Awesome icon */
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  margin-right: 10px;
+}
+
+.footer .copyright {
+  padding: 25px 0;
+  font-size: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer .copyright a {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.footer .footer-menu a {
+  margin-right: 15px;
+  padding-right: 15px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.footer .footer-menu a:last-child {
+  margin-right: 0;
+  padding-right: 0;
+  border-right: none;
+}
+
+.footer .footer-menu a:hover {
+  text-decoration: underline;
+}
+
+/*** Styling for images in the "Ảnh" section ***/
+.footer .row.g-2 .col-4 img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+}
+
+/*** Styling for subscription input and button ***/
+.footer .position-relative input {
+  border: 1px solid #007bff;
+  padding: 1rem;
+  font-size: 14px;
+}
+
+.footer .position-relative button {
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.footer .position-relative button:hover {
+  background-color: #0056b3;
 }

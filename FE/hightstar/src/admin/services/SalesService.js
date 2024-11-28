@@ -93,10 +93,25 @@ const fetchDiscounts = async () => {
 
 const createInvoice = async (invoiceData) => {
   try {
-    const response = await axiosInstance.post(`${API_URL}/createInvoice`, invoiceData);
+    const response = await axiosInstance.post(
+      `${API_URL}/createInvoice`,
+      invoiceData
+    );
     return response.data;
   } catch (error) {
-    console.error("Lỗi khi tạo đơn hàng: "+error)
+    console.error("Lỗi khi tạo đơn hàng: " + error);
+  }
+};
+
+const createInvoiceHaveCourse = async (payload) => {
+  try {
+    const response = await axiosInstance.post(
+      `${API_URL}/createInvoiceHaveCourse`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi khi tạo đơn hàng: " + error);
   }
 };
 
@@ -106,6 +121,7 @@ const SalesService = {
   fetchCourses,
   fetchDiscounts,
   createInvoice,
+  createInvoiceHaveCourse,
 };
 
 export default SalesService;

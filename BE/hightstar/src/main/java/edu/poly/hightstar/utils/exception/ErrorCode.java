@@ -39,13 +39,16 @@ public enum ErrorCode {
     PASSWORD_TOO_WEAK("PASSWORD_TOO_WEAK"), // Mật khẩu quá yếu
     INVALID_PHONE_NUMBER("INVALID_PHONE_NUMBER"), // Số điện thoại không hợp lệ
     INVALID_ORDER_DETAILS("INVALID_ORDER_DETAILS"), // Không có sản phẩm, khóa học hoặc vé nào tồn tại
+    INVALID_EMAIL("INVALID_EMAIL"), // lỗi email không hợp lệ hoặc không tồn tại.
 
     // Lỗi hệ thống và máy chủ (System and Server Errors)
     INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR"), // Lỗi máy chủ nội bộ
     SERVICE_UNAVAILABLE("SERVICE_UNAVAILABLE"), // Dịch vụ không khả dụng
     DATABASE_ERROR("DATABASE_ERROR"), // Lỗi cơ sở dữ liệu
     TIMEOUT_ERROR("TIMEOUT_ERROR"), // Hết thời gian chờ
-
+    EMAIL_SEND_FAILURE("EMAIL_SEND_FAILURE"), //lỗi chung trong quá trình gửi email.
+    EMAIL_CONFIG_ERROR("EMAIL_CONFIG_ERROR"), // Khi cấu hình email sai.
+    
     // Lỗi khi thao tác không được phép (Operation Not Allowed)
     OPERATION_NOT_ALLOWED("OPERATION_NOT_ALLOWED"), // Thao tác không được phép
     PERMISSION_DENIED("PERMISSION_DENIED"), // Từ chối quyền truy cập

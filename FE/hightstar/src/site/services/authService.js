@@ -1,4 +1,5 @@
 import axios from "axios";
+import handleErrorResponse from "../../common/utils/ErrorHandler";
 
 const API_URL = "http://localhost:8080/api/auth";
 
@@ -26,6 +27,7 @@ export const login = async (username, password) => {
     return response.data; // trả về userDetail để lưu vào localStorage
   } catch (error) {
     console.error("Lỗi khi đăng nhập:", error);
+    handleErrorResponse(error);
     throw error;
   }
 };
@@ -43,6 +45,7 @@ export const register = async (userData) => {
     return response.data; // Trả về dữ liệu nếu đăng ký thành công
   } catch (error) {
     //trả về thông báo lỗi từ server
+    handleErrorResponse(error);
     throw error;
   }
 };
@@ -68,6 +71,7 @@ export const refreshToken = async () => {
     return newAccessToken; // Trả về access token mới
   } catch (error) {
     console.error("Error refreshing token", error);
+    handleErrorResponse(error);
     throw error;
   }
 };
@@ -81,6 +85,7 @@ export const sendOtp = async (identifier, userData) => {
     });
     return response.data;
   } catch (error) {
+    handleErrorResponse(error);
     throw error;
   }
 };
@@ -94,6 +99,7 @@ export const resendOtp = async (identifier, userData) => {
     });
     return response.data;
   } catch (error) {
+    handleErrorResponse(error);
     throw error;
   }
 };
@@ -107,6 +113,7 @@ export const verifyOtp = async (identifier, otp) => {
     });
     return response.data;
   } catch (error) {
+    handleErrorResponse(error);
     throw error;
   }
 };
@@ -120,6 +127,7 @@ export const resetPassword = async (phoneNumber, newPassword) => {
     });
     return response.data;
   } catch (error) {
+    handleErrorResponse(error);
     throw error;
   }
 };

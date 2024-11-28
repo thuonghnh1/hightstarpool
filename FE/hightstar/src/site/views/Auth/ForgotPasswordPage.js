@@ -35,12 +35,6 @@ function ForgotPasswordPage() {
         navigate("/verify-otp", { state: { identifier: phoneNumber } });
       } catch (error) {
         console.error("Lỗi handleSendOTP:", error);
-        if (error.response?.data?.message) {
-          setErrors({ form: error.response.data.message });
-          toast.error(error.response.data.message);
-        } else {
-          toast.error("Đã xảy ra lỗi vui lòng thử lại sau!");
-        }
       } finally {
         setIsLoading(false);
       }

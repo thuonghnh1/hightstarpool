@@ -15,6 +15,9 @@ import {
 } from "../views/index";
 import "../css/style.css";
 import { ThemeProvider } from "../components/common/ThemeContext";
+import TicketCheck from "../views/tickets/TicketCheck";
+import BackToTop from "../../common/components/BackToTop";
+
 const AdminLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true); // Quản lý trạng thái ẩn/hiện sidebar
 
@@ -50,8 +53,9 @@ const AdminLayout = () => {
       <div className="container__admin overflow-hidden">
         <AppSidebar className="" isSidebarOpen={isSidebarOpen} />
         <div
-          className={`right__box d-flex flex-column ${isSidebarOpen ? "with-sidebar" : ""
-            }`}
+          className={`right__box d-flex flex-column ${
+            isSidebarOpen ? "with-sidebar" : ""
+          }`}
         >
           <AppHeader
             toggleSidebar={toggleSidebar}
@@ -84,6 +88,7 @@ const AdminLayout = () => {
                   path="ticket/ticket-management"
                   element={<TicketManagement />}
                 />
+                <Route path="ticket/ticket-check" element={<TicketCheck />} />
                 <Route path="order-management" element={<OrderManagement />} />
                 <Route
                   path="timeSlot-management"
@@ -96,6 +101,7 @@ const AdminLayout = () => {
           </div>
           <AppFooter />
         </div>
+        <BackToTop />
       </div>
     </ThemeProvider>
   );

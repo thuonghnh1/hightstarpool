@@ -569,7 +569,7 @@ const TableManagement = ({
           ) : (
             <>
               XEM CHI TIẾT{" "}
-              <i className="bi bi-plus-circle-dotted text-success ms-1 fs-4"></i>
+              <i className="bi bi-card-list text-succes ms-1 fs-4"></i>
             </>
           )
         }

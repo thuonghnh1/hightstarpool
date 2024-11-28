@@ -83,10 +83,6 @@ function LoginPage() {
       } catch (error) {
         if (error.response?.data?.message) {
           setErrors({ form: error.response.data.message });
-        } else {
-          toast.error(
-            "Không thể kết nối đến server. Vui lòng kiểm tra kết nối internet!"
-          );
         }
       } finally {
         setIsLoading(false);

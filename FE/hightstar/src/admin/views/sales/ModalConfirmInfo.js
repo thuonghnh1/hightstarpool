@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
+import SalesService from "../../services/SalesService";
+import { toast } from "react-toastify";
+import Select from "react-select";
+import TimeSlotService from "../../services/TimeSlotService";
+import TrainerService from "../../services/TrainerService";
 
-const MultiStepModal = ({ show, onHide, invoiceData }) => {
+const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     buyerFullName: "",
@@ -13,8 +18,88 @@ const MultiStepModal = ({ show, onHide, invoiceData }) => {
     nickname: "",
     age: 0,
     note: "",
+    timeSlots: [], // Mảng lưu các suất học được chọn
+    trainerId: null,
   });
   const [errorFields, setErrorFields] = useState({});
+  const [listTimeSlotOption, setListTimeSlotOption] = useState([]);
+  const [listTrainerOption, setListTrainerOption] = useState([]);
+  const [numSessionsPerWeek, setNumSessionsPerWeek] = useState(3); // Mặc định là 3 buổi học trong 1 tuần
+
+  const handelChangeDayOfWeek = (dayOfWeek) => {
+    const dayLabels = {
+      MONDAY: "Thứ Hai",
+      TUESDAY: "Thứ Ba",
+      WEDNESDAY: "Thứ Tư",
+      THURSDAY: "Thứ Năm",
+      FRIDAY: "Thứ Sáu",
+      SATURDAY: "Thứ Bảy",
+      SUNDAY: "Chủ Nhật",
+    };
+    return dayLabels[dayOfWeek];
+  };
+
+  // Gọi API khi component mount
+  useEffect(() => {
+    const fetchTimeSlotData = async () => {
+      try {
+        let timeSlots = await TimeSlotService.getTimeSlots();
+
+        // Chuyển đổi danh sách thành định dạng phù hợp cho Select
+        const timeSlotOptions = timeSlots.map((timeSlot) => ({
+          value: timeSlot.id,
+          label: `#${timeSlot.id}: ${handelChangeDayOfWeek(
+            timeSlot.dayOfWeek
+          )} (${timeSlot.startTime} - ${timeSlot.endTime})`, // label có định dạng vd: #1: Thứ Hai (6:00 - 7:00)
+        }));
+        // Cập nhật trạng thái danh sách tùy chọn cho Select
+        setListTimeSlotOption(timeSlotOptions);
+      } catch (error) {
+        toast.error("Lỗi khi lấy danh sách người dùng");
+      }
+    };
+    fetchTimeSlotData();
+  }, []);
+
+  // Hàm kiểm tra tất cả timeSlotId đã được chọn
+  const areAllTimeSlotsSelected = useCallback(() => {
+    return (
+      formData.timeSlots.length === numSessionsPerWeek &&
+      formData.timeSlots.every((slotId) => { // Nếu bất kỳ phần tử nào không thỏa mãn, nó trả về false
+        const slotStr = String(slotId); // Chuyển số thành chuỗi
+        return slotStr.trim() !== ""; // Kiểm tra chuỗi không rỗng
+      })
+    );
+  }, [formData.timeSlots, numSessionsPerWeek]);
+
+  // Hàm gọi API lấy danh sách HLV dựa trên các suất học
+  const fetchAvailableTrainers = useCallback(async () => {
+    if (!areAllTimeSlotsSelected()) return; // Chỉ gọi API nếu đủ số suất học
+    try {
+      // Call API
+      const trainers = await TrainerService.getAvailableTrainers(
+        formData.timeSlots
+      );
+
+      // Chuyển đổi danh sách thành định dạng phù hợp cho Select
+      const trainerOptions = trainers.map((trainer) => ({
+        value: trainer.id,
+        label: `#${trainer.id} - ${trainer.fullName}`, // label có định dạng: #1 - Nguyễn Văn A
+      }));
+
+      // Cập nhật trạng thái danh sách tùy chọn cho Select
+      setListTrainerOption(trainerOptions);
+    } catch (error) {
+      toast.error("Lỗi khi lấy danh sách HLV!");
+    }
+  }, [formData.timeSlots, areAllTimeSlotsSelected]);
+
+  // Gọi fetchAvailableTrainers mỗi khi timeSlots thay đổi
+  useEffect(() => {
+    if (areAllTimeSlotsSelected()) {
+      fetchAvailableTrainers();
+    }
+  }, [formData.timeSlots, areAllTimeSlotsSelected, fetchAvailableTrainers]);
 
   // Hàm kiểm tra từng trường hợp lỗi
   const validateField = (key, value) => {
@@ -110,6 +195,16 @@ const MultiStepModal = ({ show, onHide, invoiceData }) => {
       }
     }
 
+    if (currentStep === 3) {
+      // Step 3: Kiểm tra thông tin
+      for (let i = 1; i <= numSessionsPerWeek; i++) {
+        const key = `timeSlotId${i}`;
+        if (!formData[key]) {
+          newErrors[key] = `Vui lòng chọn suất học!`;
+        }
+      }
+    }
+
     setErrorFields(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -134,23 +229,98 @@ const MultiStepModal = ({ show, onHide, invoiceData }) => {
     return null;
   };
 
-  // Xử lý bước tiếp theo
-  const handleContinue = () => {
+  // Xử lý khi click bước tiếp theo
+  const handleContinue = async () => {
     if (validateStep()) {
-      // Lưu thông tin của bước hiện tại
-      // Để lưu vào database bạn có thể gọi API ở đây
-      console.log("Form Data at step " + currentStep, formData);
+      console.log("Dữ liệu tại bước " + currentStep, formData);
 
-      // Chuyển sang bước tiếp theo
-      if (currentStep < 3) {
-        setCurrentStep(currentStep + 1);
+      if (currentStep === 3) {
+        try {
+          const payload = {
+            buyerInfo: {
+              fullName: formData.buyerFullName,
+              phoneNumber: formData.phoneNumber,
+              email: formData.email,
+              gender: formData.buyerGender ? "Nam" : "Nữ",
+            },
+            studentInfo: {
+              fullName: formData.studentFullName,
+              nickname: formData.nickname || null,
+              age: formData.age,
+              gender: formData.studentGender ? "Nam" : "Nữ",
+              note: formData.note || null,
+            },
+            listTimeSlotId: formData.timeSlots, // Sử dụng mảng timeSlots đã chọn
+            invoice: invoiceData, // Hóa đơn từ component cha
+          };
+
+          console.log("Payload gửi lên server: ", payload);
+
+          // Gọi API
+          const response = await SalesService.createInvoiceHaveCourse(payload);
+          console.log("Đăng ký thành công: ", response);
+
+          toast.success("Đăng ký thành công!");
+          onHide();
+        } catch (error) {
+          console.error("Lỗi khi đăng ký: ", error);
+          toast.error("Đăng ký thất bại. Vui lòng thử lại!");
+        }
       } else {
-        // Bước 3: Xác nhận thanh toán
-        console.log("Final data: ", formData);
-        // Thực hiện lưu dữ liệu vào cơ sở dữ liệu
+        setCurrentStep(currentStep + 1);
       }
     }
   };
+
+  // Hàm xử lý thay đổi số buổi học
+  const handleNumSessionsChange = (e) => {
+    const value = parseInt(e.target.value, 10);
+    setNumSessionsPerWeek(value);
+  };
+
+  const renderTimeSlotInputs = () => {
+    // Tính toán lớp cột dựa trên số buổi học trong tuần
+    const columnClass =
+      numSessionsPerWeek === 1
+        ? "col-12"
+        : numSessionsPerWeek % 2 === 0
+        ? "col-md-6"
+        : "col-md-4";
+
+    return Array.from({ length: numSessionsPerWeek }, (_, index) => (
+      <div className={`${columnClass} mb-3`} key={index}>
+        <Form.Group controlId={`formTimeSlot${index}`}>
+          <Form.Label>
+            Suất học {index + 1} <span className="text-danger">(*)</span>
+          </Form.Label>
+          <Select
+            options={listTimeSlotOption}
+            value={listTimeSlotOption.find(
+              (option) => option.value === formData.timeSlots[index]
+            )}
+            onChange={(selectedOption) => {
+              // Thay đổi trực tiếp trong mảng `timeSlots`
+              const updatedTimeSlots = [...formData.timeSlots];
+              updatedTimeSlots[index] = selectedOption
+                ? selectedOption.value
+                : "";
+              handleInputChange("timeSlots", updatedTimeSlots);
+            }}
+            placeholder={`Chọn suất học ${index + 1}.`}
+            isInvalid={!!errorFields.timeSlots}
+            isClearable
+            isSearchable
+          />
+          {errorFields.timeSlots && (
+            <div className="invalid-feedback d-block">
+              {errorFields.timeSlots}
+            </div>
+          )}
+        </Form.Group>
+      </div>
+    ));
+  };
+
   const formBuyerInfo = (
     <>
       <div className="col-md-6 mb-3">
@@ -377,74 +547,58 @@ const MultiStepModal = ({ show, onHide, invoiceData }) => {
   );
 
   const confirmSignUp = (
-    <div>
-      <div className="row">
-        <div className="col-md-6 mb-3">
-          <h6 className="fw-bold text-success fs-5 mb-3">
-            Thông tin người mua:
-          </h6>
-          <p>
-            <strong>Họ và tên:</strong> {formData.buyerFullName}
-          </p>
-          <p>
-            <strong>Số điện thoại:</strong> {formData.phoneNumber}
-          </p>
-          <p>
-            <strong>Email:</strong> {formData.email}
-          </p>
-          <p>
-            <strong>Giới tính:</strong> {formData.buyerGender ? "Nam" : "Nữ"}
-          </p>
-        </div>
-
-        <div className="col-md-6 mb-3">
-          <h6 className="fw-bold text-success fs-5 mb-3">
-            Thông tin học viên:
-          </h6>
-          <p>
-            <strong>Họ và tên học viên:</strong> {formData.studentFullName}
-          </p>
-          <p>
-            <strong>Biệt danh:</strong>{" "}
-            {formData.nickname || "Chưa có biệt danh"}
-          </p>
-          <p>
-            <strong>Tuổi:</strong> {formData.age}
-          </p>
-          <p>
-            <strong>Giới tính:</strong> {formData.studentGender ? "Nam" : "Nữ"}
-          </p>
-          <p>
-            <strong>Ghi chứ:</strong> {formData.note || "Không có"}
-          </p>
-        </div>
+    <>
+      {/* Ô chọn số lượng buổi học */}
+      <div className="col-12 mb-3">
+        <Form.Group controlId="formNumSessions">
+          <Form.Label>
+            Số buổi học / tuần <span className="text-danger">(*)</span>
+          </Form.Label>
+          <Form.Select
+            value={numSessionsPerWeek}
+            onChange={handleNumSessionsChange}
+          >
+            {Array.from({ length: 7 }, (_, i) => (
+              <option key={i + 1} value={i + 1}>
+                {i + 1} buổi
+              </option>
+            ))}
+          </Form.Select>
+        </Form.Group>
       </div>
+      {/* Render các ô chọn suất học */}
+      {renderTimeSlotInputs()}
 
-      <div>
-        <h6 className="fw-bold text-success fs-5 mb-3">
-          Thông tin thanh toán:
-        </h6>
-        <p>
-          <strong>Tổng tiền:</strong> 500.000đ
-        </p>
-        {/* Thanh toán bằng QR */}
-        <div>
-          <strong>Thanh toán bằng QR:</strong>
-          <br />{" "}
-          <span className="text-danger fst-italic">
-            Vui lòng quét mã QR dưới đây để hoàn tất thanh toán.
-          </span>
-          <div className="d-flex justify-content-center mt-4">
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
-                "Thanh toán 500.000 VND"
-              )}&size=200x200`}
-              alt="QR Code"
-            />
-          </div>
-        </div>
+      {/* Ô chọn HLV */}
+      <div className="col-12 mb-3">
+        <Form.Group controlId="formTrainer">
+          <Form.Label>
+            Huấn luyện viên <span className="text-danger">(*)</span>
+          </Form.Label>
+          <Select
+            options={listTrainerOption}
+            value={listTrainerOption.find(
+              (option) => option.value === formData.TrainerId
+            )}
+            onChange={(selectedOption) =>
+              handleInputChange(
+                "TrainerId",
+                selectedOption ? selectedOption.value : ""
+              )
+            }
+            placeholder="Vui lòng chọn HLV"
+            isInvalid={!!errorFields.TrainerId}
+            isClearable
+            isSearchable
+          />
+          {errorFields.TrainerId && (
+            <div className="invalid-feedback d-block">
+              {errorFields.TrainerId}
+            </div>
+          )}
+        </Form.Group>
       </div>
-    </div>
+    </>
   );
 
   return (
@@ -619,4 +773,4 @@ const MultiStepModal = ({ show, onHide, invoiceData }) => {
   );
 };
 
-export default MultiStepModal;
+export default ModalConfirmInfo;

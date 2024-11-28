@@ -390,7 +390,7 @@ const StudentManagement = () => {
               Mã Người Dùng <span className="text-danger">(*)</span>
             </Form.Label>
             <Select
-              options={listUserOption} // danh sách user fake
+              options={listUserOption}
               value={listUserOption.find(
                 (option) => option.value === formData.userId
               )}
