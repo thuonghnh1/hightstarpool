@@ -20,6 +20,7 @@ public class EmailService {
     public void sendHtmlEmail(String to, String subject, String htmlContent) {
         MimeMessage message = mailSender.createMimeMessage();
         try {
+            message.setFrom("hightstarpoolcompany@gmail.com");
             message.setSubject(subject, "UTF-8");
             message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
             message.setContent(htmlContent, "text/html; charset=utf-8");
