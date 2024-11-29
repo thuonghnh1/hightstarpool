@@ -2,16 +2,16 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Bounce, ToastContainer } from "react-toastify";
 import AdminLayout from "./admin/layout/AdminLayout";
 import SiteLayout from "./site/layout/SiteLayout";
-import LoginPage from "./site/views/Auth/LoginPage";
-import SignUpPage from "./site/views/Auth/SignUpPage";
-import ForgotPasswordPage from "./site/views/Auth/ForgotPasswordPage";
+import LoginPage from "./site/views/auth/LoginPage";
+import SignUpPage from "./site/views/auth/SignUpPage";
+import ForgotPasswordPage from "./site/views/auth/ForgotPasswordPage";
 import PrivateRoute from "./common/PrivateRoute"; // Import PrivateRoute
 import Page403 from "./common/pages/Page403";
 import Page404 from "./common/pages/Page404";
 import Page500 from "./common/pages/Page500";
 import { UserProvider } from "./contexts/UserContext";
-import VerifyOtpPage from "./site/views/Auth/VerifyOtpPage";
-import ResetPasswordPage from "./site/views/Auth/ResetPasswordPage";
+import VerifyOtpPage from "./site/views/auth/VerifyOtpPage";
+import ResetPasswordPage from "./site/views/auth/ResetPasswordPage";
 
 function App() {
   return (
