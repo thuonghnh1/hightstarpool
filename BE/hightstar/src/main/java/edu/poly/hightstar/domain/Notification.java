@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import edu.poly.hightstar.enums.RecipientType;
+
 @Data
 @Entity
 @NoArgsConstructor
@@ -22,8 +24,9 @@ public class Notification {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
     @Column(length = 50)
-    private String recipientType; // ALL, ADMIN, EMPLOYEE,TRAINER, USER
+    private RecipientType recipientType; // ALL, ADMIN, EMPLOYEE,TRAINER, USER
 
     @ManyToOne
     @JoinColumn(name = "userId", referencedColumnName = "userId")

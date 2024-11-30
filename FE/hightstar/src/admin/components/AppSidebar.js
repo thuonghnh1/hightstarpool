@@ -164,6 +164,17 @@ const AppSidebar = ({ isSidebarOpen }) => {
 
         <li>
           <NavLink
+            to="/admin/notificaton-management"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            <i className="me-2 bi bi-bell-fill"></i> Thông báo
+          </NavLink>
+        </li>
+
+        <li>
+          <NavLink
             to="/admin/order-management"
             className={({ isActive }) =>
               isActive ? "active-link" : "inactive-link"

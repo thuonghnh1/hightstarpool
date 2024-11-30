@@ -13,6 +13,7 @@ import {
   OrderManagement,
   TimeSlotManagement,
   AttendanceManagement,
+  NotificationManagement,
 } from "../views/index";
 import "../css/style.css";
 import { ThemeProvider } from "../components/common/ThemeContext";
@@ -72,6 +73,10 @@ const AdminLayout = () => {
                 <Route
                   path="course-management"
                   element={<CourseManagement />}
+                />
+                <Route
+                  path="notificaton-management"
+                  element={<NotificationManagement/>}
                 />
                 <Route
                   path="trainer-management"

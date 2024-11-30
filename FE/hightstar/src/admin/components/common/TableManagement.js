@@ -5,6 +5,8 @@ import ImageModal from "./ImageModal";
 import DeleteModal from "./DeleteModal";
 import "../../css/table-management.css";
 import iconTrainer from "../../../assets/images/icons/trainer.png";
+import iconAll from "../../../assets/images/icons/all.png";
+import iconIndividual from "../../../assets/images/icons/personalization.png";
 import defaultImage from "../../../assets/images/defaultImage.png";
 import { formatDateTimeToDMY } from "../../utils/FormatDate";
 
@@ -93,11 +95,19 @@ const TableManagement = ({
             statusClass = "text-bg-info";
             statusText = "Đã sử dụng";
             break;
+          case true:
+            statusClass = "text-bg-info";
+            statusText = "Chưa xem";
+            break;
+          case false:
+            statusClass = "text-bg-muted";
+            statusText = "Đã xem";
+            break;
           default:
             statusClass = "text-bg-muted"; // Trường hợp mặc định
             statusText = "Không xác định";
         }
-    
+
         return (
           <span
             className={`rounded-3 fw-bold px-2 py-1 ${statusClass}`}
@@ -221,6 +231,62 @@ const TableManagement = ({
         return <span>{item.percentage} %</span>;
       case "orderDate":
         return <span>{formatDateTimeToDMY(item.orderDate)}</span>;
+      case "recipientType":
+        return (
+          <span className="d-flex align-items-center">
+            {item.recipientType === "ALL" && (
+              <>
+              <img
+                  src={iconAll}
+                  alt="Icon hlv"
+                  className="img-fluid rounded-circle mx-1 me-1"
+                  style={{ width: "20px", height: "20px" }}
+                />
+                Tất Cả
+              </>
+            )}
+            {item.recipientType === "INDIVIDUAL" && (
+              <>
+               <img
+                  src={iconIndividual}
+                  alt="Icon hlv"
+                  className="img-fluid rounded-circle mx-1 me-1"
+                  style={{ width: "20px", height: "20px" }}
+                />
+                Cá Nhân
+              </>
+            )}
+            {item.recipientType === "ADMIN" && (
+              <>
+                <i className="bi bi-shield-fill text-danger fs-5 mx-1 me-1"></i>
+                Quản Lý
+              </>
+            )}
+            {item.recipientType === "EMPLOYEE" && (
+              <>
+                <i className="fa-solid fa-user-tie fs-5 text-primary me-2 mx-1"></i>
+                Nhân Viên
+              </>
+            )}
+            {item.recipientType === "USER" && (
+              <>
+                <i className="bi bi-person-fill fs-4 text-info me-1"></i>Khách
+                Hàng
+              </>
+            )}
+            {item.recipientType === "TRAINER" && (
+              <>
+                <img
+                  src={iconTrainer}
+                  alt="Icon hlv"
+                  className="img-fluid rounded-circle mx-1 me-1"
+                  style={{ width: "20px", height: "20px" }}
+                />
+                Huấn Luyện Viên
+              </>
+            )}
+          </span>
+        );
       default:
         return item[column.key] || "Không có"; // Trả về giá trị mặc định nếu không cần custom
     }
