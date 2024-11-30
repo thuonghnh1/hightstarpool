@@ -23,9 +23,9 @@ public enum ErrorCode {
     EMPLOYEE_NOT_FOUND("EMPLOYEE_NOT_FOUND"), // Không tìm thấy Nhân viên
     CATEGORY_NOT_FOUND("CATEGORY_NOT_FOUND"), // Không tìm thấy danh mục
     TICKET_NOT_FOUND("TICKET_NOT_FOUND"), // Không tìm thấy vé
-    TIMESLOT_NOT_FOUND("TIMESLOT_NOT_FOUND"), // Không tìm thấy suất học 
-    ATTENDANCE_NOT_FOUND("ATTENDANCE_NOT_FOUND"),//không tìm thấy điểm danh
-
+    TIMESLOT_NOT_FOUND("TIMESLOT_NOT_FOUND"), // Không tìm thấy suất học
+    ATTENDANCE_NOT_FOUND("ATTENDANCE_NOT_FOUND"), // không tìm thấy điểm danh
+    NOTIFICATION_NOT_FOUND("NOTIFICATION_NOT_FOUND"), // không tìm thấy thông báo
 
     // Lỗi do dữ liệu xung đột (Conflict Errors)
     CONFLICT_ERROR("CONFLICT_ERROR"), // Xung đột dữ liệu tổng quát
@@ -47,13 +47,25 @@ public enum ErrorCode {
     SERVICE_UNAVAILABLE("SERVICE_UNAVAILABLE"), // Dịch vụ không khả dụng
     DATABASE_ERROR("DATABASE_ERROR"), // Lỗi cơ sở dữ liệu
     TIMEOUT_ERROR("TIMEOUT_ERROR"), // Hết thời gian chờ
-    EMAIL_SEND_FAILURE("EMAIL_SEND_FAILURE"), //lỗi chung trong quá trình gửi email.
+    EMAIL_SEND_FAILURE("EMAIL_SEND_FAILURE"), // Lỗi trong quá trình gửi email.
     EMAIL_CONFIG_ERROR("EMAIL_CONFIG_ERROR"), // Khi cấu hình email sai.
-    
+
     // Lỗi khi thao tác không được phép (Operation Not Allowed)
     OPERATION_NOT_ALLOWED("OPERATION_NOT_ALLOWED"), // Thao tác không được phép
     PERMISSION_DENIED("PERMISSION_DENIED"), // Từ chối quyền truy cập
-    OPERATION_FAILED("OPERATION_FAILED"); // Thao tác thất bại
+    OPERATION_FAILED("OPERATION_FAILED"), // Thao tác thất bại
+
+    // Lỗi khi thiếu tham số (Missing Parameters Errors)
+    MISSING_REQUIRED_PARAMETER("MISSING_REQUIRED_PARAMETER"), // Thiếu tham số bắt buộc trong yêu cầu
+    PARAMETER_VALIDATION_FAILED("PARAMETER_VALIDATION_FAILED"), // Kiểm tra tham số không hợp lệ
+
+    // Lỗi khi không thể xử lý dữ liệu (Data Processing Errors)
+    DATA_PROCESSING_ERROR("DATA_PROCESSING_ERROR"), // Lỗi trong quá trình xử lý dữ liệu
+    FILE_UPLOAD_ERROR("FILE_UPLOAD_ERROR"), // Lỗi tải lên tệp
+    FILE_FORMAT_NOT_SUPPORTED("FILE_FORMAT_NOT_SUPPORTED"), // Định dạng tệp không được hỗ trợ
+
+    // Lỗi không xác định (Unknown Errors)
+    UNKNOWN_ERROR("UNKNOWN_ERROR"); // Lỗi không xác định
 
     private final String code;
 

@@ -227,7 +227,7 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
                 </div>
                 <div>
                   <NavLink
-                    to={"/message"}
+                    to={"/notification"}
                     className="text-decoration-none d-flex justify-content-between align-items-center p-2 px-3 text-muted small"
                   >
                     Xem tất cả thông báo

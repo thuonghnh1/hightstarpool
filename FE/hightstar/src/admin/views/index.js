@@ -9,6 +9,7 @@ import SalesManagement from "./sales/SalesManagement";
 import OrderManagement from "./orders/OrderManagement";
 import TimeSlotManagement from "./timeslots/TimeSlotManagement";
 import AttendanceManagement from "./attendances/AttendanceManagement";
+import NotificationManagement from "./notification/NotificationManagement";
 
 export {
   Dashboard,
@@ -22,4 +23,5 @@ export {
   OrderManagement,
   TimeSlotManagement,
   AttendanceManagement,
+  NotificationManagement,
 };
