@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Link } from "react-router-dom";
-import { Spinner } from "react-bootstrap";
+import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { Helmet } from "react-helmet-async";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -8,6 +8,11 @@ import "slick-carousel/slick/slick-theme.css";
 
 export default function Home() {
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
+  const [originalRatings, setOriginalRatings] = useState({}); // Khai báo state để lưu rating ban đầu của mỗi huấn luyện viên
+  const [hoveredRatings, setHoveredRatings] = useState({}); // State cho hoveredRating của từng huấn luyện viên
+  const [selectedTrainer, setSelectedTrainer] = useState(null); // Huấn luyện viên được chọn
+  const [modalVisible, setModalVisible] = useState(false); // Trạng thái hiển thị modal
+  const [reviewText, setReviewText] = useState(""); // Nhận xét nhập vào
   const fakeCourses = [
     {
       courseName: "Khóa Học Bơi Cơ Bản",
@@ -41,6 +46,7 @@ export default function Home() {
       name: "Nguyễn Chí Linh",
       title: "Huấn Luyện Viên Trưởng",
       image: "assets/img/team-1.jpg",
+      rating: 5, // Thêm thuộc tính rating
       socials: {
         facebook: "#",
         twitter: "#",
@@ -52,6 +58,7 @@ export default function Home() {
       name: "Huỳnh Ngọc Hoài Thương",
       title: "Huấn Luyện Viên",
       image: "assets/img/team-2.jpg",
+      rating: 4, // Thêm thuộc tính rating
       socials: {
         facebook: "#",
         twitter: "#",
@@ -63,6 +70,7 @@ export default function Home() {
       name: "Nguyễn Đình Nghị",
       title: "Huấn Luyện Viên",
       image: "assets/img/team-3.jpg",
+      rating: 3, // Thêm thuộc tính rating
       socials: {
         facebook: "#",
         twitter: "#",
@@ -74,6 +82,7 @@ export default function Home() {
       name: "Nguyễn Lê Thanh Huyền",
       title: "Huấn Luyện Viên",
       image: "assets/img/team-4.jpg",
+      rating: 3.5, // Thêm thuộc tính rating
       socials: {
         facebook: "#",
         twitter: "#",
@@ -133,6 +142,119 @@ export default function Home() {
         },
       },
     ],
+  };
+
+  const handleStarClick = (trainerId, starRating) => {
+    // Lưu rating ban đầu của huấn luyện viên nếu chưa lưu
+    if (!originalRatings[trainerId]) {
+      setOriginalRatings((prevOriginalRatings) => ({
+        ...prevOriginalRatings,
+        [trainerId]: trainers.find((trainer) => trainer.id === trainerId)
+          .rating,
+      }));
+    }
+
+    // Cập nhật rating của huấn luyện viên khi click vào sao
+    setTrainers((prevTrainers) =>
+      prevTrainers.map((trainer) =>
+        trainer.id === trainerId
+          ? { ...trainer, rating: starRating, review: "" } // Xóa nhận xét cũ khi thay đổi rating
+          : trainer
+      )
+    );
+    setSelectedTrainer(trainerId); // Cập nhật huấn luyện viên được chọn
+    setModalVisible(true); // Hiển thị modal
+  };
+
+  const handleStarHover = (trainerId, starRating) => {
+    setHoveredRatings((prevHoveredRatings) => ({
+      ...prevHoveredRatings,
+      [trainerId]: starRating, // Lưu hoveredRating cho từng huấn luyện viên
+    }));
+  };
+
+  const handleStarLeave = (trainerId) => {
+    setHoveredRatings((prevHoveredRatings) => ({
+      ...prevHoveredRatings,
+      [trainerId]: 0, // Reset số sao khi hover rời khỏi sao của huấn luyện viên
+    }));
+  };
+  // Hàm render sao
+  const renderStars = (trainer) => {
+    const stars = [];
+    const { rating } = trainer;
+    const currentRating = hoveredRatings[trainer.id] || rating; // Lấy giá trị hoveredRating riêng biệt cho từng huấn luyện viên
+
+    for (let i = 1; i <= 5; i++) {
+      if (i <= Math.floor(currentRating)) {
+        // Sao đầy
+        stars.push(
+          <i
+            key={i}
+            className="bi bi-star-fill text-warning mx-1"
+            onClick={() => handleStarClick(trainer.id, i)} // Xử lý click
+            onMouseEnter={() => handleStarHover(trainer.id, i)} // Xử lý hover
+            onMouseLeave={() => handleStarLeave(trainer.id)} // Xử lý khi mouse rời khỏi sao
+            style={{ cursor: "pointer" }}
+          />
+        );
+      } else if (i === Math.ceil(currentRating) && currentRating % 1 !== 0) {
+        // Sao nửa (half-star)
+        stars.push(
+          <i
+            key={i}
+            className="bi bi-star-half text-warning mx-1"
+            onClick={() => handleStarClick(trainer.id, i)} // Xử lý click
+            onMouseEnter={() => handleStarHover(trainer.id, i)} // Xử lý hover
+            onMouseLeave={() => handleStarLeave(trainer.id)} // Xử lý khi mouse rời khỏi sao
+            style={{ cursor: "pointer" }}
+          />
+        );
+      } else {
+        // Sao trống
+        stars.push(
+          <i
+            key={i}
+            className="bi bi-star text-warning mx-1"
+            onClick={() => handleStarClick(trainer.id, i)} // Xử lý click
+            onMouseEnter={() => handleStarHover(trainer.id, i)} // Xử lý hover
+            onMouseLeave={() => handleStarLeave(trainer.id)} // Xử lý khi mouse rời khỏi sao
+            style={{ cursor: "pointer" }}
+          />
+        );
+      }
+    }
+
+    return stars;
+  };
+
+  const handleReviewCancel = () => {
+    // Khi hủy bỏ đánh giá, khôi phục lại rating ban đầu của huấn luyện viên
+    setTrainers((prevTrainers) =>
+      prevTrainers.map((trainer) =>
+        trainer.id === selectedTrainer
+          ? { ...trainer, rating: originalRatings[selectedTrainer] }
+          : trainer
+      )
+    );
+    setModalVisible(false); // Đóng modal khi hủy bỏ
+    setReviewText(""); // Reset nhận xét
+  };
+
+  const handleReviewSubmit = () => {
+    // Cập nhật nhận xét của huấn luyện viên
+    console.log(
+      "Nhận xét về HLV" +
+        selectedTrainer +
+        ":" +
+        reviewText +
+        "---" +
+        "Số sao:" +
+        hoveredRatings
+    );
+
+    setModalVisible(false); // Đóng modal sau khi submit
+    setReviewText(""); // Reset nhận xét
   };
 
   return (
@@ -399,7 +521,6 @@ export default function Home() {
             </div>
           </div>
           {/* Benefit End */}
-
           {/* Destination Start */}
           <div className="container-xxl py-5 destination">
             <div className="container">
@@ -555,7 +676,7 @@ export default function Home() {
                             className="btn btn-sm btn-primary px-3 border-end"
                             style={{ borderRadius: "30px 0 0 30px" }}
                           >
-                            Xem Thêm
+                            Xem chi tiết
                           </Link>
                           <Link
                             href="#"
@@ -569,6 +690,14 @@ export default function Home() {
                     </div>
                   </div>
                 ))}
+              </div>
+              <div className="d-flex justify-content-center">
+                <NavLink
+                  className="btn-link link-primary border-0 bg-transparent py-2 mt-5"
+                  to={"/course"}
+                >
+                  Xem nhiều hơn
+                </NavLink>{" "}
               </div>
             </div>
           </div>
@@ -704,7 +833,6 @@ export default function Home() {
             </div>
           </div>
           {/* Booking End */}
-
           {/* Process Start */}
           <div className="container-xxl py-5">
             <div className="container">
@@ -808,7 +936,6 @@ export default function Home() {
             </div>
           </div>
           {/* Process End */}
-
           {/* Team Start */}
           <div className="container-xxl py-5">
             <div className="container">
@@ -828,7 +955,8 @@ export default function Home() {
                     <div className="team-item">
                       <div className="overflow-hidden">
                         <img
-                          className="img-fluid"
+                          className="img-fluid object-fit-cover w-100"
+                          style={{ height: "350px" }}
                           src={trainer.image}
                           alt={trainer.name}
                         />
@@ -857,6 +985,9 @@ export default function Home() {
                         </Link>
                       </div>
                       <div className="text-center p-4">
+                        <div className="flex-fill text-center border-end mb-3">
+                          {renderStars(trainer)} {/* Render sao */}
+                        </div>
                         <h5 className="mb-0">{trainer.name}</h5>
                         <small>{trainer.title}</small>
                       </div>
@@ -866,6 +997,51 @@ export default function Home() {
               </div>
             </div>
           </div>
+          <Modal
+            show={modalVisible}
+            onHide={handleReviewCancel}
+            centered
+            backdrop="static" // Backdrop là cố định, không đóng khi click vào backdrop
+            size="md"
+            aria-labelledby="example-modal-sizes-title-lg"
+          >
+            <Modal.Header closeButton>
+              <Modal.Title id="example-modal-sizes-title-lg">
+                Đánh Giá Huấn Luyện Viên
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <h6>
+                Sao đã chọn:{" "}
+                {
+                  trainers.find((trainer) => trainer.id === selectedTrainer)
+                    ?.rating
+                }{" "}
+                sao
+              </h6>
+              <Form.Group controlId="reviewText">
+                <Form.Control
+                  as="textarea"
+                  rows={4}
+                  placeholder="Nhập nhận xét của bạn"
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                />
+              </Form.Group>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleReviewCancel}>
+                Đóng
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => handleReviewSubmit(reviewText)}
+              >
+                Gửi Đánh Giá
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
           {/* Team End */}
           {/* Review */}
           <div className="container-xxl py-5">

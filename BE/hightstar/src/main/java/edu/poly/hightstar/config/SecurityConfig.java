@@ -41,16 +41,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers(
                             "/api/auth/**",
-                            "/api/home/**",
-                            "/api/public/**",
-                            "/api/about/**").permitAll(); // Các endpoint công khai
+                            "/api/public/**").permitAll(); // Các endpoint công khai
                     auth.requestMatchers("/api/admin/**").hasRole("ADMIN"); // ADMIN mới có thể truy cập
                     auth.requestMatchers("/api/employee/**").hasAnyRole("EMPLOYEE", "ADMIN"); // EMPLOYEE và ADMIN có
-                                                                                              // thể truy cập
+                    // thể truy cập
                     auth.requestMatchers("/api/trainer/**").hasAnyRole("TRAINER", "ADMIN"); // TRAINER và ADMIN có thể
-                                                                                            // truy cập
+                    // truy cập
                     auth.requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN"); // USER có thể truy cập các
-                                                                                      // endpoint riêng của mình
+                    // endpoint riêng của mình
                     auth.anyRequest().authenticated(); // Các endpoint khác yêu cầu xác thực
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

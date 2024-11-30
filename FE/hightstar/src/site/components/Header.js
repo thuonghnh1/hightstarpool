@@ -12,6 +12,7 @@ function Header() {
     logout();
     updateUser(null);
   };
+
   return (
     <div>
       {/* Topbar Start */}
@@ -76,24 +77,27 @@ function Header() {
         </div>
       </div>
       {/* Topbar End */}
+
       {/* Navbar & Hero Start */}
       <div className="container-fluid position-relative p-0">
         <nav className="navbar navbar-expand-lg navbar-light px-4 px-lg-5 py-3 py-lg-0">
           <Link to="/" className="navbar-brand p-0">
-            <h1 className="text-primary m-0">
-              {/* <i className="fa fa-map-marker-alt me-3" /> */}
-              HightStarPool
-            </h1>
-            {/* <img src="img/logo.png" alt="Logo"> */}
+            <h1 className="text-primary m-0">HightStarPool</h1>
           </Link>
+          {/* Navbar Toggle Button */}
           <button
             className="navbar-toggler"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#navbarCollapse"
+            aria-controls="navbarCollapse"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
           >
             <span className="fa fa-bars" />
           </button>
+
+          {/* Navbar Menu */}
           <div className="collapse navbar-collapse" id="navbarCollapse">
             <div className="navbar-nav ms-auto py-0">
               <NavLink to="/" className="nav-item nav-link">
@@ -121,7 +125,7 @@ function Header() {
                 <Dropdown.Menu className="m-0">
                   <Dropdown.Item as={NavLink} to="/myCourse">
                     Khóa học của tôi
-                  </Dropdown.Item>{" "}
+                  </Dropdown.Item>
                   <Dropdown.Item as={NavLink} to="/schedule">
                     Lịch học
                   </Dropdown.Item>
@@ -153,7 +157,7 @@ function Header() {
                   style={{ background: "none" }}
                 >
                   <img
-                    src={user?.avatar || avatarDefault} // userData có tồn tại và userData.avatar không null thì lấy còn ng lại thì lấy mặc định
+                    src={user?.avatar || avatarDefault}
                     alt="User"
                     className="rounded-circle"
                     width={40}

@@ -1,8 +1,8 @@
 package edu.poly.hightstar.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
 import java.time.LocalTime;
+import lombok.*;
 
 @Data
 @Entity

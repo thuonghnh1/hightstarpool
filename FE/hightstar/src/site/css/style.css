@@ -133,6 +133,7 @@ h6,
 }
 
 @media (max-width: 991.98px) {
+
   .sticky-top.navbar-light {
     position: relative;
     background: #ffffff;
