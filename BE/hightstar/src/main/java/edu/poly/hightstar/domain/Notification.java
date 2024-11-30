@@ -1,10 +1,8 @@
 package edu.poly.hightstar.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDateTime;
-
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Data
@@ -13,6 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 @AllArgsConstructor
 @Table(name = "notifications")
 public class Notification {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long notificationId;
@@ -23,6 +22,8 @@ public class Notification {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+    @Column(length = 50)
+    private String recipientType; // ALL, ADMIN, EMPLOYEE,TRAINER, USER
 
     @ManyToOne
     @JoinColumn(name = "userId", referencedColumnName = "userId")

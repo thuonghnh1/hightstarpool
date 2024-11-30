@@ -620,7 +620,7 @@ export default function Home() {
                         <div className="col-md-6">
                           <input
                             type="text"
-                            className="form-control rounded-1"
+                            className="form-control rounded-1 py-3"
                             placeholder="Tên Của Bạn"
                             style={{
                               backgroundColor: "rgba(255, 255, 255, 0.0)",
@@ -634,7 +634,7 @@ export default function Home() {
                         <div className="col-md-6">
                           <input
                             type="email"
-                            className="form-control rounded-1"
+                            className="form-control rounded-1 py-3"
                             placeholder="Email Của Bạn"
                             style={{
                               backgroundColor: "rgba(255, 255, 255, 0.0)",
@@ -648,7 +648,7 @@ export default function Home() {
                         <div className="col-md-6">
                           <input
                             type="tel"
-                            className="form-control"
+                            className="form-control rounded-1 py-3"
                             placeholder="Số Điện Thoại"
                             style={{
                               backgroundColor: "rgba(255, 255, 255, 0.0)",
@@ -661,7 +661,7 @@ export default function Home() {
                         {/* Khóa học cần tư vấn */}
                         <div className="col-md-6">
                           <select
-                            className="form-select"
+                            className="form-select rouded-1 py-3"
                             style={{
                               backgroundColor: "rgba(255, 255, 255, 0.0)", // Màu nền sáng cho select
                               border: "1px solid rgba(255, 255, 255, 0.6)",
