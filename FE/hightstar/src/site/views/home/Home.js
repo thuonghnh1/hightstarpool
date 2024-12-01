@@ -1,95 +1,43 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import { Button, Form, Modal, Spinner } from "react-bootstrap";
 import { Helmet } from "react-helmet-async";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import HomeService from "../../services/HomeService";
+import { UserContext } from "../../../contexts/UserContext";
 
 export default function Home() {
+  const { user } = useContext(UserContext);
+
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
   const [originalRatings, setOriginalRatings] = useState({}); // Khai báo state để lưu rating ban đầu của mỗi huấn luyện viên
   const [hoveredRatings, setHoveredRatings] = useState({}); // State cho hoveredRating của từng huấn luyện viên
   const [selectedTrainer, setSelectedTrainer] = useState(null); // Huấn luyện viên được chọn
   const [modalVisible, setModalVisible] = useState(false); // Trạng thái hiển thị modal
   const [reviewText, setReviewText] = useState(""); // Nhận xét nhập vào
-  const fakeCourses = [
-    {
-      courseName: "Khóa Học Bơi Cơ Bản",
-      courseImage: "assets/img/course-1.jpg",
-      description:
-        "Làm quen với nước và kỹ thuật thở đúng cách. Học các động tác cơ bản như đạp chân, quạt tay, nổi và di chuyển trong nước. Kỹ thuật bơi cơ bản: bơi ếch hoặc bơi sải.",
-      price: "3.000.000 VND",
-      numberOfSessions: "10 buổi",
-    },
-    {
-      courseName: "Khóa Học Bơi Nâng Cao",
-      courseImage: "assets/img/course-2.jpg",
-      description:
-        "Hoàn thiện kỹ thuật bơi sải, bơi ngửa, hoặc bơi bướm. Rèn luyện thể lực và kỹ năng cứu hộ cơ bản.",
-      price: "4.000.000 VND",
-      numberOfSessions: "8 buổi",
-    },
-    {
-      courseName: "Khóa Học Bơi Gia Đình",
-      courseImage: "assets/img/course-3.jpg",
-      description:
-        "Phù hợp với mọi thành viên trong gia đình, từ trẻ em đến người lớn. Lịch học linh hoạt, nội dung được thiết kế riêng để đáp ứng nhu cầu từng người.",
-      price: "10.000.000 VND",
-      numberOfSessions: "10 buổi",
-    },
-  ];
 
-  const [trainers, setTrainers] = useState([
-    {
-      id: 1,
-      name: "Nguyễn Chí Linh",
-      title: "Huấn Luyện Viên Trưởng",
-      image: "assets/img/team-1.jpg",
-      rating: 5, // Thêm thuộc tính rating
-      socials: {
-        facebook: "#",
-        twitter: "#",
-        instagram: "#",
-      },
-    },
-    {
-      id: 2,
-      name: "Huỳnh Ngọc Hoài Thương",
-      title: "Huấn Luyện Viên",
-      image: "assets/img/team-2.jpg",
-      rating: 4, // Thêm thuộc tính rating
-      socials: {
-        facebook: "#",
-        twitter: "#",
-        instagram: "#",
-      },
-    },
-    {
-      id: 3,
-      name: "Nguyễn Đình Nghị",
-      title: "Huấn Luyện Viên",
-      image: "assets/img/team-3.jpg",
-      rating: 3, // Thêm thuộc tính rating
-      socials: {
-        facebook: "#",
-        twitter: "#",
-        instagram: "#",
-      },
-    },
-    {
-      id: 4,
-      name: "Nguyễn Lê Thanh Huyền",
-      title: "Huấn Luyện Viên",
-      image: "assets/img/team-4.jpg",
-      rating: 3.5, // Thêm thuộc tính rating
-      socials: {
-        facebook: "#",
-        twitter: "#",
-        instagram: "#",
-      },
-    },
-  ]);
+  const [courses, setCourses] = useState([]);
+
+  const [trainers, setTrainers] = useState([]);
+
+  const fetchData = async () => {
+    try {
+      setLoadingPage(true);
+      const listCourseData = await HomeService.getCourses();
+      setCourses(listCourseData); // lưu course vào state
+      const listTrainerData = await HomeService.getTrainers();
+      setTrainers(listTrainerData); // lưu course vào state
+    } catch (error) {
+    } finally {
+      setLoadingPage(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   // Fake data for testimonials
   const testimonials = [
@@ -126,6 +74,13 @@ export default function Home() {
       image: "assets/img/testimonial-4.jpg",
     },
   ];
+
+  const formatCurrency = (price) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
+  };
 
   // Settings for react-slick
   const settings = {
@@ -374,9 +329,21 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
-                  <Link className="btn btn-primary py-2 px-5 mt-2" href="">
-                    Đăng ký ngay
-                  </Link>
+                  {user ? (
+                    <NavLink
+                      className="btn btn-primary py-2 px-5 mt-2"
+                      to={"/course"}
+                    >
+                      Khám phá ngay
+                    </NavLink>
+                  ) : (
+                    <NavLink
+                      className="btn btn-primary py-2 px-5 mt-2"
+                      to={"/register"}
+                    >
+                      Đăng ký ngay
+                    </NavLink>
+                  )}
                 </div>
               </div>
             </div>
@@ -632,8 +599,8 @@ export default function Home() {
                 <h1 className="mb-5">Khám Phá Các Khóa Học Bơi</h1>
               </div>
               <div className="row g-4 justify-content-center">
-                {fakeCourses.map((course, index) => (
-                  <div className="col-lg-4 col-md-6" key={index}>
+                {courses.slice(0, 3).map((course) => (
+                  <div className="col-lg-4 col-md-6" key={course.id}>
                     <div className="course-item rounded overflow-hidden shadow">
                       <div
                         className="overflow-hidden"
@@ -644,7 +611,7 @@ export default function Home() {
                       >
                         <img
                           className="img-fluid w-100 h-100"
-                          src={course.courseImage}
+                          src={course.image}
                           alt={course.courseName}
                           style={{ objectFit: "cover" }}
                         />
@@ -657,12 +624,11 @@ export default function Home() {
                           <small className="fa fa-star text-primary" />
                           <small className="fa fa-star text-primary" />
                         </div>
-
-                        <small className="flex-fill text-center border-end py-2">
-                          {course.numberOfSessions}
+                        <small className="flex-fill text-center border-end py-2 m-auto">
+                          {course.numberOfSessions} Buổi
                         </small>
-                        <small className="flex-fill text-center py-2">
-                          {course.price}
+                        <small className="flex-fill text-center py-2 m-auto">
+                          {formatCurrency(course.price)}
                         </small>
                       </div>
                       <div className="text-center p-4">
@@ -957,7 +923,7 @@ export default function Home() {
                         <img
                           className="img-fluid object-fit-cover w-100"
                           style={{ height: "350px" }}
-                          src={trainer.image}
+                          src={trainer.avatar}
                           alt={trainer.name}
                         />
                       </div>
@@ -965,27 +931,18 @@ export default function Home() {
                         className="position-relative d-flex justify-content-center"
                         style={{ marginTop: "-19px" }}
                       >
-                        <Link
-                          className="btn btn-square mx-1"
-                          href={trainer.socials.facebook}
-                        >
+                        <Link className="btn btn-square mx-1" href={"#"}>
                           <i className="fab fa-facebook-f" />
                         </Link>
-                        <Link
-                          className="btn btn-square mx-1"
-                          href={trainer.socials.twitter}
-                        >
+                        <Link className="btn btn-square mx-1" href={"#"}>
                           <i className="fab fa-twitter" />
                         </Link>
-                        <Link
-                          className="btn btn-square mx-1"
-                          href={trainer.socials.instagram}
-                        >
+                        <Link className="btn btn-square mx-1" href={"#"}>
                           <i className="fab fa-instagram" />
                         </Link>
                       </div>
                       <div className="text-center p-4">
-                        <div className="flex-fill text-center border-end mb-3">
+                        <div className="flex-fill text-center mb-3">
                           {renderStars(trainer)} {/* Render sao */}
                         </div>
                         <h5 className="mb-0">{trainer.name}</h5>

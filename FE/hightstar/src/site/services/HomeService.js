@@ -6,7 +6,7 @@ const API_URL = "/public";
 // Hàm lấy tất cả khóa học
 const getCourses = async () => {
   try {
-    const response = await axiosInstance.get(`${API_URL}/course`);
+    const response = await axiosInstance.get(`${API_URL}/courses`);
     return response.data; // Trả về dữ liệu khóa học
   } catch (error) {
     console.error("Lỗi khi lấy danh sách khóa học:", error);
@@ -17,7 +17,7 @@ const getCourses = async () => {
 // Hàm lấy một khóa học theo ID
 const getCourseById = async (id) => {
   try {
-    const response = await axiosInstance.get(`${API_URL}/course/${id}`);
+    const response = await axiosInstance.get(`${API_URL}/courses/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Lỗi khi lấy khóa học với ID: ${id}`, error);
@@ -28,26 +28,28 @@ const getCourseById = async (id) => {
 // Hàm lấy tất cả huấn luyện viên
 const getTrainers = async () => {
   try {
-    const response = await axiosInstance.get(`${API_URL}/trainer`);
+    const response = await axiosInstance.get(`${API_URL}/trainers`);
     return response.data;
   } catch (error) {
-    handleError(error, "Lỗi khi lấy danh sách huấn luyện viên:");
+    throw error;
   }
 };
 
 // Hàm lấy một huấn luyện viên theo ID
 const getTrainerById = async (id) => {
   try {
-    const response = await axiosInstance.get(`${API_URL}/trainer/${id}`);
+    const response = await axiosInstance.get(`${API_URL}/trainers/${id}`);
     return response.data;
   } catch (error) {
-    handleError(error, `Lỗi khi lấy huấn luyện viên với ID: ${id}`);
+    throw error;
   }
 };
 
 const HomeService = {
   getCourses,
   getCourseById,
+  getTrainers,
+  getTrainerById,
 };
 
 export default HomeService;

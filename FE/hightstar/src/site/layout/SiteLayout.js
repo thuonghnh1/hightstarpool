@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import Home from "../views/home/Home";
 import About from "../views/about/About";
 import BackToTop from "../../common/components/BackToTop";
+import Contact from "../views/contact/Contact";
 
 const SiteLayout = () => {
   return (
@@ -15,6 +16,7 @@ const SiteLayout = () => {
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Navigate to={"/"} />} />
         <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="*" element={<Navigate to={"/page404"} />} />
       </Routes>
       <Outlet />
