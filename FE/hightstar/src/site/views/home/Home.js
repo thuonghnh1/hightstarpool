@@ -228,17 +228,17 @@ export default function Home() {
               <div className="row justify-content-center py-5">
                 <div className="col-lg-10 pt-lg-5 mt-lg-5 text-center">
                   <h1 className="display-3 text-white mb-3 animated slideInDown">
-                    Học bơi hôm nay – Bảo vệ bản thân Và Mọi Người!
+                    Mỗi người biết bơi.<br />Đánh dấu sứ mệnh hoàn thành.
                   </h1>
                   <p className="fs-4 text-white mb-4 animated slideInDown">
                     Kỹ năng bơi lội không chỉ là môn thể thao, mà là sự bảo vệ
-                    cho bản thân bạn và gia đình và mọi người.
+                    cho bản thân, gia đình và mọi người.
                   </p>
                   <div className="position-relative w-75 mx-auto animated slideInDown">
                     <input
                       className="form-control border-0 rounded-pill w-100 py-3 ps-4 pe-5"
                       type="text"
-                      placeholder="Tìm Khóa Học"
+                      placeholder="Tìm Khóa học, huấn luyện viên..."
                     />
                     <button
                       type="button"
