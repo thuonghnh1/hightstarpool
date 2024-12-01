@@ -8,7 +8,7 @@ const API_URL = "/admin/notification";
 const getNotifications = async () => {
   try {
     const response = await axiosInstance.get(API_URL);
-    const notifications = response.data
+    const notifications = response.data;
     return notifications.map((notification) => ({
       ...notification,
       createdAt: formatDateTimeToDMY(notification.createdAt),
@@ -36,11 +36,7 @@ const getNotificationById = async (id) => {
 // Hàm tạo thông báo mới
 const createNotification = async (notificationData) => {
   try {
-    const response = await axiosInstance.post(API_URL, notificationData, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await axiosInstance.post(API_URL, notificationData);
     return response.data; // Trả về thông báo đã tạo
   } catch (error) {
     console.error("Lỗi khi thêm mới thông báo:", error);
@@ -51,11 +47,10 @@ const createNotification = async (notificationData) => {
 // Hàm cập nhật thông báo
 const updateNotification = async (id, notificationData) => {
   try {
-    const response = await axiosInstance.put(`${API_URL}/${id}`, notificationData, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await axiosInstance.put(
+      `${API_URL}/${id}`,
+      notificationData
+    );
     return response.data; // Trả về thông báo đã cập nhật
   } catch (error) {
     console.error(`Lỗi khi cập nhật thông báo với ID: ${id}`, error);

@@ -27,6 +27,7 @@ public class Course {
     private String courseImage;
     @Column(nullable = false, length = 4)
     private int maxStudents;
+    @Column(name = "description", length = 2000) // Đặt kích thước tối đa là 2000 ký tự
     private String description;
     private double price;
     private int numberOfSessions;

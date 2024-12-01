@@ -29,7 +29,7 @@ public class Product {
     @Column(length = 200)
     private String productName;
     private String productImage;
-    @Column(length = 700)
+    @Column(name = "description", length = 2000) // Đặt kích thước tối đa là 2000 ký tự
     private String description;
     @Column(nullable = false)
     private double price;

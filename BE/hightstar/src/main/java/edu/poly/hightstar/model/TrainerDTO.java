@@ -12,10 +12,11 @@ public class TrainerDTO {
 
     @JsonProperty("id")
     private Long trainerId;
-    private String fullName; // Từ userProfile
-    private String phoneNumber; // Từ userProfile
+    private String fullName;
+    private String phoneNumber;
     private String email; // Từ bảng User
-    private boolean gender; // Từ userProfile
+    private boolean gender;
+    private String avatar;
     private String specialty;
     private int experienceYears;
     private double rating;
