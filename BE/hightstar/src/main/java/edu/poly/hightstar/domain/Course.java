@@ -1,7 +1,17 @@
 package edu.poly.hightstar.domain;
 
-import jakarta.persistence.*;
-import lombok.*;
+import java.util.List;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
@@ -20,4 +30,8 @@ public class Course {
     private String description;
     private double price;
     private int numberOfSessions;
+
+    // Mối quan hệ One-to-Many với Review
+    @OneToMany(mappedBy = "course")
+    private List<Review> reviews;  // Trường này sẽ lưu trữ danh sách các đánh giá liên quan tới sản phẩm
 }

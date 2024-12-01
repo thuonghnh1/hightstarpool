@@ -1,7 +1,8 @@
 package edu.poly.hightstar.service;
 
-import edu.poly.hightstar.model.TrainerDTO;
 import java.util.List;
+
+import edu.poly.hightstar.model.TrainerDTO;
 
 public interface TrainerService {
 
@@ -14,6 +15,8 @@ public interface TrainerService {
     TrainerDTO updateTrainer(Long id, TrainerDTO trainerDTO); // Cập nhật thông tin HLV
 
     void deleteTrainer(Long id); // Xóa HLV
+
+    void updateRating(Long trainerId);
 
     boolean isPhoneNumberExistsForUpdate(String phoneNumber, Long userId);
 

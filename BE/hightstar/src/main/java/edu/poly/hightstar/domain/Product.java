@@ -1,9 +1,20 @@
 package edu.poly.hightstar.domain;
 
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.util.Date;
+import java.util.List;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
@@ -11,6 +22,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Table(name = "products")
 public class Product {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productId;
@@ -31,4 +43,8 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "categoryId", referencedColumnName = "categoryId")
     private Category category;
+
+    // Mối quan hệ One-to-Many với Review
+    @OneToMany(mappedBy = "product")
+    private List<Review> reviews;  // Trường này sẽ lưu trữ danh sách các đánh giá liên quan tới sản phẩm
 }
