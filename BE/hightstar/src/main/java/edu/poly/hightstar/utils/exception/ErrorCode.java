@@ -26,6 +26,7 @@ public enum ErrorCode {
     TIMESLOT_NOT_FOUND("TIMESLOT_NOT_FOUND"), // Không tìm thấy suất học
     ATTENDANCE_NOT_FOUND("ATTENDANCE_NOT_FOUND"), // không tìm thấy điểm danh
     NOTIFICATION_NOT_FOUND("NOTIFICATION_NOT_FOUND"), // không tìm thấy thông báo
+    REVIEW_NOT_FOUND("REVIEW_NOT_FOUND"), // không tìm thấy thông báo
 
     // Lỗi do dữ liệu xung đột (Conflict Errors)
     CONFLICT_ERROR("CONFLICT_ERROR"), // Xung đột dữ liệu tổng quát
@@ -41,6 +42,7 @@ public enum ErrorCode {
     INVALID_PHONE_NUMBER("INVALID_PHONE_NUMBER"), // Số điện thoại không hợp lệ
     INVALID_ORDER_DETAILS("INVALID_ORDER_DETAILS"), // Không có sản phẩm, khóa học hoặc vé nào tồn tại
     INVALID_EMAIL("INVALID_EMAIL"), // lỗi email không hợp lệ hoặc không tồn tại.
+    INVALID_OTP("INVALID_OTP"), // lỗi otp không hợp lệ hoặc đã hết hạn.
 
     // Lỗi hệ thống và máy chủ (System and Server Errors)
     INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR"), // Lỗi máy chủ nội bộ

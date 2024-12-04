@@ -5,6 +5,7 @@ export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Khi component được mount, kiểm tra và lưu thông tin người dùng
   useEffect(() => {
@@ -12,6 +13,7 @@ export const UserProvider = ({ children }) => {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+    setLoading(false);
   }, []);
 
   // Hàm để cập nhật thông tin người dùng và lưu vào localStorage
@@ -21,7 +23,7 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, updateUser }}>
+    <UserContext.Provider value={{ user, updateUser, loading }}>
       {children}
     </UserContext.Provider>
   );

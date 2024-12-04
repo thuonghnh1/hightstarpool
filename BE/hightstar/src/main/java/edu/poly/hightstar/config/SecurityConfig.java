@@ -43,11 +43,11 @@ public class SecurityConfig {
                             "/api/auth/**",
                             "/api/public/**").permitAll(); // Các endpoint công khai
                     auth.requestMatchers("/api/admin/**").hasRole("ADMIN"); // ADMIN mới có thể truy cập
-                    auth.requestMatchers("/api/employee/**").hasAnyRole("EMPLOYEE", "ADMIN"); // EMPLOYEE và ADMIN có
+                    auth.requestMatchers("/api/employee/**").authenticated();
                     // thể truy cập
-                    auth.requestMatchers("/api/trainer/**").hasAnyRole("TRAINER", "ADMIN"); // TRAINER và ADMIN có thể
+                    auth.requestMatchers("/api/trainer/**").authenticated();
                     // truy cập
-                    auth.requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN"); // USER có thể truy cập các
+                    auth.requestMatchers("/api/user/**").authenticated();
                     // endpoint riêng của mình
                     auth.anyRequest().authenticated(); // Các endpoint khác yêu cầu xác thực
                 })

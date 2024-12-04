@@ -1,33 +1,55 @@
 import { useContext, useEffect, useState } from "react";
-import { NavLink, Link } from "react-router-dom";
-import { Button, Form, Modal, Spinner } from "react-bootstrap";
+import { NavLink, Link, useNavigate } from "react-router-dom";
+import { Spinner } from "react-bootstrap";
 import { Helmet } from "react-helmet-async";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import HomeService from "../../services/HomeService";
+import SiteService from "../../services/SiteService";
 import { UserContext } from "../../../contexts/UserContext";
+import { formatCurrency } from "../utils/formatCurrency";
+import TrainerList from "./TrainerList";
+import Select from "react-select"; // thư viện tạo select có hỗ trợ search
 import { toast } from "react-toastify";
 
 export default function Home() {
   const { user } = useContext(UserContext);
-
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
-  const [originalRatings, setOriginalRatings] = useState({}); // Khai báo state để lưu rating ban đầu của mỗi huấn luyện viên
-  const [hoveredRatings, setHoveredRatings] = useState({}); // State cho hoveredRating của từng huấn luyện viên
-  const [selectedTrainer, setSelectedTrainer] = useState(null); // Huấn luyện viên được chọn
-  const [modalVisible, setModalVisible] = useState(false);
-  const [reviewText, setReviewText] = useState("");
   const [courses, setCourses] = useState([]);
   const [trainers, setTrainers] = useState([]);
+  // State để lưu giá trị form và lỗi
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    courseId: "",
+    notes: "",
+  });
+  const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
+  const [listCourseOption, setListCourseOption] = useState([]);
+  const navigate = useNavigate();
+
+  const handleNavigateDetails = (course) => {
+    // Điều hướng tới URL với ID khóa học, đồng thời truyền toàn bộ đối tượng `course` qua state
+    navigate(`/course/${course.id}`, {
+      state: { course }, // Truyền đối tượng course qua state
+    });
+  };
 
   const fetchData = async () => {
     try {
       setLoadingPage(true);
-      const listCourseData = await HomeService.getCourses();
+      const listCourseData = await SiteService.getCourses();
       setCourses(listCourseData); // lưu course vào state
-      const listTrainerData = await HomeService.getTrainers();
-      setTrainers(listTrainerData); // lưu course vào state
+      const listTrainerData = await SiteService.getTrainers();
+      setTrainers(listTrainerData); // Lưu course vào state
+
+      // Chuyển đổi danh sách người dùng đã lọc thành định dạng phù hợp cho Select
+      const courseOptions = listCourseData.map((course) => ({
+        value: course.id,
+        label: `${course.courseName} - 1 Kèm ${course.maxStudents}`,
+      }));
+      setListCourseOption(courseOptions);
     } catch (error) {
     } finally {
       setLoadingPage(false);
@@ -74,13 +96,6 @@ export default function Home() {
     },
   ];
 
-  const formatCurrency = (price) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
-  };
-
   // Settings for react-slick
   const settings = {
     dots: true,
@@ -98,126 +113,61 @@ export default function Home() {
     ],
   };
 
-  const handleStarClick = (trainerId, starRating) => {
-    // Lưu rating ban đầu của huấn luyện viên nếu chưa lưu
-    if (!originalRatings[trainerId]) {
-      setOriginalRatings((prevOriginalRatings) => ({
-        ...prevOriginalRatings,
-        [trainerId]: trainers.find((trainer) => trainer.id === trainerId)
-          .rating,
-      }));
+  // Hàm validate toàn bộ form
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.fullName || formData.fullName.trim() === "") {
+      newErrors.fullName = "Tên không được để trống.";
+    } else if (/\d/.test(formData.fullName)) {
+      newErrors.fullName = "Tên không được chứa chữ số.";
+    }
+    if (!formData.phoneNumber || !/^\d{10}$/.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = "Số điện thoại không hợp lệ.";
     }
 
-    // Cập nhật rating của huấn luyện viên khi click vào sao
-    setTrainers((prevTrainers) =>
-      prevTrainers.map((trainer) =>
-        trainer.id === trainerId
-          ? { ...trainer, rating: starRating, review: "" } // Xóa nhận xét cũ khi thay đổi rating
-          : trainer
-      )
-    );
-    setSelectedTrainer(trainerId); // Cập nhật huấn luyện viên được chọn
-    setModalVisible(true); // Hiển thị modal
+    if (!formData.email || formData.email.trim() === "") {
+      newErrors.email = "Email không được để trống.";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email không hợp lệ.";
+    }
+    if (!formData.courseId) {
+      newErrors.courseId = "Khóa học là bắt buộc";
+    }
+
+    setErrorFields(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleStarHover = (trainerId, starRating) => {
-    setHoveredRatings((prevHoveredRatings) => ({
-      ...prevHoveredRatings,
-      [trainerId]: starRating, // Lưu hoveredRating cho từng huấn luyện viên
-    }));
+  // Hàm xử lý khi thay đổi giá trị input
+  const handleInputChange = (key, value) => {
+    setFormData({ ...formData, [key]: value });
   };
 
-  const handleStarLeave = (trainerId) => {
-    setHoveredRatings((prevHoveredRatings) => ({
-      ...prevHoveredRatings,
-      [trainerId]: 0, // Reset số sao khi hover rời khỏi sao của huấn luyện viên
-    }));
+  const handleResetForm = () => {
+    setFormData({
+      fullName: "",
+      email: "",
+      phoneNumber: "",
+      courseId: "",
+      notes: "",
+    });
   };
-  // Hàm render sao
-  const renderStars = (trainer) => {
-    const stars = [];
-    const { rating } = trainer;
-    const currentRating = hoveredRatings[trainer.id] || rating; // Lấy giá trị hoveredRating riêng biệt cho từng huấn luyện viên
 
-    for (let i = 1; i <= 5; i++) {
-      if (i <= Math.floor(currentRating)) {
-        // Sao đầy
-        stars.push(
-          <i
-            key={i}
-            className="bi bi-star-fill text-warning mx-1"
-            onClick={() => handleStarClick(trainer.id, i)} // Xử lý click
-            onMouseEnter={() => handleStarHover(trainer.id, i)} // Xử lý hover
-            onMouseLeave={() => handleStarLeave(trainer.id)} // Xử lý khi mouse rời khỏi sao
-            style={{ cursor: "pointer" }}
-          />
-        );
-      } else if (i === Math.ceil(currentRating) && currentRating % 1 !== 0) {
-        // Sao nửa (half-star)
-        stars.push(
-          <i
-            key={i}
-            className="bi bi-star-half text-warning mx-1"
-            onClick={() => handleStarClick(trainer.id, i)} // Xử lý click
-            onMouseEnter={() => handleStarHover(trainer.id, i)} // Xử lý hover
-            onMouseLeave={() => handleStarLeave(trainer.id)} // Xử lý khi mouse rời khỏi sao
-            style={{ cursor: "pointer" }}
-          />
-        );
-      } else {
-        // Sao trống
-        stars.push(
-          <i
-            key={i}
-            className="bi bi-star text-warning mx-1"
-            onClick={() => handleStarClick(trainer.id, i)} // Xử lý click
-            onMouseEnter={() => handleStarHover(trainer.id, i)} // Xử lý hover
-            onMouseLeave={() => handleStarLeave(trainer.id)} // Xử lý khi mouse rời khỏi sao
-            style={{ cursor: "pointer" }}
-          />
-        );
+  // Hàm xử lý submit
+  const handleSubmitRegisterCourse = async (e) => {
+    e.preventDefault();
+    if (validateForm()) {
+      // Gọi API để gửi thông tin tư vấn.
+      try {
+        setLoadingPage(true);
+        SiteService.sendInfoRegister(formData);
+        handleResetForm();
+        toast.success("Chúng tôi sẽ sớm liên hệ tư vấn cho bạn!");
+      } finally {
+        setLoadingPage(false);
       }
     }
-
-    return stars;
   };
-
-  const handleReviewCancel = () => {
-    // Khi hủy bỏ đánh giá, khôi phục lại rating ban đầu của huấn luyện viên
-    setTrainers((prevTrainers) =>
-      prevTrainers.map((trainer) =>
-        trainer.id === selectedTrainer
-          ? { ...trainer, rating: originalRatings[selectedTrainer] }
-          : trainer
-      )
-    );
-    setModalVisible(false); // Đóng modal khi hủy bỏ
-    setReviewText(""); // Reset nhận xét
-  };
-
-  const handleReviewSubmit = async () => {
-    // Cập nhật nhận xét của huấn luyện viên
-    console.log(
-      "Nhận xét về HLV" +
-        selectedTrainer +
-        ":" +
-        reviewText +
-        "---" +
-        "Số sao:" +
-        hoveredRatings
-    );
-    // Gom tất cả dữ liệu thành 1 đối tượng duy nhất
-    const reviewData = {
-      trainerId: selectedTrainer,
-      rating: hoveredRatings[selectedTrainer],
-      comment: reviewText,
-    };
-    await HomeService.addOrUpdate(reviewData);
-    toast.success("Đánh giá thành công");
-    setModalVisible(false);
-    setReviewText("");
-  };
-
   return (
     <>
       <Helmet>
@@ -607,63 +557,62 @@ export default function Home() {
                 <h1 className="mb-5">Khám Phá Các Khóa Học Bơi</h1>
               </div>
               <div className="row g-4 justify-content-center">
-                {courses.slice(0, 3).map((course) => (
-                  <div className="col-lg-4 col-md-6" key={course.id}>
-                    <div className="course-item rounded overflow-hidden shadow">
-                      <div
-                        className="overflow-hidden"
-                        style={{
-                          height: "250px",
-                          width: "100%",
-                        }}
-                      >
-                        <img
-                          className="img-fluid w-100 h-100"
-                          src={course.image}
-                          alt={course.courseName}
-                          style={{ objectFit: "cover" }}
-                        />
-                      </div>
-                      <div className="d-flex border-bottom">
-                        <div className="flex-fill text-center border-end py-2">
-                          <small className="fa fa-star text-primary" />
-                          <small className="fa fa-star text-primary" />
-                          <small className="fa fa-star text-primary" />
-                          <small className="fa fa-star text-primary" />
-                          <small className="fa fa-star text-primary" />
+                {courses &&
+                  courses.slice(0, 3).map((course) => (
+                    <div className="col-lg-4 col-md-6" key={course.id}>
+                      <div className="course-item rounded overflow-hidden shadow">
+                        <div
+                          className="overflow-hidden"
+                          style={{
+                            height: "250px",
+                            width: "100%",
+                          }}
+                        >
+                          <img
+                            className="img-fluid w-100 h-100"
+                            src={course.image}
+                            alt={course.courseName}
+                            style={{ objectFit: "cover" }}
+                          />
                         </div>
-                        <small className="flex-fill text-center border-end py-2 m-auto">
-                          {course.numberOfSessions} Buổi
-                        </small>
-                        <small className="flex-fill text-center py-2 m-auto">
-                          {formatCurrency(course.price)}
-                        </small>
-                      </div>
-                      <div className="text-center p-4">
-                        <h5 className="mb-3 fw-bold">{course.courseName}</h5>
-                        <p className="mb-3 text text-truncate">
-                          {course.description}
-                        </p>
-                        <div className="d-flex justify-content-center mb-2">
-                          <Link
-                            href="#"
-                            className="btn btn-sm btn-primary px-3 border-end"
-                            style={{ borderRadius: "30px 0 0 30px" }}
-                          >
-                            Xem chi tiết
-                          </Link>
-                          <Link
-                            href="#"
-                            className="btn btn-sm btn-primary px-3"
-                            style={{ borderRadius: "0 30px 30px 0" }}
-                          >
-                            Đăng Ký Ngay
-                          </Link>
+                        <div className="d-flex border-bottom">
+                          <small className="flex-fill text-center border-end py-2 m-auto">
+                            1 Kèm {course.maxStudents}
+                          </small>
+                          <small className="flex-fill text-center border-end py-2 m-auto">
+                            {course.numberOfSessions} Buổi
+                          </small>
+                          <small className="flex-fill text-center py-2 m-auto">
+                            {formatCurrency(course.price)}
+                          </small>
+                        </div>
+                        <div className="text-center p-4">
+                          <h5 className="mb-3 fw-bold text-truncate">
+                            {course.courseName}
+                          </h5>
+                          <p className="mb-3 text text-truncate">
+                            {course.description}
+                          </p>
+                          <div className="d-flex justify-content-center mb-2">
+                            <div
+                              className="btn btn-sm btn-primary px-3 border-end"
+                              style={{ borderRadius: "30px 0 0 30px" }}
+                              onClick={() => handleNavigateDetails(course)}
+                            >
+                              Xem chi tiết
+                            </div>
+                            <div
+                              className="btn btn-sm btn-primary px-3"
+                              style={{ borderRadius: "0 30px 30px 0" }}
+                              onClick={() => handleNavigateDetails(course)}
+                            >
+                              Đăng Ký Ngay
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
               <div className="d-flex justify-content-center">
                 <NavLink
@@ -717,20 +666,29 @@ export default function Home() {
                   {/* Right Section */}
                   <div className="col-md-6">
                     <h1 className="text-white mb-4">Điền Thông Tin Liên Hệ</h1>
-                    <form>
+                    <form onSubmit={handleSubmitRegisterCourse}>
                       <div className="row g-3">
                         {/* Tên */}
-                        <div className="col-md-6">
+                        <div className="col-12">
                           <input
                             type="text"
                             className="form-control rounded-1 py-3"
                             placeholder="Tên Của Bạn"
+                            value={formData.fullName}
+                            onChange={(e) =>
+                              handleInputChange("fullName", e.target.value)
+                            }
                             style={{
                               backgroundColor: "rgba(255, 255, 255, 0.0)",
                               color: "#fff",
                               border: "1px solid rgba(255, 255, 255, 0.6)",
                             }}
                           />
+                          {errorFields.fullName && (
+                            <div className="invalid-feedback d-block">
+                              {errorFields.fullName}
+                            </div>
+                          )}
                         </div>
 
                         {/* Email */}
@@ -739,12 +697,21 @@ export default function Home() {
                             type="email"
                             className="form-control rounded-1 py-3"
                             placeholder="Email Của Bạn"
+                            value={formData.email}
+                            onChange={(e) =>
+                              handleInputChange("email", e.target.value)
+                            }
                             style={{
                               backgroundColor: "rgba(255, 255, 255, 0.0)",
                               color: "#fff",
                               border: "1px solid rgba(255, 255, 255, 0.6)",
                             }}
                           />
+                          {errorFields.email && (
+                            <div className="invalid-feedback d-block">
+                              {errorFields.email}
+                            </div>
+                          )}
                         </div>
 
                         {/* Số Điện Thoại */}
@@ -753,27 +720,72 @@ export default function Home() {
                             type="tel"
                             className="form-control rounded-1 py-3"
                             placeholder="Số Điện Thoại"
+                            value={formData.phoneNumber}
+                            onChange={(e) =>
+                              handleInputChange("phoneNumber", e.target.value)
+                            }
                             style={{
                               backgroundColor: "rgba(255, 255, 255, 0.0)",
                               color: "#fff",
                               border: "1px solid rgba(255, 255, 255, 0.6)",
                             }}
                           />
+                          {errorFields.phoneNumber && (
+                            <div className="invalid-feedback d-block">
+                              {errorFields.phoneNumber}
+                            </div>
+                          )}
                         </div>
 
-                        {/* Khóa học cần tư vấn */}
-                        <div className="col-md-6">
-                          <select
-                            className="form-select rouded-1 py-3"
-                            style={{
-                              backgroundColor: "rgba(255, 255, 255, 0.0)", // Màu nền sáng cho select
-                              border: "1px solid rgba(255, 255, 255, 0.6)",
+                        {/* Select Khóa Học */}
+                        <div className="col-12">
+                          <Select
+                            options={listCourseOption}
+                            value={listCourseOption.find(
+                              (option) => option.value === formData.courseId
+                            )}
+                            onChange={(selectedOption) =>
+                              handleInputChange(
+                                "courseId",
+                                selectedOption ? selectedOption.value : ""
+                              )
+                            }
+                            placeholder="Chọn khóa học"
+                            isInvalid={!!errorFields.courseId}
+                            isClearable
+                            isSearchable
+                            styles={{
+                              control: (provided) => ({
+                                ...provided,
+                                backgroundColor: "rgba(255, 255, 255, 0.0)", // Nền trong suốt hơn
+                                border: "1px solid rgba(255, 255, 255, 0.6)", // Viền mờ
+                                borderRadius: "4px", // Làm tròn viền
+                                padding: "10px 0", // Padding cho input
+                                color: "#fff",
+                              }),
+                              menu: (provided) => ({
+                                ...provided,
+                                color: "black",
+                              }),
+                              placeholder: (provided) => ({
+                                ...provided,
+                                color: "rgba(255, 255, 255, 0.6)",
+                              }),
+                              singleValue: (provided) => ({
+                                ...provided,
+                                color: "#fff", // Màu chữ đã chọn
+                              }),
+                              input: (provided) => ({
+                                ...provided,
+                                color: "#fff", // Màu chữ khi gõ
+                              }),
                             }}
-                          >
-                            <option value={1}>Khóa Cơ Bản</option>
-                            <option value={2}>Khóa Nâng Cao</option>
-                            <option value={3}>Khóa Gia Đình</option>
-                          </select>
+                          />
+                          {errorFields.courseId && (
+                            <div className="invalid-feedback d-block">
+                              {errorFields.courseId}
+                            </div>
+                          )}
                         </div>
 
                         {/* Ghi Chú */}
@@ -781,6 +793,10 @@ export default function Home() {
                           <textarea
                             className="form-control rounded-1"
                             placeholder="Ghi Chú"
+                            value={formData.notes}
+                            onChange={(e) =>
+                              handleInputChange("notes", e.target.value)
+                            }
                             style={{
                               height: 100,
                               backgroundColor: "rgba(255, 255, 255, 0.0)",
@@ -911,102 +927,15 @@ export default function Home() {
           </div>
           {/* Process End */}
           {/* Team Start */}
-          <div className="container-xxl py-5">
-            <div className="container">
-              <div className="text-center wow fadeInUp">
-                <h6 className="section-title bg-white text-center text-primary px-3">
-                  Huấn Luyện Viên
-                </h6>
-                <h1 className="mb-5">Đội Ngũ Huấn Luyện Viên</h1>
-              </div>
-              <div className="row g-4">
-                {trainers.map((trainer) => (
-                  <div
-                    className="col-lg-3 col-md-6 wow fadeInUp"
-                    data-wow-delay="0.1s"
-                    key={trainer.id}
-                  >
-                    <div className="team-item">
-                      <div className="overflow-hidden">
-                        <img
-                          className="img-fluid object-fit-cover w-100"
-                          style={{ height: "350px" }}
-                          src={trainer.avatar}
-                          alt={trainer.name}
-                        />
-                      </div>
-                      <div
-                        className="position-relative d-flex justify-content-center"
-                        style={{ marginTop: "-19px" }}
-                      >
-                        <Link className="btn btn-square mx-1" href={"#"}>
-                          <i className="fab fa-facebook-f" />
-                        </Link>
-                        <Link className="btn btn-square mx-1" href={"#"}>
-                          <i className="fab fa-twitter" />
-                        </Link>
-                        <Link className="btn btn-square mx-1" href={"#"}>
-                          <i className="fab fa-instagram" />
-                        </Link>
-                      </div>
-                      <div className="text-center p-4">
-                        <div className="flex-fill text-center mb-3">
-                          {renderStars(trainer)} {/* Render sao */}
-                        </div>
-                        <h5 className="mb-0">{trainer.name}</h5>
-                        <small>{trainer.title}</small>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <Modal
-            show={modalVisible}
-            onHide={handleReviewCancel}
-            centered
-            backdrop="static" // Backdrop là cố định, không đóng khi click vào backdrop
-            size="md"
-            aria-labelledby="example-modal-sizes-title-lg"
-          >
-            <Modal.Header closeButton>
-              <Modal.Title id="example-modal-sizes-title-lg">
-                Đánh Giá Huấn Luyện Viên
-              </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <h6>
-                Sao đã chọn:{" "}
-                {
-                  trainers.find((trainer) => trainer.id === selectedTrainer)
-                    ?.rating
-                }{" "}
-                sao
-              </h6>
-              <Form.Group controlId="reviewText">
-                <Form.Control
-                  as="textarea"
-                  rows={4}
-                  placeholder="Nhập nhận xét của bạn"
-                  value={reviewText}
-                  onChange={(e) => setReviewText(e.target.value)}
-                />
-              </Form.Group>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleReviewCancel}>
-                Đóng
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => handleReviewSubmit(reviewText)}
-              >
-                Gửi Đánh Giá
-              </Button>
-            </Modal.Footer>
-          </Modal>
-
+          {trainers && (
+            <TrainerList
+              trainers={trainers}
+              setTrainers={setTrainers}
+              user={user}
+              setLoadingPage={setLoadingPage}
+              trainersPerPage={4}
+            />
+          )}
           {/* Team End */}
           {/* Review */}
           <div className="container-xxl py-5">

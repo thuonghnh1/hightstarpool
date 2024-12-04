@@ -1,29 +1,30 @@
 package edu.poly.hightstar.service.impl;
 
-import edu.poly.hightstar.domain.Review;
-import edu.poly.hightstar.domain.Trainer;
-import edu.poly.hightstar.domain.User;
-import edu.poly.hightstar.domain.UserProfile;
-import edu.poly.hightstar.enums.UserStatus;
-import edu.poly.hightstar.enums.Role;
-import edu.poly.hightstar.model.TrainerDTO;
-import edu.poly.hightstar.repository.ReviewRepository;
-import edu.poly.hightstar.repository.TrainerRepository;
-import edu.poly.hightstar.repository.UserRepository;
-import edu.poly.hightstar.repository.UserProfileRepository;
-import edu.poly.hightstar.service.EmailService;
-import edu.poly.hightstar.service.TrainerService;
-import edu.poly.hightstar.utils.exception.ErrorCode;
-import edu.poly.hightstar.utils.exception.AppException;
-import lombok.RequiredArgsConstructor;
-import java.util.stream.Collectors;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // Thêm import này
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import edu.poly.hightstar.domain.Trainer;
+import edu.poly.hightstar.domain.User;
+import edu.poly.hightstar.domain.UserProfile;
+import edu.poly.hightstar.enums.Role;
+import edu.poly.hightstar.enums.UserStatus;
+import edu.poly.hightstar.model.ReviewDTO;
+import edu.poly.hightstar.model.TrainerDTO;
+import edu.poly.hightstar.repository.ReviewRepository;
+import edu.poly.hightstar.repository.TrainerRepository;
+import edu.poly.hightstar.repository.UserProfileRepository;
+import edu.poly.hightstar.repository.UserRepository;
+import edu.poly.hightstar.service.EmailService;
+import edu.poly.hightstar.service.TrainerService;
+import edu.poly.hightstar.utils.exception.AppException; // Thêm import này
+import edu.poly.hightstar.utils.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -32,8 +33,8 @@ public class TrainerServiceImpl implements TrainerService {
     private final TrainerRepository trainerRepository;
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
-    private final ReviewRepository reviewRepository;
     private final EmailService emailService;
+    private final ReviewRepository reviewRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(); // Thêm mã hóa mật khẩu
 
     @Override
@@ -47,7 +48,6 @@ public class TrainerServiceImpl implements TrainerService {
         if (userRepository.findByUsername(trainerDTO.getPhoneNumber()).isPresent()) {
             throw new AppException("Số điện thoại này đã được sử dụng!",
                     ErrorCode.PHONE_NUMBER_ALREADY_EXISTS);
-
         }
 
         // Tạo mới đối tượng User
@@ -67,6 +67,7 @@ public class TrainerServiceImpl implements TrainerService {
         newUserProfile.setPhoneNumber(trainerDTO.getPhoneNumber());
         newUserProfile.setGender(trainerDTO.isGender());
         newUserProfile.setUser(savedUser);
+        newUserProfile.setAvatar(trainerDTO.getAvatar());
         userProfileRepository.save(newUserProfile);
 
         // Tạo mới Trainer
@@ -92,15 +93,14 @@ public class TrainerServiceImpl implements TrainerService {
         Trainer trainer = trainerRepository.findById(trainerId)
                 .orElseThrow(() -> new AppException("Không tìm thấy HLV này trong hệ thống!",
                 ErrorCode.TRAINER_NOT_FOUND));
-
         // Kiểm tra số điện thoại đã tồn tại
-        if (isPhoneNumberExistsForUpdate(trainerDTO.getPhoneNumber(), trainerId)) {
+        if (isPhoneNumberExistsForUpdate(trainerDTO.getPhoneNumber(), trainerDTO.getUserId())) {
             throw new AppException("Số điện thoại này đã được sử dụng!",
                     ErrorCode.PHONE_NUMBER_ALREADY_EXISTS);
         }
 
         // Kiểm tra email đã tồn tại
-        if (isEmailExistsForUpdate(trainerDTO.getEmail(), trainerId)) {
+        if (isEmailExistsForUpdate(trainerDTO.getEmail(), trainerDTO.getUserId())) {
             throw new AppException("Email này đã được sử dụng!", ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         // Cập nhật Trainer
@@ -125,6 +125,7 @@ public class TrainerServiceImpl implements TrainerService {
         userProfile.setFullName(trainerDTO.getFullName());
         userProfile.setPhoneNumber(trainerDTO.getPhoneNumber());
         userProfile.setGender(trainerDTO.isGender());
+        userProfile.setAvatar(trainerDTO.getAvatar());
         userProfileRepository.save(userProfile);
 
         return convertToDto(trainer, user, userProfile);
@@ -175,25 +176,25 @@ public class TrainerServiceImpl implements TrainerService {
         trainerRepository.delete(trainer);
     }
 
-    // Phương thức cập nhật đánh giá trung bình cho huấn luyện viên
+// Phương thức cập nhật đánh giá trung bình cho huấn luyện viên
     @Override
     @Transactional
     public void updateRating(Long trainerId) {
         // Lấy tất cả các review của trainer
-        List<Review> reviews = reviewRepository.findByTrainer_TrainerId(trainerId);
+        List<ReviewDTO> reviewsDto = reviewRepository.findByTrainerId(trainerId);
 
-        if (reviews.isEmpty()) {
+        if (reviewsDto.isEmpty()) {
             return; // Nếu không có đánh giá nào, không cần cập nhật
         }
 
         // Tính toán rating trung bình từ các review
         double totalRating = 0;
-        for (Review review : reviews) {
-            totalRating += review.getRating(); // Cộng dồn tất cả các rating
+        for (ReviewDTO reviewDto : reviewsDto) {
+            totalRating += reviewDto.getRating(); // Cộng dồn tất cả các rating
         }
 
         // Tính giá trị trung bình
-        double averageRating = totalRating / reviews.size();
+        double averageRating = totalRating / reviewsDto.size();
 
         // Cập nhật rating trung bình vào Trainer
         Trainer trainer = trainerRepository.findById(trainerId)
@@ -259,9 +260,9 @@ public class TrainerServiceImpl implements TrainerService {
                 + "        <p>Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi.</p>"
                 + "        <div class='footer'>"
                 + "            <p>Chân thành cảm ơn bạn,<br><strong>Đội ngũ hỗ trợ khách hàng</strong></p>"
-                + "            <p><strong>HightStarCompany</strong><br>"
-                + "            Email: hightstarpoolcompany@gmail.com | Hotline: 0888-372-325</p>"
-                + "            <p>Đây là email tự động từ phần mềm Hight StarPool. Đây là email tự động vui lòng không trả lời email này.</p>"
+                + "            <p><strong>Hight Star</strong><br>"
+                + "            Email: hightstarpoolcompany@gmail.com@ | Hotline: 0888-372-325</p>"
+                + "            <p>Đây là email tự động từ phần mềm Hight Star. Vui lòng không trả lời email này.</p>"
                 + "        </div>"
                 + "    </div>"
                 + "</body>"

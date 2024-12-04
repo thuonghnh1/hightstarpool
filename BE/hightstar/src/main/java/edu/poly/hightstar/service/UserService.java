@@ -11,11 +11,11 @@ import jakarta.servlet.http.HttpServletResponse;
 public interface UserService {
     List<UserDTO> getAllUsers();
 
-    UserDTO getUserById(Long idd);
+    UserDTO getUserById(Long id);
 
     UserDTO createUser(UserDTO userDto);
 
-    UserDTO updateUser(Long idd, UserDTO userDto);
+    UserDTO updateUser(Long id, UserDTO userDto);
 
     void deleteUser(Long id);
 

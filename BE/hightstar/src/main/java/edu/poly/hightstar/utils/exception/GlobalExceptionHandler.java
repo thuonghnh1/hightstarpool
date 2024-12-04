@@ -33,25 +33,25 @@ public class GlobalExceptionHandler {
     // Xác định HttpStatus dựa trên ErrorCode
     private HttpStatus getStatusByErrorCode(ErrorCode errorCode) {
         return switch (errorCode) {
-                    case INVALID_LOGIN, UNAUTHORIZED_ACCESS -> HttpStatus.UNAUTHORIZED;
-                    case EMAIL_ALREADY_EXISTS, PHONE_NUMBER_ALREADY_EXISTS, CONFLICT_ERROR, DUPLICATE_ENTRY ->
-                        HttpStatus.CONFLICT;
-                    case USER_NOT_FOUND, RESOURCE_NOT_FOUND, ORDER_NOT_FOUND, PRODUCT_NOT_FOUND, COURSE_NOT_FOUND,
-                            STUDENT_NOT_FOUND, TRAINER_NOT_FOUND, DISCOUNT_NOT_FOUND, EMPLOYEE_NOT_FOUND, CATEGORY_NOT_FOUND,
-                            TICKET_NOT_FOUND, TIMESLOT_NOT_FOUND, ATTENDANCE_NOT_FOUND, NOTIFICATION_NOT_FOUND ->
-                        HttpStatus.NOT_FOUND;
-                    case INVALID_INPUT, INVALID_EMAIL_FORMAT, PASSWORD_TOO_WEAK, INVALID_PHONE_NUMBER, INVALID_ORDER_DETAILS,
-                            INVALID_EMAIL ->
-                        HttpStatus.BAD_REQUEST;
-                    case INTERNAL_SERVER_ERROR, SERVICE_UNAVAILABLE, DATABASE_ERROR, TIMEOUT_ERROR, EMAIL_SEND_FAILURE,
-                            EMAIL_CONFIG_ERROR ->
-                        HttpStatus.INTERNAL_SERVER_ERROR;
-                    case OPERATION_NOT_ALLOWED, PERMISSION_DENIED, OPERATION_FAILED -> HttpStatus.FORBIDDEN;
-                    case MISSING_REQUIRED_PARAMETER, PARAMETER_VALIDATION_FAILED -> HttpStatus.BAD_REQUEST;
-                    case DATA_PROCESSING_ERROR, FILE_UPLOAD_ERROR, FILE_FORMAT_NOT_SUPPORTED ->
-                        HttpStatus.INTERNAL_SERVER_ERROR;
-                    case UNKNOWN_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
-                    default -> throw new IllegalArgumentException("Unexpected value: " + errorCode);
+            case INVALID_LOGIN, UNAUTHORIZED_ACCESS -> HttpStatus.UNAUTHORIZED;
+            case EMAIL_ALREADY_EXISTS, PHONE_NUMBER_ALREADY_EXISTS, CONFLICT_ERROR, DUPLICATE_ENTRY ->
+                HttpStatus.CONFLICT;
+            case USER_NOT_FOUND, RESOURCE_NOT_FOUND, ORDER_NOT_FOUND, PRODUCT_NOT_FOUND, COURSE_NOT_FOUND,
+                    STUDENT_NOT_FOUND, TRAINER_NOT_FOUND, DISCOUNT_NOT_FOUND, EMPLOYEE_NOT_FOUND, CATEGORY_NOT_FOUND,
+                    TICKET_NOT_FOUND, TIMESLOT_NOT_FOUND, ATTENDANCE_NOT_FOUND, NOTIFICATION_NOT_FOUND ->
+                HttpStatus.NOT_FOUND;
+            case INVALID_INPUT, INVALID_EMAIL_FORMAT, PASSWORD_TOO_WEAK, INVALID_PHONE_NUMBER, INVALID_ORDER_DETAILS,
+                    INVALID_EMAIL, INVALID_OTP ->
+                HttpStatus.BAD_REQUEST;
+            case INTERNAL_SERVER_ERROR, SERVICE_UNAVAILABLE, DATABASE_ERROR, TIMEOUT_ERROR, EMAIL_SEND_FAILURE,
+                    EMAIL_CONFIG_ERROR ->
+                HttpStatus.INTERNAL_SERVER_ERROR;
+            case OPERATION_NOT_ALLOWED, PERMISSION_DENIED, OPERATION_FAILED -> HttpStatus.FORBIDDEN;
+            case MISSING_REQUIRED_PARAMETER, PARAMETER_VALIDATION_FAILED -> HttpStatus.BAD_REQUEST;
+            case DATA_PROCESSING_ERROR, FILE_UPLOAD_ERROR, FILE_FORMAT_NOT_SUPPORTED ->
+                HttpStatus.INTERNAL_SERVER_ERROR;
+            case UNKNOWN_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
+            default -> throw new IllegalArgumentException("Unexpected value: " + errorCode);
         };
     }
 

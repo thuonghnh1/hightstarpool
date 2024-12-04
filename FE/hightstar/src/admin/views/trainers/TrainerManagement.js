@@ -18,9 +18,11 @@ const TrainerManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
   const [errorServer, setErrorServer] = useState(null);
+  const [imageFile, setImageFile] = useState(null); // State lưu trữ ảnh upload
 
   const trainerColumns = [
     { key: "id", label: "ID" },
+    { key: "avatar", label: "Ảnh đại diện" },
     { key: "fullName", label: "Họ và Tên" },
     { key: "phoneNumber", label: "Số điện thoại" },
     { key: "email", label: "Email" },
@@ -159,6 +161,7 @@ const TrainerManagement = () => {
 
   const handleReset = () => {
     setFormData({
+      avatar: "",
       fullName: "",
       phoneNumber: "",
       email: "",
@@ -187,7 +190,8 @@ const TrainerManagement = () => {
       if (statusFunction.isEditing) {
         const updatedTrainer = await trainerService.updateTrainer(
           formData.id,
-          formData
+          formData,
+          imageFile
         );
         const updatedTrainers = trainerData.map((trainer) =>
           trainer.id === updatedTrainer.id ? updatedTrainer : trainer
@@ -195,7 +199,10 @@ const TrainerManagement = () => {
         setTrainerData(updatedTrainers);
         toast.success("Cập nhật thành công!");
       } else if (statusFunction.isAdd) {
-        const newTrainer = await trainerService.createTrainer(formData);
+        const newTrainer = await trainerService.createTrainer(
+          formData,
+          imageFile
+        );
         setTrainerData([...trainerData, newTrainer]);
         toast.success("Thêm mới thành công!");
       }
@@ -231,25 +238,140 @@ const TrainerManagement = () => {
   const modalContent = (
     <>
       <div className="row">
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formFullName">
-            <Form.Label>
-              Họ và tên <span className="text-danger">(*)</span>
-            </Form.Label>
+        <div className="col-md-6">
+          {/* Phần hiển thị hình ảnh */}
+          <Form.Label className="align-items-start">Ảnh đại diện</Form.Label>
+          <div
+            className="d-flex justify-content-center align-items-center mb-3 rounded-circle bg-light mx-auto"
+            style={{
+              width: "200px",
+              height: "200px",
+              overflow: "hidden",
+              border: "2px dashed #ddd",
+              cursor: "pointer", // Thêm con trỏ chuột thay đổi khi hover
+            }}
+            onClick={() => document.getElementById("formAvatar").click()} // Kích hoạt file input khi click vào ảnh
+          >
+            {formData.avatar ? (
+              <img
+                src={formData.avatar}
+                alt="Ảnh đại diện"
+                className="w-100 h-100 object-fit-cover rounded"
+              />
+            ) : (
+              <span className="text-muted">
+                <i className="bi bi-plus-lg me-2"></i>Thêm hình ảnh
+              </span>
+            )}
+          </div>
+
+          <Form.Group controlId="formAvatar">
             <Form.Control
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              maxLength={100}
-              onChange={(e) => handleInputChange("fullName", e.target.value)}
-              isInvalid={!!errorFields.fullName}
-              placeholder="VD: Nguyen Van A"
+              type="file"
+              name="avatar"
+              accept="avatar/*"
+              onChange={(e) => {
+                const file = e.target.files[0];
+
+                if (file) {
+                  setImageFile(file); // lưu file vào imgFile để gửi lên server
+                  const fileUrl = URL.createObjectURL(file);
+                  handleInputChange("avatar", fileUrl); // lưu file vào img để xem trước
+                } else {
+                  // Nếu người dùng xóa hình ảnh đã chọn thì xóa cả avatar và imageFile
+                  handleInputChange("avatar", "");
+                  setImageFile(null);
+                }
+              }}
+              isInvalid={!!errorFields.avatar}
+              style={{ display: "none" }} // Ẩn phần input file thực tế
               required
             />
             <Form.Control.Feedback type="invalid">
-              {errorFields.fullName}
+              {errorFields.avatar}
             </Form.Control.Feedback>
           </Form.Group>
+        </div>
+
+        <div className="col-md-6">
+          <div className="row m-0 p-0">
+            <div className="mb-3 p-0">
+              <Form.Group controlId="formFullName">
+                <Form.Label>
+                  Họ và tên <span className="text-danger">(*)</span>
+                </Form.Label>
+                <Form.Control
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  maxLength={100}
+                  onChange={(e) =>
+                    handleInputChange("fullName", e.target.value)
+                  }
+                  isInvalid={!!errorFields.fullName}
+                  placeholder="VD: Nguyen Van A"
+                  required
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errorFields.fullName}
+                </Form.Control.Feedback>
+              </Form.Group>
+            </div>
+            <div className="mb-3 p-0">
+              <Form.Group controlId="formGender">
+                <Form.Label>Giới tính</Form.Label>
+                <div>
+                  <Form.Check
+                    type="radio"
+                    label="Nam"
+                    name="gender"
+                    value="true"
+                    checked={formData.gender === true}
+                    onChange={() => handleInputChange("gender", true)}
+                    inline
+                    isInvalid={!!errorFields.gender}
+                  />
+                  <Form.Check
+                    type="radio"
+                    label="Nữ"
+                    name="gender"
+                    value="false"
+                    checked={formData.gender === false}
+                    onChange={() => handleInputChange("gender", false)}
+                    inline
+                    isInvalid={!!errorFields.gender}
+                  />
+                </div>
+                {errorFields.gender && (
+                  <div className="invalid-feedback d-block">
+                    {errorFields.gender}
+                  </div>
+                )}
+              </Form.Group>
+            </div>
+            <div className="mb-3 p-0">
+              <Form.Group controlId="formEmail">
+                <Form.Label>
+                  Email <span className="text-danger">(*)</span>
+                </Form.Label>
+                <Form.Control
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  maxLength={100}
+                  onChange={(e) =>
+                    handleInputChange("email", e.target.value.trim())
+                  }
+                  isInvalid={!!errorFields.email}
+                  placeholder="Nhập vào email"
+                  required
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errorFields.email}
+                </Form.Control.Feedback>
+              </Form.Group>
+            </div>
+          </div>
         </div>
 
         <div className="col-md-6 mb-3">
@@ -272,62 +394,6 @@ const TrainerManagement = () => {
             <Form.Control.Feedback type="invalid">
               {errorFields.phoneNumber}
             </Form.Control.Feedback>
-          </Form.Group>
-        </div>
-
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formEmail">
-            <Form.Label>
-              Email <span className="text-danger">(*)</span>
-            </Form.Label>
-            <Form.Control
-              type="email"
-              name="email"
-              value={formData.email}
-              maxLength={100}
-              onChange={(e) =>
-                handleInputChange("email", e.target.value.trim())
-              }
-              isInvalid={!!errorFields.email}
-              placeholder="Nhập vào email"
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              {errorFields.email}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </div>
-
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formGender">
-            <Form.Label>Giới tính</Form.Label>
-            <div>
-              <Form.Check
-                type="radio"
-                label="Nam"
-                name="gender"
-                value="true"
-                checked={formData.gender === true}
-                onChange={() => handleInputChange("gender", true)}
-                inline
-                isInvalid={!!errorFields.gender}
-              />
-              <Form.Check
-                type="radio"
-                label="Nữ"
-                name="gender"
-                value="false"
-                checked={formData.gender === false}
-                onChange={() => handleInputChange("gender", false)}
-                inline
-                isInvalid={!!errorFields.gender}
-              />
-            </div>
-            {errorFields.gender && (
-              <div className="invalid-feedback d-block">
-                {errorFields.gender}
-              </div>
-            )}
           </Form.Group>
         </div>
 
@@ -396,28 +462,29 @@ const TrainerManagement = () => {
             </Form.Control.Feedback>
           </Form.Group>
         </div>
-
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formSchedule">
-            <Form.Label>Trạng thái</Form.Label>
-            <Form.Check
-              type="switch"
-              id="custom-switch"
-              label={
-                formData.status && formData.status.includes("ACTIVE")
-                  ? "Hoạt động"
-                  : "Vô hiệu hóa"
-              }
-              onChange={(e) =>
-                handleInputChange(
-                  "status",
-                  e.target.checked ? "ACTIVE" : "DISABLED"
-                )
-              }
-              checked={formData.status === "ACTIVE"}
-            />
-          </Form.Group>
-        </div>
+        {statusFunction.isEditing && (
+          <div className="col-md-6 mb-3">
+            <Form.Group controlId="formSchedule">
+              <Form.Label>Trạng thái</Form.Label>
+              <Form.Check
+                type="switch"
+                id="custom-switch"
+                label={
+                  formData.status && formData.status.includes("ACTIVE")
+                    ? "Hoạt động"
+                    : "Vô hiệu hóa"
+                }
+                onChange={(e) =>
+                  handleInputChange(
+                    "status",
+                    e.target.checked ? "ACTIVE" : "DISABLED"
+                  )
+                }
+                checked={formData.status === "ACTIVE"}
+              />
+            </Form.Group>
+          </div>
+        )}
       </div>
     </>
   );

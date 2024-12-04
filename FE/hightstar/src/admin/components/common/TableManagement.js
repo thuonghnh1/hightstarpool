@@ -55,6 +55,7 @@ const TableManagement = ({
     const buttonConfig = buttonCustom ?? defaultButtonConfig;
     return buttonConfig;
   };
+  
   // Hàm render custom cell dựa trên loại cột
   const renderCustomCell = (column, item) => {
     switch (column.key) {
@@ -130,14 +131,33 @@ const TableManagement = ({
 
       case "rating":
         const stars = [];
+
         for (let i = 1; i <= 5; i++) {
-          stars.push(
-            <i
-              key={i}
-              className={`bi ${i <= item.averageRating ? "bi-star-fill" : "bi-star"
-                } text-warning me-1`}
-            ></i>
-          );
+          if (i <= Math.floor(item.rating)) {
+            stars.push(
+              <i
+                key={i}
+                className="bi bi-star-fill text-warning me-1"
+                style={{ fontSize: "15px" }}
+              />
+            );
+          } else if (i === Math.ceil(item.rating) && item.rating % 1 !== 0) {
+            stars.push(
+              <i
+                key={i}
+                className="bi bi-star-half text-warning me-1"
+                style={{ fontSize: "15px" }}
+              />
+            );
+          } else {
+            stars.push(
+              <i
+                key={i}
+                className="bi bi-star text-warning me-1"
+                style={{ fontSize: "15px" }}
+              />
+            );
+          }
         }
         return <div>{stars}</div>;
       case "gender":
@@ -163,7 +183,7 @@ const TableManagement = ({
           THURSDAY: "Thứ Năm",
           FRIDAY: "Thứ Sáu",
           SATURDAY: "Thứ Bảy",
-          SUNDAY: "Chủ Nhật"
+          SUNDAY: "Chủ Nhật",
         };
         return (
           <span className={`rounded-3 px-2 py-1`}>
@@ -175,7 +195,7 @@ const TableManagement = ({
         const ticketTypeLabels = {
           ONETIME_TICKET: "Vé một lần",
           WEEKLY_TICKET: "Vé tuần",
-          MONTHLY_TICKET: "Vé tháng"
+          MONTHLY_TICKET: "Vé tháng",
         };
         return (
           <span className={`rounded-3 px-2 py-1`}>
@@ -236,7 +256,7 @@ const TableManagement = ({
           <span className="d-flex align-items-center">
             {item.recipientType === "ALL" && (
               <>
-              <img
+                <img
                   src={iconAll}
                   alt="Icon hlv"
                   className="img-fluid rounded-circle mx-1 me-1"
@@ -247,7 +267,7 @@ const TableManagement = ({
             )}
             {item.recipientType === "INDIVIDUAL" && (
               <>
-               <img
+                <img
                   src={iconIndividual}
                   alt="Icon hlv"
                   className="img-fluid rounded-circle mx-1 me-1"
@@ -319,13 +339,13 @@ const TableManagement = ({
         ? compareA > compareB
           ? 1
           : compareA < compareB
-            ? -1
-            : 0
+          ? -1
+          : 0
         : compareA < compareB
-          ? 1
-          : compareA > compareB
-            ? -1
-            : 0;
+        ? 1
+        : compareA > compareB
+        ? -1
+        : 0;
     }
     return 0;
   });
@@ -481,18 +501,20 @@ const TableManagement = ({
                       {column.label}
                       <span className="icon_sort ps-2 light__text">
                         <i
-                          className={`bi bi-arrow-up ${sortConfig.key === column.key &&
+                          className={`bi bi-arrow-up ${
+                            sortConfig.key === column.key &&
                             sortConfig.direction === "asc"
-                            ? "text-black"
-                            : "opacity-50"
-                            }`}
+                              ? "text-black"
+                              : "opacity-50"
+                          }`}
                         ></i>
                         <i
-                          className={`bi bi-arrow-down ${sortConfig.key === column.key &&
+                          className={`bi bi-arrow-down ${
+                            sortConfig.key === column.key &&
                             sortConfig.direction === "desc"
-                            ? "text-black"
-                            : "opacity-50"
-                            }`}
+                              ? "text-black"
+                              : "opacity-50"
+                          }`}
                         ></i>
                       </span>
                     </th>

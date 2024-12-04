@@ -37,7 +37,7 @@ public class UserProfile {
     @UpdateTimestamp // Thời gian cập nhật cuối cùng, tự động cập nhật khi có thay đổi
     private LocalDateTime updatedAt;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", referencedColumnName = "userId")
     private User user;
 }
