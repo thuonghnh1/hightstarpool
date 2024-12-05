@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OtpService {
 
     private final Map<String, OtpData> otpStorage = new ConcurrentHashMap<>();
-    private static final int OTP_EXPIRY_MINUTES = 1;
+    private static final int OTP_EXPIRY_MINUTES = 2;
     private final EmailService emailService;
 
     // Tạo OTP ngẫu nhiên

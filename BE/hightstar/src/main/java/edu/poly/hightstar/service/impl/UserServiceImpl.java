@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
 
         User user = userOptional.get();
         if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new RuntimeException("Tài khoản của bạn đang bị khóa!");
+            throw new AppException("Tài khoản của bạn đang bị khóa!", ErrorCode.ACCOUNT_LOCKED);
         }
 
         Optional<UserProfile> userProfile = userProfileRepository.findByUser_UserId(user.getUserId());

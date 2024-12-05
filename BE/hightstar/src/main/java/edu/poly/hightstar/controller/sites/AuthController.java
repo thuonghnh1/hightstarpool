@@ -7,6 +7,8 @@ import edu.poly.hightstar.model.SendOtpRequestDTO;
 import edu.poly.hightstar.model.UserDTO;
 import edu.poly.hightstar.service.OtpService;
 import edu.poly.hightstar.service.UserService;
+import edu.poly.hightstar.utils.exception.AppException;
+import edu.poly.hightstar.utils.exception.ErrorCode;
 import edu.poly.hightstar.utils.jwt.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +42,7 @@ public class AuthController {
     }
 
     @PostMapping("/send-otp")
-    public ResponseEntity<Object> sendOtp(@RequestBody SendOtpRequestDTO request) {
+    public ResponseEntity<String> sendOtp(@RequestBody SendOtpRequestDTO request) {
         String identifier = request.getIdentifier();
         UserDTO userData = request.getUserData();
 
@@ -53,14 +55,14 @@ public class AuthController {
                 boolean isPhoneNumberExists = userService.isPhoneNumberExists(phoneNumber);
 
                 if (isPhoneNumberExists) {
-                    return new ResponseEntity<>("Số điện thoại này đã được sử dụng!", HttpStatus.CONFLICT);
+                    throw new AppException("Số điện thoại này đã được sử dụng!", ErrorCode.PHONE_NUMBER_ALREADY_EXISTS);
                 }
             } else {
-                return new ResponseEntity<>("Đã xảy ra lỗi. Vui lòng thử lại sau!", HttpStatus.BAD_REQUEST);
+                throw new AppException("Đã xảy ra lỗi. Vui lòng thử lại sau!", ErrorCode.INTERNAL_SERVER_ERROR);
             }
 
             if (isEmailExists) {
-                return new ResponseEntity<>("Email này đã được sử dụng!", HttpStatus.CONFLICT);
+                throw new AppException("Email này đã được sử dụng!", ErrorCode.EMAIL_ALREADY_EXISTS);
             }
 
             email = identifier;
@@ -75,7 +77,7 @@ public class AuthController {
 
     // Endpoint resend OTP
     @PostMapping("/resend-otp")
-    public ResponseEntity<Object> resendOtp(@RequestBody SendOtpRequestDTO request) {
+    public ResponseEntity<String> resendOtp(@RequestBody SendOtpRequestDTO request) {
         String identifier = request.getIdentifier();
         UserDTO userData = request.getUserData();
 
@@ -88,14 +90,14 @@ public class AuthController {
                 boolean isPhoneNumberExists = userService.isPhoneNumberExists(phoneNumber);
 
                 if (isPhoneNumberExists) {
-                    return new ResponseEntity<>("Số điện thoại này đã được sử dụng!", HttpStatus.CONFLICT);
+                    throw new AppException("Số điện thoại này đã được sử dụng!", ErrorCode.PHONE_NUMBER_ALREADY_EXISTS);
                 }
             } else {
-                return new ResponseEntity<>("Đã xảy ra lỗi. Vui lòng thử lại sau!", HttpStatus.BAD_REQUEST);
+                throw new AppException("Đã xảy ra lỗi. Vui lòng thử lại sau!", ErrorCode.INTERNAL_SERVER_ERROR);
             }
 
             if (isEmailExists) {
-                return new ResponseEntity<>("Email này đã được sử dụng!", HttpStatus.CONFLICT);
+                throw new AppException("Email này đã được sử dụng!", ErrorCode.EMAIL_ALREADY_EXISTS);
             }
 
             email = identifier;
@@ -105,18 +107,18 @@ public class AuthController {
         }
         String otp = otpService.sendOtp(identifier, email);
         System.out.println("OTP mới của bạn là: " + otp);
-        return new ResponseEntity<>("Mã OTP mới đã được gửi lại. Vui lòng kiểm tra email của bạn!", HttpStatus.OK);
+        return new ResponseEntity<>("Mã OTP mới đã được gửi lại. Vui lòng kiểm tra email của bạn!", HttpStatus.CREATED);
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<Object> verifyOtp(@RequestBody Map<String, String> request) {
+    public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> request) {
         String identifier = request.get("identifier");
         String otp = request.get("otp");
 
         if (otpService.validateOtp(identifier, otp)) {
             return ResponseEntity.ok("Xác thực thành công!");
         } else {
-            return new ResponseEntity<>("Mã OTP không hợp lệ hoặc đã hết hạn.", HttpStatus.UNAUTHORIZED);
+            throw new AppException("Mã OTP không hợp lệ hoặc đã hết hạn!", ErrorCode.INVALID_OTP);
         }
     }
 
@@ -128,7 +130,7 @@ public class AuthController {
         if (userService.resetPassword(phoneNumber, newPassword)) {
             return ResponseEntity.ok("Đặt lại mật khẩu thành công!");
         } else {
-            return new ResponseEntity<>("Không thể đặt lại mật khẩu, vui lòng thử lại!", HttpStatus.BAD_REQUEST);
+            throw new AppException("Không thể đặt lại mật khẩu, vui lòng thử lại!", ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 

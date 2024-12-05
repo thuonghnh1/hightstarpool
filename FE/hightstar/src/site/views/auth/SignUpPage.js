@@ -108,7 +108,7 @@ function SignUpPage() {
               <img src={logoVertical} className="mb-4" width={140} alt="logo" />
             </NavLink>
             <div className="text-center px-4">
-              <h5 className="mb-3 text-uppercase fw-bold">
+              <h5 className="mb-3 text-uppercase fw-bold text-white">
                 Đăng ký tài khoản Hight Star
               </h5>
               <p className="opacity-75">

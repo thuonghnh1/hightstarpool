@@ -65,7 +65,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
             onClick={() => toggleMenu("ticket")}
             style={{ cursor: "pointer" }}
           >
-            <i className="me-2 bi bi-ticket-perforated"></i> Vé bơi
+            <i className="me-3 fs-5 bi bi-ticket-perforated"></i> Vé bơi
             <i
               className={`ms-auto bi ${menuState.ticket
                 ? "bi-chevron-compact-up"
@@ -169,7 +169,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
               isActive ? "active-link" : "inactive-link"
             }
           >
-            <i className="me-2 bi bi-bell-fill"></i> Thông báo
+            <i className="me-2 fs-5 bi bi-bell-fill"></i> Thông báo
           </NavLink>
         </li>
 
@@ -191,7 +191,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
               isActive ? "active-link" : "inactive-link"
             }
           >
-            <i className="me-1 bi bi-palette-fill"></i> Suất học
+            <i className="me-2 bi bi-palette-fill"></i> Suất học
           </NavLink>
         </li>
 
@@ -202,7 +202,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
               isActive ? "active-link" : "inactive-link"
             }
           >
-            <i className="me-2 fa-solid fa-people-roof"></i> Điểm danh
+            <i className="me-2 bi bi-card-checklist"></i> Điểm danh
           </NavLink>
         </li>
 
@@ -213,7 +213,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
             onClick={() => toggleMenu("stock")}
             style={{ cursor: "pointer" }}
           >
-            <i className="me-2 fa fa-archive"></i> Kho hàng
+            <i className="me-3 fa fa-archive"></i> Kho hàng
             <i
               className={`ms-auto bi ${menuState.stock
                 ? "bi-chevron-compact-up"

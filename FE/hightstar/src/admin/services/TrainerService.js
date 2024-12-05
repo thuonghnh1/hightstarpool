@@ -29,22 +29,42 @@ const getTrainerById = async (id) => {
 };
 
 // Hàm thêm mới huấn luyện viên
-const createTrainer = async (trainerData) => {
+const createTrainer = async (trainerData, file) => {
+  const formData = new FormData(); // Gửi dữ liệu đa dạng với FormData
+  formData.append("trainer", JSON.stringify(trainerData));
+  if (file) {
+    formData.append("file", file);
+  }
   try {
-    const response = await axiosInstance.post(API_URL, trainerData);
+    const response = await axiosInstance.post(API_URL, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   } catch (error) {
-    handleError(error, "Lỗi khi thêm mới huấn luyện viên:");
+    console.error("Lỗi khi thêm mới HLV:", error);
+    throw error;
   }
 };
 
 // Hàm cập nhật thông tin huấn luyện viên
-const updateTrainer = async (id, trainerData) => {
+const updateTrainer = async (id, trainerData, file) => {
+  const formData = new FormData();
+  formData.append("trainer", JSON.stringify(trainerData));
+  if (file) {
+    formData.append("file", file);
+  }
   try {
-    const response = await axiosInstance.put(`${API_URL}/${id}`, trainerData);
+    const response = await axiosInstance.put(`${API_URL}/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   } catch (error) {
-    handleError(error, `Lỗi khi cập nhật huấn luyện viên với ID: ${id}`);
+    console.error(`Lỗi khi cập nhật HLV với ID: ${id}`, error);
+    throw error;
   }
 };
 

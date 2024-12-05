@@ -65,7 +65,7 @@ function ForgotPasswordPage() {
               <img src={logoVertical} className="mb-4" width={180} alt="logo" />
             </NavLink>
             <div className="text-center px-4">
-              <h5 className="mb-3 text-uppercase fw-bold">Quên mật khẩu</h5>
+              <h5 className="mb-3 text-uppercase fw-bold text-white">Quên mật khẩu</h5>
               <p className="opacity-75">
                 Đừng lo, hãy nhập số điện thoại của bạn để đặt lại mật khẩu.
                 Chúng tôi sẽ hướng dẫn bạn các bước tiếp theo.

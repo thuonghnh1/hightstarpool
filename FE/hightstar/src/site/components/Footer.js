@@ -63,7 +63,7 @@ export default function Footer() {
                   <img
                     className="img-fluid object-fit-cover bg-light p-1"
                     style={{height:"70px"}}
-                    src="assets/img/course-1.jpg"
+                    src="/assets/img/course-1.jpg"
                     alt="1"
                   />
                 </div>
@@ -71,7 +71,7 @@ export default function Footer() {
                   <img
                     className="img-fluid object-fit-cover bg-light p-1"
                     style={{height:"70px"}}
-                    src="assets/img/course-2.jpg"
+                    src="/assets/img/course-2.jpg"
                     alt="2"
                   />
                 </div>
@@ -79,7 +79,7 @@ export default function Footer() {
                   <img
                     className="img-fluid object-fit-cover bg-light p-1"
                     style={{height:"70px"}}
-                    src="assets/img/course-3.jpg"
+                    src="/assets/img/course-3.jpg"
                     alt="3"
                   />
                 </div>
@@ -87,7 +87,7 @@ export default function Footer() {
                   <img
                     className="img-fluid object-fit-cover bg-light p-1"
                     style={{height:"70px"}}
-                    src="assets/img/bg-hero.jpg"
+                    src="/assets/img/bg-hero.jpg"
                     alt="4"
                   />
                 </div>
@@ -95,7 +95,7 @@ export default function Footer() {
                   <img
                     className="img-fluid object-fit-cover bg-light p-1"
                     style={{height:"70px"}}
-                    src="assets/img/about.jpg"
+                    src="/assets/img/about.jpg"
                     alt="5"
                   />
                 </div>
@@ -103,7 +103,7 @@ export default function Footer() {
                   <img
                     className="img-fluid object-fit-cover bg-light p-1"
                     style={{height:"70px"}}
-                    src="assets/img/course-2.jpg"
+                    src="/assets/img/course-2.jpg"
                     alt="6"
                   />
                 </div>

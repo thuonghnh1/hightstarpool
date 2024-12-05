@@ -152,7 +152,7 @@ function VerifyOtpPage() {
               <img src={logoVertical} className="mb-4" width={180} alt="logo" />
             </NavLink>
             <div className="text-center px-4">
-              <h5 className="mb-3 text-uppercase fw-bold">Xác thực OTP</h5>
+              <h5 className="mb-3 text-uppercase fw-bold text-white">Xác thực OTP</h5>
               <p className="opacity-75">
                 Vui lòng nhập mã OTP được gửi đến email của bạn để tiếp tục quá
                 trình xác thực.

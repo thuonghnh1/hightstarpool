@@ -101,16 +101,13 @@ function Header() {
           <div className="collapse navbar-collapse" id="navbarCollapse">
             <div className="navbar-nav ms-auto py-0">
               <NavLink to="/" className="nav-item nav-link">
-                Trang Chủ
+                Trang chủ
               </NavLink>
               <NavLink to="/about" className="nav-item nav-link">
                 Thông tin
               </NavLink>
               <NavLink to="/course" className="nav-item nav-link">
                 Khóa học
-              </NavLink>
-              <NavLink to="/services" className="nav-item nav-link">
-                Dịch Vụ
               </NavLink>
 
               <Dropdown align="start">
@@ -138,7 +135,7 @@ function Header() {
                 </Dropdown.Menu>
               </Dropdown>
               <NavLink to="/Contact" className="nav-item nav-link">
-                Liên Hệ
+                Liên hệ
               </NavLink>
             </div>
             {!user ? (
@@ -160,8 +157,8 @@ function Header() {
                     src={user?.avatar || avatarDefault}
                     alt="User"
                     className="rounded-circle"
-                    width={40}
-                    height={40}
+                    width={55}
+                    height={55}
                   />
                 </Dropdown.Toggle>
 

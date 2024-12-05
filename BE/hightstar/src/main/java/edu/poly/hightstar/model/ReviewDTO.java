@@ -18,5 +18,7 @@ public class ReviewDTO {
     private Long productId;
     private Long courseId;
     private Long trainerId;
+    private String fullName;
+    private String avatar;
     private Long userId;
 }
