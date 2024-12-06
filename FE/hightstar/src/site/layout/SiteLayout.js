@@ -9,6 +9,8 @@ import BackToTop from "../../common/components/BackToTop";
 import Contact from "../views/contacts/Contact";
 import Course from "../views/courses/Course";
 import CourseDetail from "../views/courses/CourseDetail";
+import VietQRGenerator from "../views/Payment/VietQRGenerator";
+import TransactionHistory from "../views/Payment/TransactionHistory";
 
 const SiteLayout = () => {
   return (
@@ -21,6 +23,8 @@ const SiteLayout = () => {
         <Route path="/course" element={<Course />} />
         <Route path="/course/:courseId" element={<CourseDetail />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/generator-qr" element={<VietQRGenerator />} />
+        <Route path="/trainsaction" element={<TransactionHistory />} />
         <Route path="*" element={<Navigate to={"/page404"} />} />
       </Routes>
       <Outlet />
