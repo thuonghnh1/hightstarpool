@@ -6,6 +6,9 @@ import Page500 from "../../../common/pages/Page500";
 import { Spinner, Form } from "react-bootstrap";
 import { Helmet } from "react-helmet-async";
 import { formatDateTimeToDMY } from "../../utils/FormatDate";
+import Select from "react-select";
+
+
 
 const ProductManagement = () => {
   // State lưu dữ liệu sản phẩm
@@ -114,7 +117,8 @@ const ProductManagement = () => {
     const product = productData.find((item) => item.productId === id);
     setFormData({
       ...product,
-      createdAt: formatDateTimeToISO(product.createdAt),
+      // createdAt: formatDateTimeToISO(product.createdAt),
+      
     });
   };
 
