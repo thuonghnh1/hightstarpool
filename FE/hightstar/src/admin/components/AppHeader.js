@@ -1,18 +1,18 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import { Image, Button } from "react-bootstrap";
 import { NavLink, useNavigate } from "react-router-dom";
 import avatarDefault from "../../assets/images/avatars/user.png";
-import iconAddUser from "../../assets/images/icons/add-user.png";
+// import iconAddUser from "../../assets/images/icons/add-user.png";
 import iconBell from "../../assets/images/icons/notification.png";
 import { useTheme } from "./common/ThemeContext";
 // import { toast } from "react-toastify";
 import { logout } from "../../site/services/AuthService";
 import { UserContext } from "../../contexts/UserContext";
+import NotificationService from "../../site/services/NotificationService";
 const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-
   const { user, updateUser } = useContext(UserContext);
 
   // Sử dụng state để lưu trữ danh sách thông báo
@@ -51,32 +51,39 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
     },
   ]);
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      content: "Hồ sơ của bạn đã được cập nhật.",
-      time: "1 giờ trước",
-      imgSrc: iconBell,
-      status: true,
-    },
-    {
-      id: 2,
-      content: "Có người dùng mới đăng ký",
-      time: "2 giờ trước",
-      imgSrc: iconAddUser,
-      status: false,
-    },
-    {
-      id: 3,
-      content: "Máy chủ được lên lịch bảo trì vào ngày mai.",
-      time: "5 giờ trước",
-      imgSrc: "http://127.0.0.1:5500/assets/img/jm_denis.jpg",
-      status: true,
-    },
-  ]);
+  const [notifications, setNotifications] = useState([]);
+  const [roleNotifications, setRoleNotifications] = useState([]);
+
+  // Hàm fetch thông báo
+  const fetchNotification = async () => {
+    try {
+      // Lấy thông báo chung (ALL)
+      const commonNotifications =
+        await NotificationService.getNotificationsByRecipientType("ALL");
+      setNotifications(commonNotifications);
+
+      // Lấy thông báo theo vai trò
+      const roleSpecificNotifications =
+        await NotificationService.getNotificationsByRecipientType(user.role);
+      // Thêm thuộc tính imgSrc vào mỗi thông báo theo vai trò
+      const notificationsWithIcon = roleSpecificNotifications.map(
+        (notification) => ({
+          ...notification,
+          imgSrc: iconBell,
+        })
+      );
+      setRoleNotifications(notificationsWithIcon);
+    } catch (error) {
+      console.error("Lỗi khi lấy thông báo:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotification();
+  }, []);
 
   const unreadMessagesCount = messages.filter((msg) => msg.status).length;
-  const unreadNotificationsCount = notifications.filter(
+  const unreadNotificationsCount = roleNotifications.filter(
     (notif) => notif.status
   ).length;
 
@@ -184,7 +191,7 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
                   className="notif-center small custom-scrollbar"
                   style={{ maxHeight: "300px", overflowY: "auto" }}
                 >
-                  {notifications.map((notif, index) => (
+                  {roleNotifications.map((notif, index) => (
                     <div
                       key={index}
                       className={`box__item d-flex align-items-center border-bottom p-2 ${
@@ -374,6 +381,11 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
                 <Dropdown.Item as={NavLink} to="/admin/my-profile">
                   Thông tin cá nhân
                 </Dropdown.Item>
+                {user.role !== "USER" && (
+                  <Dropdown.Item as={NavLink} to="/">
+                    Chuyển sang khách
+                  </Dropdown.Item>
+                )}
                 <Dropdown.Item as={NavLink} to="/admin/settings">
                   Cài đặt
                 </Dropdown.Item>

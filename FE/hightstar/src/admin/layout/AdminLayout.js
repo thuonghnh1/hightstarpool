@@ -106,7 +106,7 @@ const AdminLayout = () => {
                   path="attendance-management"
                   element={<AttendanceManagement />}
                 />
-                <Route path="*" element={<Navigate to={"/page404"} />} />
+                <Route path="*" element={<Navigate to={"/admin"} />} />
               </Routes>
               <Outlet /> {/* Để hiển thị các component con */}
             </div>

@@ -156,16 +156,21 @@ function Header() {
                   <img
                     src={user?.avatar || avatarDefault}
                     alt="User"
-                    className="rounded-circle"
+                    className="rounded-circle object-fit-cover"
                     width={50}
                     height={50}
                   />
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu className="m-0 mt-3">
-                  <Dropdown.Item as={NavLink} to="/profile">
+                  <Dropdown.Item as={NavLink} to="/my-profile">
                     Thông tin cá nhân
                   </Dropdown.Item>
+                  {user.role !== "USER" && (
+                    <Dropdown.Item as={NavLink} to="/admin">
+                      Chuyển sang quản lý
+                    </Dropdown.Item>
+                  )}
                   <Dropdown.Item as={NavLink} to="/settings">
                     Cài đặt
                   </Dropdown.Item>
