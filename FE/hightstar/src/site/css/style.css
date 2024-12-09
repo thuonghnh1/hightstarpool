@@ -133,7 +133,6 @@ h6,
 }
 
 @media (max-width: 991.98px) {
-
   .sticky-top.navbar-light {
     position: relative;
     background: #ffffff;
@@ -407,6 +406,18 @@ p {
   z-index: 1;
 }
 
+/* Mặc định: Màu đen cho các icon-cart */
+.icon-cart {
+  color: #000 !important;
+}
+
+/* Ở kích thước lớn hơn lg (≥1200px), đổi màu thành trắng */
+@media (min-width: 1200px) {
+  .icon-cart {
+    color: #fff !important;
+  }
+}
+
 @media (min-width: 768px) {
   .testimonial-carousel::before,
   .testimonial-carousel::after {
@@ -465,18 +476,25 @@ p {
   background: #6a11cb;
 
   /* Chrome 10-25, Safari 5.1-6 */
-  background: -webkit-linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1));
+  background: -webkit-linear-gradient(
+    to right,
+    rgba(106, 17, 203, 1),
+    rgba(37, 117, 252, 1)
+  );
 
   /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-  background: linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1));
+  background: linear-gradient(
+    to right,
+    rgba(106, 17, 203, 1),
+    rgba(37, 117, 252, 1)
+  );
 }
 
-.shopping-container input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
+.shopping-container input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-
 
 /*** Footer ***/
 

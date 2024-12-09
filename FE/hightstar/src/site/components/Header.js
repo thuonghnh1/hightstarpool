@@ -7,6 +7,7 @@ import { logout } from "../services/AuthService";
 
 function Header() {
   const { user, updateUser } = useContext(UserContext);
+  const listCartItems = JSON.parse(localStorage.getItem("shoppingCartItems"));
 
   const handleLogout = async () => {
     logout();
@@ -138,6 +139,23 @@ function Header() {
                 Liên hệ
               </NavLink>
             </div>
+            <NavLink
+              to={"/shopping-cart"}
+              className="nav-link icon-badge position-relative px-3 me-4 py-lg-0 py-2"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              <i class="bi bi-cart text-white fs-4 icon-cart"></i>
+              <span
+                className="badge rounded-pill bg-danger position-absolute"
+                style={{ top: "-5px", left: "32px" }}
+              >
+                {listCartItems?.length}
+              </span>
+            </NavLink>
             {!user ? (
               <NavLink
                 to="/login"

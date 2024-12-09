@@ -45,11 +45,11 @@ const SiteLayout = () => {
           path="/shopping-cart"
           element={
             <PrivateRoute roles={["ADMIN", "EMPLOYEE", "TRAINER", "USER"]}>
-              <div className="bg-body-secondary min-vh-100">
+              <div className="bg-body-secondary pb-5 min-vh-100">
                 <div className="container-fluid bg-primary py-5 hero-header">
                   <div className="container py-1"></div>
                 </div>
-                <div className="">
+                <div className="mt-5">
                   <ShoppingCart />
                 </div>
               </div>
