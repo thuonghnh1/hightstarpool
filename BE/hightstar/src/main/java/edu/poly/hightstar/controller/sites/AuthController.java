@@ -1,10 +1,12 @@
 package edu.poly.hightstar.controller.sites;
 
+import edu.poly.hightstar.model.ChangePasswordRequest;
 import edu.poly.hightstar.model.LoginDTO;
 import edu.poly.hightstar.model.LoginResponse;
 import edu.poly.hightstar.model.RegisterDTO;
 import edu.poly.hightstar.model.SendOtpRequestDTO;
 import edu.poly.hightstar.model.UserDTO;
+import edu.poly.hightstar.model.VerifyPasswordRequest;
 import edu.poly.hightstar.service.OtpService;
 import edu.poly.hightstar.service.UserService;
 import edu.poly.hightstar.utils.exception.AppException;
@@ -39,6 +41,19 @@ public class AuthController {
     public ResponseEntity<Object> registerUser(@RequestBody RegisterDTO userData) {
         userService.registerUser(userData);
         return new ResponseEntity<>("Đăng ký thành công, vui lòng đăng nhập để tiếp tục!", HttpStatus.CREATED);
+    }
+
+    @PostMapping("/verify-password")
+    public ResponseEntity<Boolean> verifyPassword(@RequestBody VerifyPasswordRequest request) {
+        boolean result = userService.verifyPassword(request.getUserId(), request.getPassword());
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<Boolean> changePassword(@RequestBody ChangePasswordRequest request) {
+        boolean result = userService.changePassword(request.getUserId(), request.getPassword(),
+                request.getNewPassword());
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/send-otp")

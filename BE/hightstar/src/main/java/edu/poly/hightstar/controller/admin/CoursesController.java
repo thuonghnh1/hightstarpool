@@ -43,6 +43,7 @@ public class CoursesController {
         return courseService.getCourseById(id);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping
     public ResponseEntity<CourseDTO> createCourse(
             @RequestPart("course") String courseData,
@@ -67,6 +68,7 @@ public class CoursesController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping("/{id}")
     public CourseDTO updateCourse(
             @PathVariable Long id,
@@ -91,6 +93,7 @@ public class CoursesController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCourse(@PathVariable Long id) {
         CourseDTO courseDTO = courseService.getCourseById(id);

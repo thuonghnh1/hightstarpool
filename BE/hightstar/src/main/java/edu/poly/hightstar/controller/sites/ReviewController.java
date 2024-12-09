@@ -74,7 +74,11 @@ public class ReviewController {
             ReviewDTO reviewDTO = mapper.readValue(reviewData, ReviewDTO.class);
 
             // Lấy review cũ (nếu tồn tại)
-            ReviewDTO existingReview = reviewService.getReviewById(reviewDTO.getReviewId());
+            ReviewDTO existingReview = null;
+            if (reviewDTO.getReviewId() != null) {
+                // Lấy review cũ (nếu tồn tại)
+                existingReview = reviewService.getReviewById(reviewDTO.getReviewId());
+            }
 
             // Nếu có ảnh mới
             if (files != null && !files.isEmpty()) {

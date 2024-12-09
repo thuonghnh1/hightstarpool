@@ -29,17 +29,20 @@ public class DiscountController {
                 return discountService.getDiscountById(id);
         }
 
+        @PreAuthorize("hasAnyRole('ADMIN')")
         @PostMapping
         public ResponseEntity<DiscountDTO> createDiscount(@RequestBody DiscountDTO discountDTO) {
                 DiscountDTO createdDiscount = discountService.createDiscount(discountDTO);
                 return ResponseEntity.status(HttpStatus.CREATED).body(createdDiscount);
         }
 
+        @PreAuthorize("hasAnyRole('ADMIN')")
         @PutMapping("/{id}")
         public DiscountDTO updateDiscount(@PathVariable Long id, @RequestBody DiscountDTO discountDTO) {
                 return discountService.updateDiscount(id, discountDTO);
         }
 
+        @PreAuthorize("hasAnyRole('ADMIN')")
         @DeleteMapping("/{id}")
         public ResponseEntity<String> deleteDiscount(@PathVariable Long id) {
                 discountService.deleteDiscount(id);

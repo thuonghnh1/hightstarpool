@@ -9,16 +9,37 @@ import {
   formatDateTimeToDMY,
 } from "../../utils/FormatDate";
 import { Spinner, Form } from "react-bootstrap";
+import UserProfileManagement from "../profiles/UserProfileManagement";
 
 const UserManagement = () => {
   const [userData, setUserData] = useState([]);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    id: "",
+    fullName: "",
+    phoneNumber: "",
+    username: "",
+    password: "",
+    email: "",
+    role: "USER",
+    status: "ACTIVE",
+    registeredDate: "",
+    lastLogin: "",
+  });
   const [errorFields, setErrorFields] = useState({});
   const [statusFunction, setStatusFunction] = useState({
     isAdd: false,
     isEditing: false,
     isViewDetail: false,
   });
+
+  // Danh sách button
+  const button = {
+    btnAdd: true,
+    btnEdit: true,
+    btnDelete: true,
+    btnDetail: true,
+    btnFilter: true,
+  };
 
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
@@ -62,7 +83,7 @@ const UserManagement = () => {
       case "fullName":
         if (!value || value.trim() === "") {
           error = "Tên không được để trống.";
-        }else if(/\d/.test(formData.fullName)){
+        } else if (/\d/.test(formData.fullName)) {
           error = "Tên không được chứa số.";
         }
         break;
@@ -136,12 +157,16 @@ const UserManagement = () => {
 
   const handleReset = () => {
     setFormData({
+      id: "",
       fullName: "",
       phoneNumber: "",
+      username: "",
+      password: "",
       email: "",
       role: "USER",
-      password: "",
       status: "ACTIVE",
+      registeredDate: "",
+      lastLogin: "",
     });
     handleResetStatus();
     setErrorFields({});
@@ -155,6 +180,13 @@ const UserManagement = () => {
     });
     updateStatus({ isEditing: true });
     setErrorFields({});
+  };
+
+  const handleViewDetail = async (item) => {
+    updateStatus({ isAdd: false, isEditing: false, isViewDetail: true });
+    setFormData({
+      ...item,
+    });
   };
 
   const handleSaveItem = async () => {
@@ -216,7 +248,9 @@ const UserManagement = () => {
     }
   };
 
-  const modalContent = (
+  const modalContent = statusFunction.isViewDetail ? (
+    <UserProfileManagement userId={formData.id} />
+  ) : (
     <>
       {/* Nếu là edit thì không cần họ và tên */}
       <div className="row">
@@ -229,7 +263,7 @@ const UserManagement = () => {
               <Form.Control
                 type="text"
                 name="fullName"
-                value={formData.fullName}
+                value={formData.fullName || ""}
                 maxLength={100}
                 onChange={(e) => handleInputChange("fullName", e.target.value)}
                 isInvalid={!!errorFields.fullName}
@@ -242,6 +276,7 @@ const UserManagement = () => {
             </Form.Group>
           </div>
         )}
+
         {statusFunction.isEditing || (
           <div className="col-md-6 mb-3">
             <Form.Group controlId="formPhoneNumber">
@@ -251,7 +286,7 @@ const UserManagement = () => {
               <Form.Control
                 type="text"
                 name="phoneNumber"
-                value={formData.phoneNumber}
+                value={formData.phoneNumber || ""}
                 maxLength={100}
                 onChange={(e) =>
                   handleInputChange("phoneNumber", e.target.value)
@@ -278,6 +313,7 @@ const UserManagement = () => {
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
               isInvalid={!!errorFields.email}
+              placeholder="Nhập email"
               required
             />
             <Form.Control.Feedback type="invalid">
@@ -285,6 +321,7 @@ const UserManagement = () => {
             </Form.Control.Feedback>
           </Form.Group>
         </div>
+
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formRole">
             <Form.Label>Vai trò</Form.Label>
@@ -294,7 +331,6 @@ const UserManagement = () => {
               onChange={(e) => handleInputChange("role", e.target.value)}
               isInvalid={!!errorFields.role}
               required
-              // disabled={statusFunction.isEditing}
             >
               <option value="ADMIN">Quản Trị</option>
               <option value="EMPLOYEE">Nhân Viên</option>
@@ -302,7 +338,7 @@ const UserManagement = () => {
               {statusFunction.isEditing && (
                 <option value="TRAINER">Huấn Luyện Viên</option>
               )}
-              <option value="USER">Người Dùng</option>
+              <option value="USER">Khách Hàng</option>
             </Form.Select>
             <Form.Control.Feedback type="invalid">
               {errorFields.role}
@@ -354,6 +390,8 @@ const UserManagement = () => {
             onEdit={handleEdit}
             handleSaveItem={handleSaveItem}
             onDelete={handleDelete}
+            onViewDetail={handleViewDetail}
+            buttonCustom={button}
             isLoading={isLoading}
             statusFunction={statusFunction}
             onResetStatus={handleResetStatus}

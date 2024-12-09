@@ -14,6 +14,7 @@ import {
   TimeSlotManagement,
   AttendanceManagement,
   NotificationManagement,
+  MyProfile,
 } from "../views/index";
 import "../css/style.css";
 import { ThemeProvider } from "../components/common/ThemeContext";
@@ -64,19 +65,20 @@ const AdminLayout = () => {
             isSidebarOpen={isSidebarOpen}
           />
           <div className="main p-0">
-            <div className="container-fluid m-0 p-0 p-md-4">
+            <div className="container-fluid m-0 p-0 p-md-4 d-flex flex-column">
               <Routes>
                 <Route index element={<Navigate to="/admin/dashboard" />} />
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="sales-management" element={<SalesManagement />} />
                 <Route path="user-management" element={<UserManagement />} />
+                <Route path="my-profile" element={<MyProfile />} />
                 <Route
                   path="course-management"
                   element={<CourseManagement />}
                 />
                 <Route
                   path="notificaton-management"
-                  element={<NotificationManagement/>}
+                  element={<NotificationManagement />}
                 />
                 <Route
                   path="trainer-management"

@@ -47,6 +47,7 @@ public class TrainerController {
         return trainerService.getTrainerById(id);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping
     public ResponseEntity<TrainerDTO> createTrainer(
             @RequestPart("trainer") String trainerData,
@@ -75,6 +76,7 @@ public class TrainerController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping("/{id}")
     public TrainerDTO updateTrainer(
             @PathVariable Long id,
@@ -101,6 +103,7 @@ public class TrainerController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTrainer(@PathVariable Long id) {
         trainerService.deleteTrainer(id);

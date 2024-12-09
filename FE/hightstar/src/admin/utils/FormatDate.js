@@ -1,14 +1,17 @@
 export function formatDateToISO(inputDate) {
+  if (!inputDate) return "";
   const [day, month, year] = inputDate.split("/");
   return `${year}-${month}-${day}`;
 }
 
 export function formatDateToDMY(inputDate) {
+  if (!inputDate) return "";
   const [year, month, day] = inputDate.split("-");
   return `${day}/${month}/${year}`;
 }
 
 export function formatDateTimeToISO(inputDateTime) {
+  if (!inputDateTime) return "";
   const [date, time] = inputDateTime.split(" ");
   const [day, month, year] = date.split("/");
   const [hours, minutes] = time.split(":");
@@ -16,6 +19,7 @@ export function formatDateTimeToISO(inputDateTime) {
 }
 
 export function formatDateTimeToDMY(inputDateTime) {
+  if (!inputDateTime) return "";
   const [date, time] = inputDateTime.split("T");
   const [year, month, day] = date.split("-");
   const [hours, minutes] = time.split(":");
@@ -39,4 +43,4 @@ export function getCurrentTime() {
   const minutes = now.getMinutes().toString().padStart(2, "0");
   const seconds = now.getSeconds().toString().padStart(2, "0");
   return `${hours}:${minutes}:${seconds}`;
-};
+}

@@ -36,6 +36,7 @@ public class StudentController {
         return studentService.getStudentById(id);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @PostMapping
     public ResponseEntity<StudentDTO> createStudent(
             @RequestPart("student") String studentData,
@@ -62,6 +63,7 @@ public class StudentController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @PutMapping("/{id}")
     public StudentDTO updateStudent(
             @PathVariable Long id,

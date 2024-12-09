@@ -32,4 +32,8 @@ public interface UserService {
     LoginResponse loginUser(LoginDTO loginDTO, HttpServletResponse response);
 
     boolean resetPassword(String phoneNumber, String newPassword);
+
+    boolean changePassword(Long userId, String password, String newPassword);
+
+    boolean verifyPassword(Long userId, String password);
 }

@@ -16,8 +16,9 @@ public class UserProfileDTO {
     private String fullName;
     private String avatar;
     private String phoneNumber;
+    private String email;
     private Date dateOfBirth;
-    private boolean gender;
+    private Boolean gender;
     private String bio;
     private LocalDateTime updatedAt;
     private Long userId;

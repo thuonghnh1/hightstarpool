@@ -36,17 +36,20 @@ public class TicketController {
         return ticketService.getTicketById(id);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping
     public ResponseEntity<TicketDTO> createTicket(@RequestBody TicketDTO ticketDTO) {
         TicketDTO createdTicket = ticketService.createTicket(ticketDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTicket);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping("/{id}")
     public TicketDTO updateTicket(@PathVariable Long id, @RequestBody TicketDTO ticketDTO) {
         return ticketService.updateTicket(id, ticketDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTicket(@PathVariable Long id) {
         ticketService.deleteTicket(id);

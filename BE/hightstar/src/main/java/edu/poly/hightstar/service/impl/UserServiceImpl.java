@@ -75,6 +75,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOptional = userRepository.findByUsername(loginDTO.getUsername());
         if (!userOptional.isPresent()
                 || !passwordEncoder.matches(loginDTO.getPassword(), userOptional.get().getPassword())) {
+            System.out.println(loginDTO.getPassword() + "--" + userOptional.get().getPassword());
             throw new AppException("Thông tin đăng nhập không chính xác!", ErrorCode.INVALID_LOGIN);
         }
 
@@ -124,6 +125,7 @@ public class UserServiceImpl implements UserService {
             UserDTO dto = new UserDTO();
             System.out.println();
             BeanUtils.copyProperties(user, dto);
+            dto.setPassword("");
             return dto;
         }).collect(Collectors.toList());
     }
@@ -134,9 +136,37 @@ public class UserServiceImpl implements UserService {
         if (user.isPresent()) {
             UserDTO userDto = new UserDTO();
             BeanUtils.copyProperties(user.get(), userDto);
+            userDto.setPassword("");
             return userDto;
         }
         throw new AppException("Người dùng này không tồn tại trong hệ thống!", ErrorCode.USER_NOT_FOUND);
+    }
+
+    @Override
+    public boolean verifyPassword(Long userId, String password) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (!userOptional.isPresent()) {
+            throw new AppException("Người dùng này không tồn tại trong hệ thống!", ErrorCode.USER_NOT_FOUND);
+        }
+        if (!passwordEncoder.matches(password, userOptional.get().getPassword())) {
+            throw new AppException("Mật khẩu không chính xác!", ErrorCode.INVALID_LOGIN);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean changePassword(Long userId, String password, String newPassword) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (!userOptional.isPresent()) {
+            throw new AppException("Người dùng này không tồn tại trong hệ thống!", ErrorCode.USER_NOT_FOUND);
+        }
+        if (!passwordEncoder.matches(password, userOptional.get().getPassword())) {
+            throw new AppException("Mật khẩu cũ không chính xác!", ErrorCode.INVALID_LOGIN);
+        }
+        User user = userOptional.get();
+        user.setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
+        return true;
     }
 
     @Override
@@ -149,6 +179,7 @@ public class UserServiceImpl implements UserService {
                 BeanUtils.copyProperties(user.get(), userDto);
                 userDto.setFullName(userProfile.get().getFullName());
                 userDto.setPhoneNumber(userProfile.get().getPhoneNumber());
+                userDto.setPassword("");
                 return userDto;
             }
         }
@@ -185,6 +216,7 @@ public class UserServiceImpl implements UserService {
         createdUserDto.setFullName(userDto.getFullName());
         createdUserDto.setPhoneNumber(userDto.getPhoneNumber());
         SendEmail(createdUserDto, defaultPassword);
+        createdUserDto.setPassword("");
         return createdUserDto;
     }
 
@@ -192,12 +224,14 @@ public class UserServiceImpl implements UserService {
     public UserDTO updateUser(Long id, UserDTO userDto) {
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isPresent()) {
-            User userDetails = userOptional.get();
-            BeanUtils.copyProperties(userDto, userDetails);
-            User updatedUser = userRepository.save(userDetails);
+            User user = userOptional.get();
+            userDto.setPassword(user.getPassword());// lấy pass ra và lưu lại để pass lúc đầu là rổng để gửi an toàn
+            BeanUtils.copyProperties(userDto, user);
+            User updatedUser = userRepository.save(user);
 
             UserDTO updatedUserDto = new UserDTO();
             BeanUtils.copyProperties(updatedUser, updatedUserDto);
+            updatedUserDto.setPassword("");
             return updatedUserDto;
         }
         throw new AppException("Người dùng này không tồn tại trong hệ thống!", ErrorCode.USER_NOT_FOUND);

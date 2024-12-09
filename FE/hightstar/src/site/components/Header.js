@@ -146,10 +146,10 @@ function Header() {
                 Đăng Nhập
               </NavLink>
             ) : (
-              <Dropdown align="start" className="ms-4">
+              <Dropdown align="start" className="ms-lg-4">
                 <Dropdown.Toggle
                   id="dropdown-basic"
-                  className="border-0"
+                  className="border-0 px-0 px-lg-2"
                   bsPrefix="custom-toggle"
                   style={{ background: "none" }}
                 >
@@ -157,8 +157,8 @@ function Header() {
                     src={user?.avatar || avatarDefault}
                     alt="User"
                     className="rounded-circle"
-                    width={55}
-                    height={55}
+                    width={50}
+                    height={50}
                   />
                 </Dropdown.Toggle>
 

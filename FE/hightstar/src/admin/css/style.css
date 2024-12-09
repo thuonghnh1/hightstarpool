@@ -21,7 +21,9 @@
 }
 
 .main {
-  min-height: 85vh;
+  min-height: calc(
+    100vh - 68px - 53px
+  ); /* Chiều cao viewport trừ header và footer */
   display: flex;
   justify-content: center;
   margin-top: 66px;
@@ -33,4 +35,10 @@
   overflow-y: scroll; /* Chỉ hiển thị thanh cuộn dọc */
   scrollbar-width: thin; /* Đối với Firefox */
   scrollbar-color: #58525260 #1a1a1a00; /* Màu con lăn và màu nền của thanh cuộn */
+}
+
+.form-profile .tab-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }

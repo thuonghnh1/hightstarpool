@@ -42,7 +42,7 @@ public class SecurityConfig {
                     auth.requestMatchers(
                             "/api/auth/**",
                             "/api/public/**").permitAll(); // Các endpoint công khai
-                    auth.requestMatchers("/api/admin/**").hasRole("ADMIN"); // ADMIN mới có thể truy cập
+                    auth.requestMatchers("/api/admin/**").authenticated(); // yêu cầu xác thực
                     auth.requestMatchers("/api/employee/**").authenticated();
                     // thể truy cập
                     auth.requestMatchers("/api/trainer/**").authenticated();

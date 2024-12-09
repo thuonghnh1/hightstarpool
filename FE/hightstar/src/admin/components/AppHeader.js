@@ -107,8 +107,9 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
 
   return (
     <div
-      className={`header navbar navbar-expand bg-body py-1 shadow-none border-dark-subtle  border-bottom ${theme === "dark" ? "dark-theme" : "light-theme"
-        }`}
+      className={`header navbar navbar-expand bg-body py-1 shadow-none border-dark-subtle  border-bottom ${
+        theme === "dark" ? "dark-theme" : "light-theme"
+      }`}
       style={{ height: "66px", left: isSidebarOpen ? "250px" : "0px" }}
     >
       <div className="container-fluid d-flex align-items-center px-2">
@@ -186,8 +187,9 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
                   {notifications.map((notif, index) => (
                     <div
                       key={index}
-                      className={`box__item d-flex align-items-center border-bottom p-2 ${notif.status && "new"
-                        }`}
+                      className={`box__item d-flex align-items-center border-bottom p-2 ${
+                        notif.status && "new"
+                      }`}
                       style={{ cursor: "pointer", position: "relative" }}
                       onClick={() => markNotificationAsRead(notif.id)}
                     >
@@ -284,8 +286,9 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
                   {messages.map((msg, index) => (
                     <div
                       key={index}
-                      className={`box__item d-flex align-items-center border-bottom p-2 ${msg.status && "new"
-                        }`}
+                      className={`box__item d-flex align-items-center border-bottom p-2 ${
+                        msg.status && "new"
+                      }`}
                       style={{ cursor: "pointer", position: "relative" }}
                       onClick={() => markMessageAsRead(msg.id)}
                     >
@@ -338,7 +341,7 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
           <li className="d-flex justify-content-center align-items-center mx-2">
             <span className="fs-2 fw-lighter opacity-25 mb-2 text-dark">|</span>
           </li>
-          <li className="nav-item d-flex justify-content-center align-items-center d-none d-sm-flex">
+          <li className="nav-item d-flex justify-content-center align-items-center  d-sm-flex">
             <button className="nav-link icon-badge" onClick={toggleTheme}>
               {theme === "light" ? (
                 <i className="bi bi-brightness-high fs-5"></i>
@@ -347,7 +350,7 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
               )}
             </button>
           </li>
-          <li className="d-flex justify-content-center align-items-center mx-2 d-none d-sm-flex">
+          <li className="d-flex justify-content-center align-items-center mx-2  d-sm-flex">
             <span className="fs-2 fw-lighter opacity-25 mb-2 text-dark">|</span>
           </li>
           {/* <!-- User profile --> */}
@@ -361,17 +364,17 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
                 <img
                   src={user?.avatar || avatarDefault} // userData có tồn tại và userData.avatar không null thì lấy còn ng lại thì lấy mặc định
                   alt="User"
-                  className="rounded-circle"
+                  className="rounded-circle object-fit-cover"
                   width={40}
                   height={40}
                 />
               </Dropdown.Toggle>
 
               <Dropdown.Menu>
-                <Dropdown.Item as={NavLink} to="/profile">
+                <Dropdown.Item as={NavLink} to="/admin/my-profile">
                   Thông tin cá nhân
                 </Dropdown.Item>
-                <Dropdown.Item as={NavLink} to="/settings">
+                <Dropdown.Item as={NavLink} to="/admin/settings">
                   Cài đặt
                 </Dropdown.Item>
                 <Dropdown.Item onClick={handleLogout}>Đăng xuất</Dropdown.Item>

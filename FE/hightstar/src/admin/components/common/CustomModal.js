@@ -1,4 +1,4 @@
-import { Modal, Button} from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 const CustomModal = ({
   show,
   handleClose,
@@ -6,7 +6,7 @@ const CustomModal = ({
   children,
   onSubmit,
   isLoading,
-  statusFunction
+  statusFunction,
 }) => {
   return (
     <Modal
@@ -19,32 +19,27 @@ const CustomModal = ({
       <Modal.Header closeButton>
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
-        {children}
-      </Modal.Body>
-      <Modal.Footer>
-        {!statusFunction.isViewDetail ? (
-          <>
-            <Button variant="secondary" onClick={handleClose}>
-              Đóng
-            </Button>
-            <Button variant="primary" onClick={onSubmit} disabled={isLoading}>
-              {isLoading ? (
-                <span
-                  className="spinner-border spinner-border-sm"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
-              ) : (
-                "Lưu"
-              )}
-            </Button>
-          </>
-        ) : null}
-      </Modal.Footer>
+      <Modal.Body>{children}</Modal.Body>
+      {!statusFunction.isViewDetail && (
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Đóng
+          </Button>
+          <Button variant="primary" onClick={onSubmit} disabled={isLoading}>
+            {isLoading ? (
+              <span
+                className="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+            ) : (
+              "Lưu"
+            )}
+          </Button>
+        </Modal.Footer>
+      )}
     </Modal>
   );
 };
 
 export default CustomModal;
-

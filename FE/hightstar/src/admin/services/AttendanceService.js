@@ -1,7 +1,6 @@
 import axiosInstance from "../../services/axiosInstance";
-import { formatDateTimeToDMY } from "../utils/FormatDate";
 
-const API_URL = "/admin/attendances";
+const API_URL = "/employee/attendances";
 
 // Hàm lấy tất cả điểm danh
 const getAttendances = async () => {
