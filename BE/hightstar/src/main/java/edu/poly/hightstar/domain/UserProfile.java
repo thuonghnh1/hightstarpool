@@ -29,7 +29,8 @@ public class UserProfile {
     @Temporal(TemporalType.DATE)
     private Date dateOfBirth;
 
-    private boolean gender;
+    @Column(nullable = true)
+    private Boolean gender;
 
     @Column(length = 600) // Giới hạn chiều dài của bio là 600 ký tự
     private String bio;

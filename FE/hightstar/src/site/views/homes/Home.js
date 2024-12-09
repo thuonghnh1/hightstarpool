@@ -43,8 +43,6 @@ export default function Home() {
       setCourses(listCourseData); // lưu course vào state
       const listTrainerData = await SiteService.getTrainers();
       setTrainers(listTrainerData); // Lưu course vào state
-
-      // Chuyển đổi danh sách người dùng đã lọc thành định dạng phù hợp cho Select
       const courseOptions = listCourseData.map((course) => ({
         value: course.id,
         label: `${course.courseName} - 1 Kèm ${course.maxStudents}`,
@@ -938,7 +936,7 @@ export default function Home() {
           )}
           {/* Team End */}
           {/* Review */}
-          <div className="container-xxl py-5">
+          <div className="container-xxl py-5 mb-5">
             <div className="container">
               <div className="text-center">
                 <h6 className="section-title bg-white text-center text-primary px-3">

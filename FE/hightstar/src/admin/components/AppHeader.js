@@ -1,18 +1,19 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import { Image, Button } from "react-bootstrap";
 import { NavLink, useNavigate } from "react-router-dom";
 import avatarDefault from "../../assets/images/avatars/user.png";
-import iconAddUser from "../../assets/images/icons/add-user.png";
+// import iconAddUser from "../../assets/images/icons/add-user.png";
 import iconBell from "../../assets/images/icons/notification.png";
 import { useTheme } from "./common/ThemeContext";
 // import { toast } from "react-toastify";
 import { logout } from "../../site/services/AuthService";
 import { UserContext } from "../../contexts/UserContext";
+import NotificationService from "../../site/services/NotificationService";
+import { toast } from "react-toastify";
 const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-
   const { user, updateUser } = useContext(UserContext);
 
   // Sử dụng state để lưu trữ danh sách thông báo
@@ -51,32 +52,79 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
     },
   ]);
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      content: "Hồ sơ của bạn đã được cập nhật.",
-      time: "1 giờ trước",
-      imgSrc: iconBell,
-      status: true,
-    },
-    {
-      id: 2,
-      content: "Có người dùng mới đăng ký",
-      time: "2 giờ trước",
-      imgSrc: iconAddUser,
-      status: false,
-    },
-    {
-      id: 3,
-      content: "Máy chủ được lên lịch bảo trì vào ngày mai.",
-      time: "5 giờ trước",
-      imgSrc: "http://127.0.0.1:5500/assets/img/jm_denis.jpg",
-      status: true,
-    },
-  ]);
+  const [notifications, setNotifications] = useState([]);
+  const [roleNotifications, setRoleNotifications] = useState([]);
+
+  // Hàm fetch thông báo
+  const fetchNotification = async () => {
+    try {
+      // Lấy thông báo chung (ALL)
+      const commonNotifications =
+        await NotificationService.getNotificationsByRecipientType("ALL");
+      setNotifications(commonNotifications);
+
+      // Lấy thông báo theo vai trò
+      const roleSpecificNotifications =
+        await NotificationService.getNotificationsByRecipientType(user.role);
+      // Thêm thuộc tính imgSrc vào mỗi thông báo theo vai trò
+      const notificationsWithIcon = roleSpecificNotifications.map(
+        (notification) => ({
+          ...notification,
+          imgSrc: iconBell,
+        })
+      );
+      setRoleNotifications(notificationsWithIcon);
+    } catch (error) {
+      console.error("Lỗi khi lấy thông báo:", error);
+    }
+  };
+
+  useEffect(() => {
+    const handleNotifications = async () => {
+      await fetchNotification();
+
+      // Kiểm tra sessionStorage
+      const isShowNotification = sessionStorage.getItem("isShowNotification");
+
+      // Nếu chưa hiển thị thông báo và có thông báo chung
+      if (isShowNotification !== "true" && notifications.length > 0) {
+        // Hiển thị toast với thông báo
+        toast.info(
+          <div>
+            <h5>Thông báo chung</h5>
+            <ul>
+              {notifications.map((notif) => (
+                <li key={notif.id}>
+                  <strong>{notif.title || "Thông báo mới"}</strong>:{" "}
+                  {notif.message}
+                </li>
+              ))}
+            </ul>
+          </div>,
+          {
+            autoClose: false, // Không tự động đóng
+            closeOnClick: false, // Không đóng khi click vào toast
+            draggable: false, // Không kéo để đóng
+            pauseOnHover: true, // Tạm dừng khi hover
+          }
+        );
+
+        // Đánh dấu đã hiển thị thông báo
+        sessionStorage.setItem("isShowNotification", "true");
+      }
+
+      // Nếu không có thông báo chung nhưng chưa hiển thị trước đó
+      if (notifications.length === 0 && isShowNotification !== "true") {
+        // Đánh dấu đã hiển thị (không hiển thị gì)
+        sessionStorage.setItem("isShowNotification", "true");
+      }
+    };
+
+    handleNotifications();
+  }, [notifications.length]); // Chạy lại khi độ dài notifications thay đổi
 
   const unreadMessagesCount = messages.filter((msg) => msg.status).length;
-  const unreadNotificationsCount = notifications.filter(
+  const unreadNotificationsCount = roleNotifications.filter(
     (notif) => notif.status
   ).length;
 
@@ -107,8 +155,9 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
 
   return (
     <div
-      className={`header navbar navbar-expand bg-body py-1 shadow-none border-dark-subtle  border-bottom ${theme === "dark" ? "dark-theme" : "light-theme"
-        }`}
+      className={`header navbar navbar-expand bg-body py-1 shadow-none border-dark-subtle  border-bottom ${
+        theme === "dark" ? "dark-theme" : "light-theme"
+      }`}
       style={{ height: "66px", left: isSidebarOpen ? "250px" : "0px" }}
     >
       <div className="container-fluid d-flex align-items-center px-2">
@@ -183,11 +232,12 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
                   className="notif-center small custom-scrollbar"
                   style={{ maxHeight: "300px", overflowY: "auto" }}
                 >
-                  {notifications.map((notif, index) => (
+                  {roleNotifications.map((notif, index) => (
                     <div
                       key={index}
-                      className={`box__item d-flex align-items-center border-bottom p-2 ${notif.status && "new"
-                        }`}
+                      className={`box__item d-flex align-items-center border-bottom p-2 ${
+                        notif.status && "new"
+                      }`}
                       style={{ cursor: "pointer", position: "relative" }}
                       onClick={() => markNotificationAsRead(notif.id)}
                     >
@@ -284,8 +334,9 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
                   {messages.map((msg, index) => (
                     <div
                       key={index}
-                      className={`box__item d-flex align-items-center border-bottom p-2 ${msg.status && "new"
-                        }`}
+                      className={`box__item d-flex align-items-center border-bottom p-2 ${
+                        msg.status && "new"
+                      }`}
                       style={{ cursor: "pointer", position: "relative" }}
                       onClick={() => markMessageAsRead(msg.id)}
                     >
@@ -338,7 +389,7 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
           <li className="d-flex justify-content-center align-items-center mx-2">
             <span className="fs-2 fw-lighter opacity-25 mb-2 text-dark">|</span>
           </li>
-          <li className="nav-item d-flex justify-content-center align-items-center d-none d-sm-flex">
+          <li className="nav-item d-flex justify-content-center align-items-center  d-sm-flex">
             <button className="nav-link icon-badge" onClick={toggleTheme}>
               {theme === "light" ? (
                 <i className="bi bi-brightness-high fs-5"></i>
@@ -347,7 +398,7 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
               )}
             </button>
           </li>
-          <li className="d-flex justify-content-center align-items-center mx-2 d-none d-sm-flex">
+          <li className="d-flex justify-content-center align-items-center mx-2  d-sm-flex">
             <span className="fs-2 fw-lighter opacity-25 mb-2 text-dark">|</span>
           </li>
           {/* <!-- User profile --> */}
@@ -361,17 +412,22 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
                 <img
                   src={user?.avatar || avatarDefault} // userData có tồn tại và userData.avatar không null thì lấy còn ng lại thì lấy mặc định
                   alt="User"
-                  className="rounded-circle"
+                  className="rounded-circle object-fit-cover"
                   width={40}
                   height={40}
                 />
               </Dropdown.Toggle>
 
               <Dropdown.Menu>
-                <Dropdown.Item as={NavLink} to="/profile">
+                <Dropdown.Item as={NavLink} to="/admin/my-profile">
                   Thông tin cá nhân
                 </Dropdown.Item>
-                <Dropdown.Item as={NavLink} to="/settings">
+                {user.role !== "USER" && (
+                  <Dropdown.Item as={NavLink} to="/">
+                    Chuyển sang khách
+                  </Dropdown.Item>
+                )}
+                <Dropdown.Item as={NavLink} to="/admin/settings">
                   Cài đặt
                 </Dropdown.Item>
                 <Dropdown.Item onClick={handleLogout}>Đăng xuất</Dropdown.Item>

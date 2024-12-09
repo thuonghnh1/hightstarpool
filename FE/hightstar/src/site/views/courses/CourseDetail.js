@@ -132,6 +132,7 @@ const CourseDetail = () => {
                       src={course?.image || "/default-course.jpg"}
                       alt={course?.courseName}
                       className="rounded-1 object-fit-cover"
+                      style={{ height: "300px" }}
                     />
                   </Card>
                 </Col>

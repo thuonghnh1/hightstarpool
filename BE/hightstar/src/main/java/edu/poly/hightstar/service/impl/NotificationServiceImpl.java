@@ -2,6 +2,7 @@ package edu.poly.hightstar.service.impl;
 
 import edu.poly.hightstar.domain.Notification;
 import edu.poly.hightstar.domain.User;
+import edu.poly.hightstar.enums.RecipientType;
 import edu.poly.hightstar.model.NotificationDTO;
 import edu.poly.hightstar.repository.NotificationRepository;
 import edu.poly.hightstar.repository.UserRepository;
@@ -47,10 +48,25 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public List<NotificationDTO> getNotificationsByRecipientType(RecipientType recipientType) {
+        try {
+            return notificationRepository.findByRecipientType(recipientType).stream().map(notification -> {
+                return convertToNotificationDTO(notification);
+            }).collect(Collectors.toList());
+        } catch (Exception e) {
+            // Log lỗi để kiểm tra nguyên nhân
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi lấy thông báo.");
+        }
+    }
+
+    @Override
     public NotificationDTO createNotification(NotificationDTO notificationDTO) {
         // Tạo Notification từ NotificationDTO
         Notification notification = convertToNotification(notificationDTO);
-
+        if (notificationDTO.getRecipientType() != RecipientType.ALL) {
+            notification.setStatus(true);
+        }
         // Lưu Notification và chuyển đổi lại thành DTO
         Notification createdNotification = notificationRepository.save(notification);
         return convertToNotificationDTO(createdNotification);

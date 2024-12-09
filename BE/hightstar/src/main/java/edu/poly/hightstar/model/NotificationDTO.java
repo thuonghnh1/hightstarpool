@@ -15,17 +15,9 @@ import lombok.NoArgsConstructor;
 public class NotificationDTO {
     @JsonProperty("id") // ID thông báo
     private Long notificationId;
-
-   
     private String content;
-
-
-    private Boolean status = true;
-
+    private Boolean status;
     private LocalDateTime createdAt;
-
     private RecipientType recipientType;
-
-  
     private Long userId;
 }

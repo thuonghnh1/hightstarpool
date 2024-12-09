@@ -7,6 +7,7 @@ import { logout } from "../services/AuthService";
 
 function Header() {
   const { user, updateUser } = useContext(UserContext);
+  const listCartItems = JSON.parse(localStorage.getItem("shoppingCartItems"));
 
   const handleLogout = async () => {
     logout();
@@ -138,6 +139,23 @@ function Header() {
                 Liên hệ
               </NavLink>
             </div>
+            <NavLink
+              to={"/shopping-cart"}
+              className="nav-link icon-badge position-relative px-3 me-4 py-lg-0 py-2"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              <i class="bi bi-cart text-white fs-4 icon-cart"></i>
+              <span
+                className="badge rounded-pill bg-danger position-absolute"
+                style={{ top: "-5px", left: "32px" }}
+              >
+                {user ? listCartItems?.length : 0}
+              </span>
+            </NavLink>
             {!user ? (
               <NavLink
                 to="/login"
@@ -146,26 +164,31 @@ function Header() {
                 Đăng Nhập
               </NavLink>
             ) : (
-              <Dropdown align="start" className="ms-4">
+              <Dropdown align="start" className="ms-lg-4">
                 <Dropdown.Toggle
                   id="dropdown-basic"
-                  className="border-0"
+                  className="border-0 px-0 px-lg-2"
                   bsPrefix="custom-toggle"
                   style={{ background: "none" }}
                 >
                   <img
                     src={user?.avatar || avatarDefault}
                     alt="User"
-                    className="rounded-circle"
-                    width={55}
-                    height={55}
+                    className="rounded-circle object-fit-cover"
+                    width={50}
+                    height={50}
                   />
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu className="m-0 mt-3">
-                  <Dropdown.Item as={NavLink} to="/profile">
+                  <Dropdown.Item as={NavLink} to="/my-profile">
                     Thông tin cá nhân
                   </Dropdown.Item>
+                  {user.role !== "USER" && (
+                    <Dropdown.Item as={NavLink} to="/admin">
+                      Chuyển sang quản lý
+                    </Dropdown.Item>
+                  )}
                   <Dropdown.Item as={NavLink} to="/settings">
                     Cài đặt
                   </Dropdown.Item>

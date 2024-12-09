@@ -1,4 +1,3 @@
-// ThemeProvider.js
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 const ThemeContext = createContext();
@@ -7,7 +6,7 @@ export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("theme") || "light";
+    return localStorage.getItem("theme") || "dark";
   });
 
   const toggleTheme = () => {

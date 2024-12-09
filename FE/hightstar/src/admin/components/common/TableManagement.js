@@ -55,7 +55,7 @@ const TableManagement = ({
     const buttonConfig = buttonCustom ?? defaultButtonConfig;
     return buttonConfig;
   };
-  
+
   // Hàm render custom cell dựa trên loại cột
   const renderCustomCell = (column, item) => {
     switch (column.key) {
@@ -125,7 +125,10 @@ const TableManagement = ({
             alt={item.name || "Ảnh mặc định"} // Đổi alt thành "Default Image" nếu item.name không tồn tại
             className="object-fit-cover rounded-circle"
             style={{ width: "45px", height: "45px", cursor: "pointer" }}
-            onClick={() => handleImageClick(item[column.key] || defaultImage)}
+            onClick={(e) => {
+              e.stopPropagation(); // ngăn chặn sự kiện lan truyền sang cha.
+              handleImageClick(item[column.key] || defaultImage);
+            }}
           />
         );
 
@@ -525,7 +528,10 @@ const TableManagement = ({
             <tbody>
               {currentData.map((item) => (
                 <Fragment key={item.id}>
-                  <tr>
+                  <tr
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleRowToggle(item.id)}
+                  >
                     {columns
                       .filter((col) => visibleColumns.includes(col.key))
                       .map((column) => (
@@ -536,7 +542,10 @@ const TableManagement = ({
                     <td className="align-middle">
                       <button
                         className="btn btn__show p-1"
-                        onClick={() => handleRowToggle(item.id)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Ngăn chặn sự kiện lan truyền lên tr
+                          handleRowToggle(item.id);
+                        }}
                       >
                         {expandedRows.includes(item.id) ? (
                           <i className="bi bi-dash-circle"></i>
@@ -584,7 +593,7 @@ const TableManagement = ({
                               )}
                               {handleRenderBtn().btnDelete && (
                                 <button
-                                  className="btn btn__delete p-1 me-3"
+                                  className="btn btn__delete p-1 me-4"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleShowConfirmModal(item.id);
@@ -688,7 +697,6 @@ const TableManagement = ({
         {/* Truyền children modal thông qua props */}
         {modalContent}
       </CustomModal>
-      <></>
       <DeleteModal
         show={showConfirmModal}
         onConfirm={handleConfirm}

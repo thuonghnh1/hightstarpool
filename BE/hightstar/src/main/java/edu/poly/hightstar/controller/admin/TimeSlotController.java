@@ -41,6 +41,7 @@ public class TimeSlotController {
         return ResponseEntity.ok(timeSlotDTO); // 200 OK với discountDto
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping
     public ResponseEntity<TimeSlotDTO> createTimeSlot(@RequestBody TimeSlotDTO timeSlotDTO) {
         TimeSlotDTO createdTimeSlot = timeSlotService.createTimeSlot(timeSlotDTO);
@@ -50,6 +51,7 @@ public class TimeSlotController {
 
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<TimeSlotDTO> updateTimeSlot(@PathVariable Long id, @RequestBody TimeSlotDTO timeSlotDTO) {
         TimeSlotDTO updatedTimeSlot = timeSlotService.updateTimeSlot(id, timeSlotDTO);
@@ -57,6 +59,7 @@ public class TimeSlotController {
         return ResponseEntity.ok(updatedTimeSlot);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTimeSlot(@PathVariable Long id) {
         timeSlotService.deleteTimeSlot(id);

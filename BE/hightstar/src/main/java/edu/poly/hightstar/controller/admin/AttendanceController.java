@@ -19,7 +19,7 @@ import edu.poly.hightstar.service.AttendanceService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/admin/attendances")
+@RequestMapping("/api/employee/attendances")
 @RequiredArgsConstructor
 public class AttendanceController {
     private final AttendanceService attendanceService;
@@ -36,17 +36,20 @@ public class AttendanceController {
         return attendanceService.getAttendanceById(id);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @PostMapping
     public ResponseEntity<AttendanceDTO> createAttendance(@RequestBody AttendanceDTO attendanceDTO) {
         AttendanceDTO createdAttendance = attendanceService.createAttendance(attendanceDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAttendance);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @PutMapping("/{id}")
-    public AttendanceDTO updateAttendancet(@PathVariable Long id, @RequestBody AttendanceDTO attendanceDTO) {
+    public AttendanceDTO updateAttendance(@PathVariable Long id, @RequestBody AttendanceDTO attendanceDTO) {
         return attendanceService.updateAttendance(id, attendanceDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteAttendance(@PathVariable Long id) {
         attendanceService.deleteAttendance(id);

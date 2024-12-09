@@ -29,17 +29,20 @@ public class UserController {
         return userService.getUserById(id);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @GetMapping("/search-by-username")
     public UserDTO getUserByUsername(@RequestParam String username) {
         return userService.getUserByUsername(username);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDto) {
         UserDTO createDto = userService.createUser(userDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createDto);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @PutMapping("/{id}")
     public UserDTO updateUser(@PathVariable Long id, @RequestBody UserDTO userDto) {
         return userService.updateUser(id, userDto);

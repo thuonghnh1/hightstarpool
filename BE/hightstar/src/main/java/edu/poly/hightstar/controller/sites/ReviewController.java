@@ -72,7 +72,7 @@ public class ReviewController {
             // Chuyển dữ liệu JSON thành ReviewDTO
             ObjectMapper mapper = new ObjectMapper();
             ReviewDTO reviewDTO = mapper.readValue(reviewData, ReviewDTO.class);
-
+            // Lấy review cũ (nếu tồn tại)
             ReviewDTO existingReview = null;
             if (reviewDTO.getReviewId() != null) {
                 // Lấy review cũ (nếu tồn tại)

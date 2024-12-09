@@ -269,7 +269,7 @@ const TrainerManagement = () => {
             <Form.Control
               type="file"
               name="avatar"
-              accept="avatar/*"
+              accept="image/*"
               onChange={(e) => {
                 const file = e.target.files[0];
 
