@@ -23,7 +23,7 @@ const SiteLayout = () => {
         <Route path="/course" element={<Course />} />
         <Route path="/course/:courseId" element={<CourseDetail />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/generator-qr" element={<VietQRGenerator />} />
+        {/* <Route path="/generator-qr" element={<VietQRGenerator />} /> */}
         <Route path="/transaction" element={<TransactionHistory />} />
         <Route path="*" element={<Navigate to={"/page404"} />} />
       </Routes>

@@ -8,6 +8,7 @@ import {
   Col,
   Alert,
   Spinner,
+  Card,
 } from "react-bootstrap";
 import { generateOtp, verifyOtp } from "../../services/TransactionService";
 
@@ -17,7 +18,7 @@ const VietQRGenerator = () => {
     bankCode: "970422",
     accountNumber: "3402110499999",
     accountName: "NGUYEN DINH NGHI",
-    amount: 0,
+    amount: "",
     description: "",
   });
 
@@ -93,7 +94,7 @@ const VietQRGenerator = () => {
         bankCode: "970422",
         accountNumber: "3402110499999",
         accountName: "NGUYEN DINH NGHI",
-        amount: 0,
+        amount: "",
         description: "",
       });
     } catch (error) {
@@ -148,124 +149,138 @@ const VietQRGenerator = () => {
   };
 
   return (
-    <Container>
+    <Container className="my-5">
+      {/* Thông báo */}
+      {message && <Alert variant="success">{message}</Alert>}
+      {error && <Alert variant="danger">{error}</Alert>}
+
       {/* Row cho Form và QR Code */}
-      <Row className="mt-5">
+      <Row className="justify-content-center">
         {/* Cột bên trái: Form tạo giao dịch */}
-        <Col md={6}>
-          <h3>Tạo Giao dịch VietQR</h3>
+        <Col md={6} className="mb-4">
+          <Card>
+            <Card.Header className="bg-primary text-white">
+              <h4 className="mb-0">Tạo Giao dịch VietQR</h4>
+            </Card.Header>
+            <Card.Body>
+              <Form onSubmit={handleGenerateVietQR}>
+                <Form.Group controlId="bankCode" className="mb-3">
+                  <Form.Label>Mã Ngân Hàng</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Nhập mã ngân hàng"
+                    name="bankCode"
+                    value={formData.bankCode}
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
 
-          {message && <Alert variant="success">{message}</Alert>}
-          {error && <Alert variant="danger">{error}</Alert>}
+                <Form.Group controlId="accountNumber" className="mb-3">
+                  <Form.Label>Số Tài Khoản</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Nhập số tài khoản"
+                    name="accountNumber"
+                    value={formData.accountNumber}
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
 
-          <Form onSubmit={handleGenerateVietQR}>
-            <Form.Group controlId="bankCode">
-              <Form.Label>Mã Ngân Hàng</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Nhập mã ngân hàng"
-                name="bankCode"
-                value={formData.bankCode}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
+                <Form.Group controlId="accountName" className="mb-3">
+                  <Form.Label>Tên Chủ Tài Khoản</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Nhập tên chủ tài khoản"
+                    name="accountName"
+                    value={formData.accountName}
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
 
-            <Form.Group controlId="accountNumber">
-              <Form.Label>Số Tài Khoản</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Nhập số tài khoản"
-                name="accountNumber"
-                value={formData.accountNumber}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
+                <Form.Group controlId="amount" className="mb-3">
+                  <Form.Label>Số Tiền</Form.Label>
+                  <Form.Control
+                    type="number"
+                    placeholder="Nhập số tiền"
+                    name="amount"
+                    value={formData.amount}
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
 
-            <Form.Group controlId="accountName">
-              <Form.Label>Tên Chủ Tài Khoản</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Nhập tên chủ tài khoản"
-                name="accountName"
-                value={formData.accountName}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
+                <Form.Group controlId="description" className="mb-3">
+                  <Form.Label>Mô Tả</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    placeholder="Nhập mô tả"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
 
-            <Form.Group controlId="amount">
-              <Form.Label>Số Tiền</Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="Nhập số tiền"
-                name="amount"
-                value={formData.amount}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-
-            <Form.Group controlId="description">
-              <Form.Label>Mô Tả</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                placeholder="Nhập mô tả"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-
-            <Button
-              variant="primary"
-              type="submit"
-              className="mt-3"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Spinner
-                    as="span"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                  />{" "}
-                  Đang tạo...
-                </>
-              ) : (
-                "Tạo VietQR và Gửi OTP"
-              )}
-            </Button>
-          </Form>
+                <Button
+                  variant="primary"
+                  type="submit"
+                  className="w-100"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                      />{" "}
+                      Đang tạo...
+                    </>
+                  ) : (
+                    "Tạo VietQR và Gửi OTP"
+                  )}
+                </Button>
+              </Form>
+            </Card.Body>
+          </Card>
         </Col>
 
         {/* Cột bên phải: Mã QR */}
-        <Col
-          md={6}
-          className="d-flex align-items-center justify-content-center"
-        >
-          {qrData ? (
-            <div className="text-center">
-              <h5>Mã VietQR:</h5>
-              <img
-                src={qrData}
-                alt="VietQR"
-                style={{ maxWidth: "100%", height: "auto" }}
-              />
-            </div>
-          ) : (
-            <p>Không có mã VietQR nào được tạo.</p>
-          )}
+        <Col md={6} className="mb-4">
+          <Card className="h-100">
+            <Card.Header className="bg-success text-white">
+              <h4 className="mb-0">Mã VietQR</h4>
+            </Card.Header>
+            <Card.Body className="d-flex flex-column justify-content-center align-items-center">
+              {qrData ? (
+                <div className="text-center">
+                  <img
+                    src={qrData}
+                    alt="VietQR"
+                    className="img-fluid mb-3"
+                    style={{ maxHeight: "300px" }}
+                  />
+                  <p>Quét mã QR để thực hiện giao dịch.</p>
+                </div>
+              ) : (
+                <p className="text-muted">
+                  Không có mã VietQR nào được tạo. Vui lòng tạo giao dịch.
+                </p>
+              )}
+            </Card.Body>
+          </Card>
         </Col>
       </Row>
 
       {/* Row cho nút xác nhận giao dịch */}
-      <Row className="mt-5">
-        <Col className="text-center">
+      <Row className="justify-content-center">
+        <Col md={6} className="text-center">
           <Button
             variant="success"
             onClick={handleConfirmTransaction}
             disabled={isVerifying}
+            className="w-100"
           >
             {isVerifying ? (
               <>

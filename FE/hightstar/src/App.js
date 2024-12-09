@@ -12,10 +12,11 @@ import Page500 from "./common/pages/Page500";
 import { UserProvider } from "./contexts/UserContext";
 import VerifyOtpPage from "./site/views/auth/VerifyOtpPage";
 import ResetPasswordPage from "./site/views/auth/ResetPasswordPage";
+import VietQRGenerator from "./site/views/Payment/VietQRGenerator";
 
 function App() {
   return (
-    <div className="app w-100" style={{ backgroundColor: "#f3f4f7" }}>
+    <div className="app w-100" >
       <Router>
         <UserProvider>
           <Routes>
@@ -37,6 +38,7 @@ function App() {
             <Route path="/page403" element={<Page403 />} />
             <Route path="/page404" element={<Page404 />} />
             <Route path="/page500" element={<Page500 />} />
+            <Route path="/generator-qr" element={<VietQRGenerator />} />
           </Routes>
         </UserProvider>
       </Router>
