@@ -227,7 +227,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
             <ul className="list-unstyled ms-2">
               <li className="text-nowrap">
                 <NavLink
-                  to="/admin/stock/category-management"
+                  to="/admin/category-management"
                   className={({ isActive }) =>
                     isActive ? "active-link" : "inactive-link"
                   }
@@ -237,7 +237,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
               </li>
               <li className="text-nowrap">
                 <NavLink
-                  to="/admin/stock/product-management"
+                  to="/admin/products-management"
                   className={({ isActive }) =>
                     isActive ? "active-link" : "inactive-link"
                   }

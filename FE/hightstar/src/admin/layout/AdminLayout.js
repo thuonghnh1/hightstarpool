@@ -15,6 +15,8 @@ import {
   AttendanceManagement,
   NotificationManagement,
   MyProfile,
+  CategoryManagement, 
+  ProductManagement
 } from "../views/index";
 import "../css/style.css";
 import { ThemeProvider } from "../components/common/ThemeContext";
@@ -105,6 +107,14 @@ const AdminLayout = () => {
                 <Route
                   path="attendance-management"
                   element={<AttendanceManagement />}
+                />
+                <Route
+                  path="category-management"
+                  element={<CategoryManagement />}
+                />
+                <Route
+                  path="products-management"
+                  element={<ProductManagement />}
                 />
                 <Route path="*" element={<Navigate to={"/page404"} />} />
               </Routes>

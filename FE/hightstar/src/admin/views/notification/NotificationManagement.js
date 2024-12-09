@@ -1,79 +1,119 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import TableManagement from "../../components/common/TableManagement";
-import NotificationService from "../../services/NotificationService";
+import ProductService from "../../services/ProductService"; // API service cho sản phẩm
+import CategoryService from "../../services/CategoryService"; // API service cho danh mục
 import Page500 from "../../../common/pages/Page500";
 import { Spinner, Form } from "react-bootstrap";
 import { Helmet } from "react-helmet-async";
-import UserService from "../../services/UserService";
 import Select from "react-select"; // thư viện tạo select có hỗ trợ search
 import { formatDateTimeToDMY, formatDateTimeToISO } from "../../utils/FormatDate";
 
-const NotificationManagement = () => {
+const ProductManagement = () => {
   // State lưu data từ API
-  const [notificationData, setNotificationData] = useState([]);
-  const [formData, setFormData] = useState({});
+  const [productData, setProductData] = useState([]);
+  const [formData, setFormData] = useState({
+    productId: null,
+    productName: "",
+    productImage: "",
+    description: "",
+    price: "",
+    stock: "",
+    discount: "",
+    categoryId: "",
+  });
   const [errorFields, setErrorFields] = useState({});
   const [statusFunction, setStatusFunction] = useState({
     isAdd: false,
     isEditing: false,
     isViewDetail: false,
   });
-  const [listUserOption, setListUserOption] = useState([]);
+  const [listCategoryOption, setListCategoryOption] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
   const [errorServer, setErrorServer] = useState(null);
 
   // Mảng cột của bảng
-  const notificationColumns = [
-    { key: "id", label: "Mã thông báo" },
-    { key: "content", label: "Nội dung" },
-    { key: "status", label: "Trạng thái" },
+  const productColumns = [
+    { key: "productId", label: "Mã sản phẩm" },
+    { key: "productName", label: "Tên sản phẩm" },
+    { key: "price", label: "Giá" },
+    { key: "stock", label: "Số lượng tồn kho" },
+    { key: "discount", label: "Giảm giá (%)" },
+    { key: "categoryName", label: "Danh mục" }, // Hiển thị tên danh mục thay vì ID
     { key: "createdAt", label: "Ngày tạo" },
-    { key: "recipientType", label: "Loại người nhận" },
-    { key: "userId", label: "Mã người dùng" },
+    { key: "updatedAt", label: "Ngày cập nhật" },
   ];
 
-  // Loại bỏ cột 'content' khỏi notificationColumns
-  const defaultColumns = notificationColumns.filter(
-    (column) => column.key !== "content"  //lấy all - content k lấy dấu => (trả về) 1 ds mới ... là duyệt trong mảng.. khi mà cái key = content trong mảng thì nó sẽ bỏ qua cái content đó 
-  );// filter sẽ tạo ra 1 mảng mới với các phần tử có mã đk là true.
+  // Loại bỏ các cột không cần thiết nếu muốn (ví dụ: productImage, description)
+  const defaultColumns = productColumns.filter(
+    (column) => column.key !== "productImage" && column.key !== "description"
+  );
 
   // Lấy dữ liệu từ API
-  const fetchNotificationData = async () => {
+  const fetchProductData = async () => {
     setLoadingPage(true);
     try {
-      const data = await NotificationService.getNotifications();
-      setNotificationData(data);
+      // Lấy danh sách sản phẩm
+      const products = await ProductService.getProducts();
+      // Định dạng ngày tháng
+      const formattedProducts = products.map((product) => ({
+        ...product,
+        createdAt: formatDateTimeToDMY(product.createdAt),
+        updatedAt: formatDateTimeToDMY(product.updatedAt),
+      }));
+      setProductData(formattedProducts);
     } catch (err) {
-      setErrorServer(err.message);
+      setErrorServer(err.message || "Lỗi khi tải dữ liệu sản phẩm.");
     } finally {
       setLoadingPage(false);
     }
+
     try {
-      let users = await UserService.getUsers();
-      // Chuyển đổi danh sách người dùng đã lọc thành định dạng phù hợp cho Select
-      const userOptions = users.map((user) => ({
-        value: user.id,
-        label: `#${user.id} - ${user.username}`,
+      // Lấy danh sách danh mục
+      const categories = await CategoryService.getCategories();
+      // Chuyển đổi danh sách danh mục thành định dạng phù hợp cho Select
+      const categoryOptions = categories.map((category) => ({
+        value: category.categoryId,
+        label: category.categoryName,
       }));
-      // Cập nhật trạng thái danh sách tùy chọn cho Select
-      setListUserOption(userOptions);
+      setListCategoryOption(categoryOptions);
     } catch (error) {
-      toast.error("Lỗi khi lấy danh sách người dùng");
+      toast.error("Lỗi khi lấy danh sách danh mục");
     }
   };
 
   useEffect(() => {
-    fetchNotificationData();
+    fetchProductData();
   }, []);
 
+  // Hàm validate từng trường
   const validateField = (key, value) => {
     let error = "";
     switch (key) {
-      case "content":
+      case "productName":
         if (!value || value.trim() === "") {
-          error = "Nội dung không được để trống.";
+          error = "Tên sản phẩm không được để trống.";
+        }
+        break;
+      case "price":
+        if (!value || isNaN(value) || Number(value) < 0) {
+          error = "Giá phải là số dương.";
+        }
+        break;
+      case "stock":
+        if (!value || isNaN(value) || Number(value) < 0 || !Number.isInteger(Number(value))) {
+          error = "Số lượng tồn kho phải là số nguyên không âm.";
+        }
+        break;
+      case "discount":
+        if (value !== "" && (isNaN(value) || Number(value) < 0 || Number(value) > 100)) {
+          error = "Giảm giá phải là số từ 0 đến 100.";
+        }
+        break;
+      case "categoryId":
+        if (!value) {
+          error = "Danh mục không được để trống.";
         }
         break;
       default:
@@ -85,169 +125,262 @@ const NotificationManagement = () => {
     }));
   };
 
+  // Hàm validate toàn bộ form
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.content || formData.content.trim() === "") {
-      newErrors.content = "Nội dung không được để trống.";
+    if (!formData.productName || formData.productName.trim() === "") {
+      newErrors.productName = "Tên sản phẩm không được để trống.";
     }
+    if (!formData.price || isNaN(formData.price) || Number(formData.price) < 0) {
+      newErrors.price = "Giá phải là số dương.";
+    }
+    if (
+      formData.stock === "" ||
+      isNaN(formData.stock) ||
+      Number(formData.stock) < 0 ||
+      !Number.isInteger(Number(formData.stock))
+    ) {
+      newErrors.stock = "Số lượng tồn kho phải là số nguyên không âm.";
+    }
+    if (
+      formData.discount !== "" &&
+      (isNaN(formData.discount) || Number(formData.discount) < 0 || Number(formData.discount) > 100)
+    ) {
+      newErrors.discount = "Giảm giá phải là số từ 0 đến 100.";
+    }
+    if (!formData.categoryId) {
+      newErrors.categoryId = "Danh mục không được để trống.";
+    }
+
     setErrorFields(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Hàm xử lý thay đổi input trong form
   const handleInputChange = (key, value) => {
-    // Kiểm tra nếu key là userId và có giá trị
-    if (key === "userId" && value) {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [key]: value,
-        recipientType: "INDIVIDUAL", // Cập nhật recipientType thành "INDIVIDUAL" nếu userId có giá trị
-      }));
-    } else {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [key]: value,
-      }));
-    }
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [key]: value,
+    }));
 
     validateField(key, value);
   };
 
-
+  // Hàm cập nhật trạng thái chức năng (isAdd, isEditing, isViewDetail)
   const updateStatus = (newStatus) => {
     setStatusFunction((prevStatus) => ({
       ...prevStatus, // Giữ lại các thuộc tính trước đó
       ...newStatus, // Cập nhật các thuộc tính mới
     }));
   };
+
+  // Hàm reset trạng thái chức năng
   const handleResetStatus = () => {
-    updateStatus({ isAdd: true, isEditing: false, isViewDetail: false });
+    updateStatus({ isAdd: false, isEditing: false, isViewDetail: false });
   };
 
+  // Hàm reset form
   const handleReset = () => {
     setFormData({
-      content: "",
-      recipientType: "ALL",
-      userId: "",
+      productId: null,
+      productName: "",
+      productImage: "",
+      description: "",
+      price: "",
+      stock: "",
+      discount: "",
+      categoryId: "",
     });
     setErrorFields({});
     handleResetStatus();
   };
 
+  // Hàm xử lý khi nhấn chỉnh sửa sản phẩm
   const handleEdit = (item) => {
     console.log(item);
-
-    // Kiểm tra nếu userId có giá trị
     const updatedFormData = {
       ...item,
       createdAt: formatDateTimeToISO(item.createdAt),
+      updatedAt: formatDateTimeToISO(item.updatedAt),
     };
-
-    if (item.userId) {
-      // Nếu userId có giá trị, set recipientType là "INDIVIDUAL"
-      updatedFormData.recipientType = "INDIVIDUAL";
-    }
-
     setFormData(updatedFormData);
-    setStatusFunction({ isEditing: true });
+    setStatusFunction({ isAdd: false, isEditing: true, isViewDetail: false });
     setErrorFields({});
   };
 
-
+  // Hàm lưu sản phẩm (thêm mới hoặc chỉnh sửa)
   const handleSaveItem = async () => {
     if (!validateForm()) return false;
 
     setIsLoading(true);
     try {
       if (statusFunction.isEditing) {
-        const updatedNotification = await NotificationService.updateNotification(
-          formData.id,
+        const updatedProduct = await ProductService.updateProduct(
+          formData.productId,
           formData
         );
-        const formattedNotification = {
-          ...updatedNotification,
-          createdAt: formatDateTimeToDMY(updatedNotification.createdAt),
+        const formattedProduct = {
+          ...updatedProduct,
+          createdAt: formatDateTimeToDMY(updatedProduct.createdAt),
+          updatedAt: formatDateTimeToDMY(updatedProduct.updatedAt),
         };
 
-        const updatedNotifications = notificationData.map((notification) =>
-          notification.id === formattedNotification.id
-            ? formattedNotification
-            : notification
+        const updatedProducts = productData.map((product) =>
+          product.productId === formattedProduct.productId
+            ? formattedProduct
+            : product
         );
-        setNotificationData(updatedNotifications);
-        toast.success("Cập nhật thông báo thành công!");
+        setProductData(updatedProducts);
+        toast.success("Cập nhật sản phẩm thành công!");
       } else if (statusFunction.isAdd) {
-        const createdNotification = await NotificationService.createNotification(
-          formData
-        );
-        const formattedNotification = {
-          ...createdNotification,
-          createdAt: formatDateTimeToDMY(createdNotification.createdAt),
+        const createdProduct = await ProductService.createProduct(formData);
+        const formattedProduct = {
+          ...createdProduct,
+          createdAt: formatDateTimeToDMY(createdProduct.createdAt),
+          updatedAt: formatDateTimeToDMY(createdProduct.updatedAt),
         };
-        setNotificationData([...notificationData, formattedNotification]);
-        toast.success("Thêm mới thông báo thành công!");
+        setProductData([...productData, formattedProduct]);
+        toast.success("Thêm mới sản phẩm thành công!");
       }
       handleReset();
       return true;
     } catch (error) {
+      toast.error("Đã xảy ra lỗi khi lưu sản phẩm.");
+      console.error(error);
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Hàm xử lý xóa sản phẩm
   const handleDelete = async (deleteId) => {
     if (!deleteId) return;
 
     setIsLoading(true);
     try {
-      await NotificationService.deleteNotification(deleteId);
-      setNotificationData(
-        notificationData.filter((notification) => notification.id !== deleteId)
+      await ProductService.deleteProduct(deleteId);
+      setProductData(
+        productData.filter((product) => product.productId !== deleteId)
       );
-      toast.success("Xóa thông báo thành công!");
+      toast.success("Xóa sản phẩm thành công!");
     } catch (error) {
-      toast.error("Đã xảy ra lỗi khi xóa thông báo.");
+      toast.error("Đã xảy ra lỗi khi xóa sản phẩm.");
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Nội dung modal (form thêm/chỉnh sửa sản phẩm)
   const modalContent = (
     <div className="row">
       <div className="col-md-12 mb-3">
-        <Form.Group controlId="formContent">
-          <Form.Label>Nội dung</Form.Label>
+        <Form.Group controlId="formProductName">
+          <Form.Label>Tên sản phẩm</Form.Label>
           <Form.Control
             type="text"
-            name="content"
-            value={formData.content}
-            onChange={(e) => handleInputChange("content", e.target.value)}
-            isInvalid={!!errorFields.content}
+            name="productName"
+            value={formData.productName}
+            onChange={(e) => handleInputChange("productName", e.target.value)}
+            isInvalid={!!errorFields.productName}
           />
           <Form.Control.Feedback type="invalid">
-            {errorFields.content}
+            {errorFields.productName}
+          </Form.Control.Feedback>
+        </Form.Group>
+      </div>
+
+      <div className="col-md-12 mb-3">
+        <Form.Group controlId="formProductImage">
+          <Form.Label>Hình ảnh sản phẩm</Form.Label>
+          <Form.Control
+            type="text"
+            name="productImage"
+            value={formData.productImage}
+            onChange={(e) => handleInputChange("productImage", e.target.value)}
+            placeholder="Nhập URL hình ảnh hoặc đường dẫn"
+          />
+        </Form.Group>
+      </div>
+
+      <div className="col-md-12 mb-3">
+        <Form.Group controlId="formDescription">
+          <Form.Label>Mô tả</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            name="description"
+            value={formData.description}
+            onChange={(e) => handleInputChange("description", e.target.value)}
+          />
+        </Form.Group>
+      </div>
+
+      <div className="col-md-6 mb-3">
+        <Form.Group controlId="formPrice">
+          <Form.Label>Giá</Form.Label>
+          <Form.Control
+            type="number"
+            name="price"
+            value={formData.price}
+            onChange={(e) => handleInputChange("price", e.target.value)}
+            isInvalid={!!errorFields.price}
+          />
+          <Form.Control.Feedback type="invalid">
+            {errorFields.price}
           </Form.Control.Feedback>
         </Form.Group>
       </div>
 
       <div className="col-md-6 mb-3">
-        <Form.Group controlId="formUser">
-          <Form.Label>
-            Mã Người Dùng <span className="text-danger">(*)</span>
-          </Form.Label>
+        <Form.Group controlId="formStock">
+          <Form.Label>Số lượng tồn kho</Form.Label>
+          <Form.Control
+            type="number"
+            name="stock"
+            value={formData.stock}
+            onChange={(e) => handleInputChange("stock", e.target.value)}
+            isInvalid={!!errorFields.stock}
+          />
+          <Form.Control.Feedback type="invalid">
+            {errorFields.stock}
+          </Form.Control.Feedback>
+        </Form.Group>
+      </div>
+
+      <div className="col-md-6 mb-3">
+        <Form.Group controlId="formDiscount">
+          <Form.Label>Giảm giá (%)</Form.Label>
+          <Form.Control
+            type="number"
+            name="discount"
+            value={formData.discount}
+            onChange={(e) => handleInputChange("discount", e.target.value)}
+            isInvalid={!!errorFields.discount}
+          />
+          <Form.Control.Feedback type="invalid">
+            {errorFields.discount}
+          </Form.Control.Feedback>
+        </Form.Group>
+      </div>
+
+      <div className="col-md-6 mb-3">
+        <Form.Group controlId="formCategory">
+          <Form.Label>Danh mục</Form.Label>
           <Select
-            options={listUserOption}
-            value={listUserOption.find(
-              (option) => option.value === formData.userId
+            options={listCategoryOption}
+            value={listCategoryOption.find(
+              (option) => option.value === formData.categoryId
             )}
             onChange={(selectedOption) =>
               handleInputChange(
-                "userId",
+                "categoryId",
                 selectedOption ? selectedOption.value : ""
               )
             }
-            placeholder="Chọn người dùng"
-            isInvalid={!!errorFields.userId}
+            placeholder="Chọn danh mục"
+            isInvalid={!!errorFields.categoryId}
             isClearable // Cho phép xóa chọn lựa
             isSearchable // Bật tính năng tìm kiếm
             styles={{
@@ -256,43 +389,24 @@ const NotificationManagement = () => {
               }),
             }}
           />
-          {errorFields.userId && (
+          {errorFields.categoryId && (
             <div className="invalid-feedback d-block">
-              {errorFields.userId}
+              {errorFields.categoryId}
             </div>
           )}
         </Form.Group>
       </div>
 
-      {formData?.userId ? null : (<div className="col-md-6 mb-3">
-        <Form.Group controlId="formRecipientType">
-          <Form.Label>Loại người nhận</Form.Label>
-          <Form.Select
-            name="recipientType"
-            value={formData.recipientType}
-            onChange={(e) => handleInputChange("recipientType", e.target.value)}
-            isInvalid={!!errorFields.recipientType}
-            required
-          >
-            {[{ value: "ALL", label: "Tất cả" }, { value: "ADMIN", label: "Quản trị" }, { value: "EMPLOYEE", label: "Nhân viên" }, { value: "TRAINER", label: "Huấn luyện viên" }, { value: "USER", label: "Khách hàng" }].map((object) => (
-              <option key={object.value} value={object.value}>
-                {object.label}
-              </option>
-            ))}
-          </Form.Select>
-          <Form.Control.Feedback type="invalid">
-            {errorFields.recipientType}
-          </Form.Control.Feedback>
-        </Form.Group>
-      </div>)}
-      <div className="small fst-italic text-danger mb-3">Lưu ý: Bỏ trống trường người dùng nếu gửi chung!</div>
+      <div className="small fst-italic text-danger mb-3">
+        Lưu ý: Các trường không bắt buộc có thể để trống!
+      </div>
     </div>
   );
 
   return (
     <>
       <Helmet>
-        <title>Quản lý thông báo - Hight Star</title>
+        <title>Quản lý sản phẩm - Hight Star</title>
       </Helmet>
       {loadingPage ? (
         <div className="w-100 h-100 d-flex justify-content-center align-items-center">
@@ -303,10 +417,10 @@ const NotificationManagement = () => {
       ) : (
         <section className="row m-0 p-0">
           <TableManagement
-            data={notificationData}
-            columns={notificationColumns}
+            data={productData}
+            columns={productColumns}
             defaultColumns={defaultColumns} // Truyền mảng cột đã lọc
-            title={"Quản lý thông báo"}
+            title={"Quản lý sản phẩm"}
             modalContent={modalContent}
             handleReset={handleReset}
             onEdit={handleEdit}
@@ -315,6 +429,7 @@ const NotificationManagement = () => {
             isLoading={isLoading}
             statusFunction={statusFunction}
             onResetStatus={handleResetStatus}
+            showAddButton={() => updateStatus({ isAdd: true, isEditing: false, isViewDetail: false })}
           />
         </section>
       )}
@@ -322,4 +437,4 @@ const NotificationManagement = () => {
   );
 };
 
-export default NotificationManagement;
+export default ProductManagement;
