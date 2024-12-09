@@ -153,7 +153,7 @@ function Header() {
                 className="badge rounded-pill bg-danger position-absolute"
                 style={{ top: "-5px", left: "32px" }}
               >
-                {listCartItems?.length}
+                {user ? listCartItems?.length : 0}
               </span>
             </NavLink>
             {!user ? (

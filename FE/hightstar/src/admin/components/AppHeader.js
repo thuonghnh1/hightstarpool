@@ -10,6 +10,7 @@ import { useTheme } from "./common/ThemeContext";
 import { logout } from "../../site/services/AuthService";
 import { UserContext } from "../../contexts/UserContext";
 import NotificationService from "../../site/services/NotificationService";
+import { toast } from "react-toastify";
 const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
@@ -79,8 +80,48 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
   };
 
   useEffect(() => {
-    fetchNotification();
-  }, []);
+    const handleNotifications = async () => {
+      await fetchNotification();
+
+      // Kiểm tra sessionStorage
+      const isShowNotification = sessionStorage.getItem("isShowNotification");
+
+      // Nếu chưa hiển thị thông báo và có thông báo chung
+      if (isShowNotification !== "true" && notifications.length > 0) {
+        // Hiển thị toast với thông báo
+        toast.info(
+          <div>
+            <h5>Thông báo chung</h5>
+            <ul>
+              {notifications.map((notif) => (
+                <li key={notif.id}>
+                  <strong>{notif.title || "Thông báo mới"}</strong>:{" "}
+                  {notif.message}
+                </li>
+              ))}
+            </ul>
+          </div>,
+          {
+            autoClose: false, // Không tự động đóng
+            closeOnClick: false, // Không đóng khi click vào toast
+            draggable: false, // Không kéo để đóng
+            pauseOnHover: true, // Tạm dừng khi hover
+          }
+        );
+
+        // Đánh dấu đã hiển thị thông báo
+        sessionStorage.setItem("isShowNotification", "true");
+      }
+
+      // Nếu không có thông báo chung nhưng chưa hiển thị trước đó
+      if (notifications.length === 0 && isShowNotification !== "true") {
+        // Đánh dấu đã hiển thị (không hiển thị gì)
+        sessionStorage.setItem("isShowNotification", "true");
+      }
+    };
+
+    handleNotifications();
+  }, [notifications.length]); // Chạy lại khi độ dài notifications thay đổi
 
   const unreadMessagesCount = messages.filter((msg) => msg.status).length;
   const unreadNotificationsCount = roleNotifications.filter(

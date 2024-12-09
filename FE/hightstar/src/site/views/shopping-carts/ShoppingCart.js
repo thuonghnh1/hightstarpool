@@ -1,8 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Modal, Button, Spinner } from "react-bootstrap"; // Sử dụng React Bootstrap cho modal
 import { Helmet } from "react-helmet-async";
+import { UserContext } from "../../../contexts/UserContext";
+import { useNavigate } from "react-router-dom";
 
 const ShoppingCart = () => {
+  const { user } = useContext(UserContext);
+  const navigate = useNavigate();
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
   // Khởi tạo dữ liệu giỏ hàng từ localStorage hoặc sử dụng dữ liệu mẫu
   const initialCartItems = JSON.parse(
@@ -47,6 +51,10 @@ const ShoppingCart = () => {
 
   // Tính tổng tiền trong giỏ hàng
   useEffect(() => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     setLoadingPage(true);
     const total = shoppingCartItems.reduce(
       (acc, item) => acc + item.unitPrice * item.quantity,
@@ -61,7 +69,7 @@ const ShoppingCart = () => {
       JSON.stringify(shoppingCartItems)
     );
     setLoadingPage(false);
-  }, [shoppingCartItems]);
+  }, [shoppingCartItems, user, navigate]);
 
   // Xử lý thay đổi số lượng sản phẩm
   const handleQuantityChange = (itemId, newQuantity) => {
