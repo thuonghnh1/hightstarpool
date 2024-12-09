@@ -5,7 +5,7 @@ export default function Footer() {
     <div>
       {/* Footer Start */}
       <div
-        className="container-fluid bg-dark text-light footer pt-5 mt-5"
+        className="container-fluid bg-dark text-light footer pt-5"
       >
         <div className="container py-5">
           <div className="row g-5">

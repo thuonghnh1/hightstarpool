@@ -19,6 +19,7 @@ import { formatDateTimeToDMY } from "../../../utils/FormatDate";
 import { UserContext } from "../../../../contexts/UserContext";
 import ChangePasswordModal from "./ChangePasswordModal";
 import VerifyPasswordModal from "./VerifyPasswordModal";
+import { useNavigate } from "react-router-dom";
 
 const MyProfile = () => {
   const { user, updateUser } = useContext(UserContext);
@@ -32,15 +33,20 @@ const MyProfile = () => {
   const [showChangeBio, setShowChangeBio] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const navigate = useNavigate();
 
   // Ref for hidden file input
   const fileInputRef = useRef(null);
 
   useEffect(() => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     if (user.userId) {
       fetchUserProfile(user.userId);
     }
-  }, [user.userId]);
+  }, [user, navigate]);
 
   const fetchUserProfile = async (userId) => {
     try {
@@ -240,7 +246,7 @@ const MyProfile = () => {
   return (
     <>
       <Helmet>
-        <title>Quản lý hồ sơ người dùng - Hight Star</title>
+        <title>Hồ sơ của tôi - Hight Star</title>
       </Helmet>
 
       {profile && (
@@ -288,7 +294,7 @@ const MyProfile = () => {
                             style={{ cursor: "pointer" }}
                             onClick={(e) => setShowChangeBio(true)}
                           >
-                            {profile.bio || "(Thêm tiểu sử của bạn)"}
+                            <i class="bi bi-pencil me-2"></i>{profile.bio || "(Thêm tiểu sử của bạn)"}
                           </div>
                         </div>
                       </Col>

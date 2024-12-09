@@ -19,8 +19,7 @@ public class Notification {
     private Long notificationId;
     @Column(length = 255)
     private String content;
-    @Column(nullable = false)
-    private Boolean status; // đã đọc, chưa đọc
+    private Boolean status; // đã đọc, chưa đọc , không có
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

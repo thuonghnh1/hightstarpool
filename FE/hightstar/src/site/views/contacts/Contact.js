@@ -3,12 +3,12 @@ import { NavLink } from "react-router-dom";
 
 function Contact() {
   return (
-    <div>
+    <div className="mb-5">
       <div className="container-fluid bg-primary py-5 mb-5 hero-header">
         <div className="container py-5">
           <div className="row justify-content-center py-5">
             <div className="col-lg-10 pt-lg-5 mt-lg-5 text-center">
-              <h1 className="display-3 text-white animated slideInDown">
+              <h1 className="display-3 text-white">
                 Liên Hệ
               </h1>
               <nav aria-label="breadcrumb">
