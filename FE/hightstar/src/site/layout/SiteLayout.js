@@ -10,8 +10,8 @@ import Contact from "../views/contacts/Contact";
 import Course from "../views/courses/Course";
 import CourseDetail from "../views/courses/CourseDetail";
 
-import VietQRGenerator from "../views/Payment/VietQRGenerator";
-import TransactionHistory from "../views/Payment/TransactionHistory";
+// import VietQRGenerator from "../views/Payment/VietQRGenerator";
+// import TransactionHistory from "../views/Payment/TransactionHistory";
 
 import { MyProfile } from "../../admin/views";
 import PrivateRoute from "../../common/PrivateRoute";
