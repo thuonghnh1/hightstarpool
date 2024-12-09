@@ -135,13 +135,13 @@ const VietQRGenerator = () => {
         setQrData(""); // Xóa QR code nếu muốn
       } else {
         setError(
-          verifyResponse.message || "Mã OTP không chính xác hoặc đã hết hạn!"
+          verifyResponse.message || "Nội dung chuyển khoản không trùng khớp hoặc đã hết thời gian chuyển khoản"
         );
       }
     } catch (error) {
       console.error(error);
       setError(
-        error.message || "Có lỗi xảy ra khi xác thực mã OTP. Vui lòng thử lại."
+        error.message || "Có lỗi xảy ra khi xác thực nội dung chuyển khoản. Vui lòng thử lại."
       );
     } finally {
       setIsVerifying(false);
@@ -159,7 +159,7 @@ const VietQRGenerator = () => {
         {/* Cột bên trái: Form tạo giao dịch */}
         <Col md={6} className="mb-4">
           <Card>
-            <Card.Header className="bg-primary text-white">
+            <Card.Header className="bg-info-subtle text-white">
               <h4 className="mb-0">Tạo Giao dịch VietQR</h4>
             </Card.Header>
             <Card.Body>
@@ -249,7 +249,7 @@ const VietQRGenerator = () => {
         {/* Cột bên phải: Mã QR */}
         <Col md={6} className="mb-4">
           <Card className="h-100">
-            <Card.Header className="bg-success text-white">
+            <Card.Header className="bg-success-subtle text-white">
               <h4 className="mb-0">Mã VietQR</h4>
             </Card.Header>
             <Card.Body className="d-flex flex-column justify-content-center align-items-center">
