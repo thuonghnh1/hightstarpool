@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.poly.hightstar.model.AttendanceDTO;
+import edu.poly.hightstar.model.QRCodeValidationRequest;
 import edu.poly.hightstar.service.AttendanceService;
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +29,12 @@ public class AttendanceController {
     @GetMapping
     public List<AttendanceDTO> getAllAttendances() {
         return attendanceService.getAllAttendances();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    @GetMapping("/without-checkout")
+    public List<AttendanceDTO> getAttendancesWithoutCheckOut() {
+        return attendanceService.getAttendancesWithoutCheckOut();
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')")
@@ -47,6 +54,13 @@ public class AttendanceController {
     @PutMapping("/{id}")
     public AttendanceDTO updateAttendance(@PathVariable Long id, @RequestBody AttendanceDTO attendanceDTO) {
         return attendanceService.updateAttendance(id, attendanceDTO);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    @PostMapping("/scan")
+    public ResponseEntity<AttendanceDTO> scanQRCode(@RequestBody QRCodeValidationRequest request) {
+        AttendanceDTO attendance = attendanceService.scanQRCode(request.getQrCodeBase64());
+        return ResponseEntity.ok(attendance);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN')")

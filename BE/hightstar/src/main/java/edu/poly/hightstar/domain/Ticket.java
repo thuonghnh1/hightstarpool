@@ -3,7 +3,6 @@ package edu.poly.hightstar.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.Date;
-
 import edu.poly.hightstar.enums.TicketStatus;
 import edu.poly.hightstar.enums.TicketType;
 
@@ -16,7 +15,7 @@ public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ticketId;
-    @Column(length = 50, unique = true)
+    @Column(length = 500, unique = true)
     private String ticketCode;
     @Temporal(TemporalType.DATE)
     private Date issueDate;
@@ -31,4 +30,6 @@ public class Ticket {
     @ManyToOne
     @JoinColumn(name = "studentId", referencedColumnName = "studentId")
     private Student student;
+    @Column(length = 4096)
+    private String qrCodeBase64; // Lưu mã QR dưới dạng Base64 string
 }

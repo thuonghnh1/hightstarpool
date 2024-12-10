@@ -9,6 +9,7 @@ import { Helmet } from "react-helmet-async";
 import Select from "react-select";
 import studentService from "../../services/StudentService";
 import { NumericFormat } from "react-number-format";
+import TicketPriceModal from "./TicketPriceModal";
 
 const TicketManagement = () => {
   // State để lưu trữ dữ liệu giảm giá từ API
@@ -25,38 +26,49 @@ const TicketManagement = () => {
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
   const [errorServer, setErrorServer] = useState(null);
   const [listStudentOption, setListStudentOption] = useState([]);
-  const listTicketTypeOption = [{
-    value: "ONETIME_TICKET",
-    label: "Vé một lần",
-  }, {
-    value: "WEEKLY_TICKET",
-    label: "Vé tuần",
-  }, {
-    value: "MONTHLY_TICKET",
-    label: "Vé tháng",
-  }, {
-    value: "STUDENT_TICKET",
-    label: "Vé học viên",
-  }];
+  const [showModalTicketPrice, setShowModalTicketPrice] = useState(false);
+  const listTicketTypeOption = [
+    {
+      value: "ONETIME_TICKET",
+      label: "Vé một lần",
+    },
+    {
+      value: "WEEKLY_TICKET",
+      label: "Vé tuần",
+    },
+    {
+      value: "MONTHLY_TICKET",
+      label: "Vé tháng",
+    },
+    {
+      value: "STUDENT_TICKET",
+      label: "Vé học viên",
+    },
+  ];
 
-  const listTicketStatus = [{
-    value: "ACTIVE",
-    label: "Còn hiệu lực",
-  }, {
-    value: "EXPIRED",
-    label: "Đã hết hạn",
-  }, {
-    value: "USED",
-    label: "Đã sử dụng",
-  }, {
-    value: "CANCELED",
-    label: "Đã hủy",
-  }];
+  const listTicketStatus = [
+    {
+      value: "ACTIVE",
+      label: "Còn hiệu lực",
+    },
+    {
+      value: "EXPIRED",
+      label: "Đã hết hạn",
+    },
+    {
+      value: "USED",
+      label: "Đã sử dụng",
+    },
+    {
+      value: "CANCELED",
+      label: "Đã hủy",
+    },
+  ];
 
   // Mảng cột của bảng
   const ticketColumns = [
     { key: "id", label: "ID" },
-    { key: "ticketCode", label: "Mã vé" },
+    { key: "qrCodeBase64", label: "Mã QR" },
     { key: "issueDate", label: "Ngày Phát Hành" },
     { key: "expiryDate", label: "Ngày Hết Hạn" },
     { key: "ticketType", label: "Loại Vé" },
@@ -78,7 +90,7 @@ const TicketManagement = () => {
       setTicketData(data); // Lưu dữ liệu vào state
     } catch (err) {
       setErrorServer(err.message); // Lưu lỗi vào state nếu có
-      console.log(err)
+      console.log(err);
     } finally {
       setLoadingPage(false);
     }
@@ -94,7 +106,7 @@ const TicketManagement = () => {
       setListStudentOption(studentOptions);
     } catch (error) {
       toast.error("Lỗi khi lấy danh sách học viên");
-      console.log(error)
+      console.log(error);
     }
   };
 
@@ -108,7 +120,6 @@ const TicketManagement = () => {
     let error = "";
 
     switch (key) {
-
       case "issueDate":
         if (!value) {
           error = "Ngày phát hành không được để trống.";
@@ -137,7 +148,6 @@ const TicketManagement = () => {
         }
         break;
 
-
       default:
         break;
     }
@@ -165,17 +175,14 @@ const TicketManagement = () => {
     if (!formData.ticketType || formData.ticketType.trim() === "") {
       newErrors.ticketType = "Loại vé không được để trống.";
     }
-
-    if (formData.ticketPrice === "" || formData.ticketPrice === null) {
-      newErrors.ticketPrice = "Giá vé không được để trống.";
-    } else if (
-      isNaN(formData.ticketPrice) ||
-      formData.ticketPrice < 0
-    ) {
-      newErrors.ticketPrice =
-        "Giá vé phải là một số và không âm.";
+    if (statusFunction.isEditing) {
+      if (formData.ticketPrice === "" || formData.ticketPrice === null) {
+        newErrors.ticketPrice = "Giá vé không được để trống.";
+      } else if (isNaN(formData.ticketPrice) || formData.ticketPrice < 0) {
+        newErrors.ticketPrice = "Giá vé phải là một số và không âm.";
+      }
     }
-    console.log(newErrors)
+    console.log(newErrors);
     setErrorFields(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -202,18 +209,23 @@ const TicketManagement = () => {
 
     if (key === "issueDate" && formData.ticketType) {
       // Tự động tính ngày hết hạn khi thay đổi ngày phát hành
-      updatedFormData.expiryDate = calculateExpiryDate(value, formData.ticketType);
+      updatedFormData.expiryDate = calculateExpiryDate(
+        value,
+        formData.ticketType
+      );
     }
 
     if (key === "ticketType" && formData.issueDate) {
       // Tự động tính ngày hết hạn khi thay đổi loại vé
-      updatedFormData.expiryDate = calculateExpiryDate(formData.issueDate, value);
+      updatedFormData.expiryDate = calculateExpiryDate(
+        formData.issueDate,
+        value
+      );
     }
 
     setFormData(updatedFormData);
     validateField(key, value); // Gọi validateField nếu cần
   };
-
 
   const updateStatus = (newStatus) => {
     setStatusFunction((prevStatus) => ({
@@ -228,13 +240,13 @@ const TicketManagement = () => {
   // Hàm reset form khi thêm mới
   const handleReset = () => {
     setFormData({
-      ticketCode: "",
+      qrCodeBase64: "",
       issueDate: new Date().toISOString().split("T")[0], // Ngày hiện tại
       expiryDate: "",
       ticketType: "",
+      status: "ACTIVE",
       ticketPrice: "",
     });
-    console.log(new Date())
     handleResetStatus();
     setErrorFields({});
   };
@@ -251,7 +263,6 @@ const TicketManagement = () => {
   };
 
   const handleSaveItem = async () => {
-
     if (!validateForm()) return false;
 
     setIsLoading(true);
@@ -346,7 +357,6 @@ const TicketManagement = () => {
               placeholder="Chọn Loại Vé"
               isClearable // Cho phép xóa chọn lựa
               isSearchable // Bật tính năng tìm kiếm
-
             />
             {errorFields.ticketType && (
               <div className="invalid-feedback d-block">
@@ -355,64 +365,6 @@ const TicketManagement = () => {
             )}
           </Form.Group>
         </div>
-
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formTicketPrice">
-            <Form.Label>Giá Vé <span className="text-danger">(*)</span></Form.Label>
-            <NumericFormat
-              thousandSeparator={true}
-              suffix=" VNĐ"
-              decimalScale={0} // Không cho phép số thập phân
-              value={formData.ticketPrice}
-              onValueChange={(values) => {
-                const { floatValue } = values;
-                handleInputChange("ticketPrice", floatValue); // Lấy giá trị số thực (floatValue là giá trị số thực không có dấu phân cách hay định dạng   )
-              }}
-              className="form-control"
-              placeholder="Nhập giá (VNĐ)"
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              {errorFields.ticketPrice}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </div>
-
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formIssueDate">
-            <Form.Label>Ngày Phát Hành <span className="text-danger">(*)</span></Form.Label>
-            <Form.Control
-              type="date"
-              name="issueDate"
-              value={formData.issueDate}
-              onChange={(e) => handleInputChange("issueDate", e.target.value)}
-              isInvalid={!!errorFields.issueDate}
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              {errorFields.issueDate}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </div>
-
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formExpiryDate">
-            <Form.Label>Ngày Hết Hạn <span className="text-danger">(*)</span></Form.Label>
-            <Form.Control
-              type="date"
-              name="expiryDate"
-              value={formData.expiryDate}
-              onChange={(e) => handleInputChange("expiryDate", e.target.value)}
-              isInvalid={!!errorFields.expiryDate}
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              {errorFields.expiryDate}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </div>
-
-
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formStudentId">
             <Form.Label>
@@ -432,7 +384,6 @@ const TicketManagement = () => {
               placeholder="Chọn học viên"
               isClearable // Cho phép xóa chọn lựa
               isSearchable // Bật tính năng tìm kiếm
-
             />
             {errorFields.studentId && (
               <div className="invalid-feedback d-block">
@@ -441,10 +392,78 @@ const TicketManagement = () => {
             )}
           </Form.Group>
         </div>
-        {statusFunction.isEditing &&
+
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formIssueDate">
+            <Form.Label>
+              Ngày Phát Hành <span className="text-danger">(*)</span>
+            </Form.Label>
+            <Form.Control
+              type="date"
+              name="issueDate"
+              value={formData.issueDate}
+              onChange={(e) => handleInputChange("issueDate", e.target.value)}
+              isInvalid={!!errorFields.issueDate}
+              required
+            />
+            <Form.Control.Feedback type="invalid">
+              {errorFields.issueDate}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </div>
+
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formExpiryDate">
+            <Form.Label>
+              Ngày Hết Hạn <span className="text-danger">(*)</span>
+            </Form.Label>
+            <Form.Control
+              type="date"
+              name="expiryDate"
+              value={formData.expiryDate}
+              onChange={(e) => handleInputChange("expiryDate", e.target.value)}
+              isInvalid={!!errorFields.expiryDate}
+              required
+            />
+            <Form.Control.Feedback type="invalid">
+              {errorFields.expiryDate}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </div>
+
+        {statusFunction.isEditing && (
+          <div className="col-md-6 mb-3">
+            <Form.Group controlId="formTicketPrice">
+              <Form.Label>
+                Giá Vé <span className="text-danger">(*)</span>
+              </Form.Label>
+              <NumericFormat
+                thousandSeparator={true}
+                suffix=" VNĐ"
+                decimalScale={0} // Không cho phép số thập phân
+                value={formData.ticketPrice}
+                onValueChange={(values) => {
+                  const { floatValue } = values;
+                  handleInputChange("ticketPrice", floatValue); // Lấy giá trị số thực (floatValue là giá trị số thực không có dấu phân cách hay định dạng   )
+                }}
+                className="form-control"
+                placeholder="Nhập giá (VNĐ)"
+                required
+                readOnly
+              />
+              <Form.Control.Feedback type="invalid">
+                {errorFields.ticketPrice}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </div>
+        )}
+
+        {statusFunction.isEditing && (
           <div className="col-md-6 mb-3">
             <Form.Group controlId="formStatus">
-              <Form.Label>Trạng thái vé<span className="text-danger">(*)</span></Form.Label>
+              <Form.Label>
+                Trạng thái vé<span className="text-danger">(*)</span>
+              </Form.Label>
               <Form.Select
                 name="status"
                 value={formData.status}
@@ -462,7 +481,18 @@ const TicketManagement = () => {
                 {errorFields.status}
               </Form.Control.Feedback>
             </Form.Group>
-          </div>}
+          </div>
+        )}
+        {statusFunction.isEditing && (
+          <div className="col-md-12 my-1 text-center">
+            <img
+              src={`data:image/png;base64,${formData.qrCodeBase64}`}
+              alt="QR Code"
+              width={200}
+              height={200}
+            />
+          </div>
+        )}
       </div>
     </>
   );
@@ -494,9 +524,15 @@ const TicketManagement = () => {
             isLoading={isLoading}
             statusFunction={statusFunction}
             onResetStatus={handleResetStatus}
+            onSetting={() => setShowModalTicketPrice(true)}
           />
         </section>
       )}
+      <TicketPriceModal
+        show={showModalTicketPrice}
+        onClose={() => setShowModalTicketPrice(false)}
+        ticketTypes={listTicketTypeOption} // Dữ liệu loại vé
+      />
     </>
   );
 };

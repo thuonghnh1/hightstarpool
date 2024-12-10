@@ -1,9 +1,12 @@
+// src/components/TicketCheck.js
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Table, Card, Modal, Button } from "react-bootstrap";
 import { Helmet } from "react-helmet-async";
 import QrScanner from "qr-scanner";
 import { toast } from "react-toastify";
 import "../../css/ticket/ticket-check.css";
+import AttendanceService from "../../services/AttendanceService"; // Đảm bảo đường dẫn đúng
 
 const ERROR_MESSAGES = {
   CAMERA_ACCESS: "Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập!",
@@ -24,35 +27,7 @@ const TicketCheck = () => {
   });
 
   // Danh sách khách
-  const [guestList, setGuestList] = useState([
-    {
-      id: "1",
-      checkIn: "15:00",
-      checkout: "Chưa ra",
-      duration: "3 giờ",
-      studentId: "2",
-      ticketId: "4",
-      penalty: "0đ",
-    },
-    {
-      id: "2",
-      checkIn: "15:00",
-      checkout: "Chưa ra",
-      duration: "1 giờ",
-      studentId: "1",
-      ticketId: "7",
-      penalty: "0đ",
-    },
-    {
-      id: "3",
-      checkIn: "15:00",
-      checkout: "Chưa ra",
-      duration: "2 giờ",
-      studentId: "3",
-      ticketId: "10",
-      penalty: "0đ",
-    },
-  ]);
+  const [guestList, setGuestList] = useState([]);
 
   const calculateDuration = useCallback((checkIn, checkOut) => {
     const [checkInHours, checkInMinutes] = checkIn.split(":").map(Number);
@@ -68,55 +43,47 @@ const TicketCheck = () => {
   }, []);
 
   // Hàm xử lý khi quét thành công
-  // Dùng useRef để tránh hàm thay đổi khi setState làm re-render và làm chạy lại useEffect và gây lỗi camera khi quét thành công.
   const handleScanSuccessRef = useRef();
 
-  handleScanSuccessRef.current = (decodedData) => {
+  handleScanSuccessRef.current = async (decodedData) => {
     try {
-      const validJson = decodedData.data.replace(/'/g, '"');
-      const parsedTicket = JSON.parse(validJson);
-      const scannedTicketId = parsedTicket["ticketId"];
+      const qrCodeBase64 = decodedData.data; // Lấy qrCodeBase64 từ dữ liệu quét được
+
+      // Gọi API scanQRCode với qrCodeBase64
+      const response = await AttendanceService.scanQRCode(qrCodeBase64);
 
       const currentTime = new Date().toLocaleTimeString("vi-VN", {
         hour: "2-digit",
         minute: "2-digit",
       });
 
-      const guest = guestList.find((g) => g.ticketId === scannedTicketId);
-
-      //cv còn tHIẾU: KIỂM TRA NẾU NGƯỜI DÙNG RA KHỎI HỒ RỒI THÌ HIỂN THỊ THÔNG BÁO QR ĐÃ ĐƯỢC SỬ DỤNG
-
-      if (guest) {
-        const updatedGuestList = guestList.map((g) =>
-          g.ticketId === scannedTicketId
+      // Cập nhật danh sách khách
+      setGuestList((prevGuestList) =>
+        prevGuestList.map((g) =>
+          g.ticketId === response.ticketId
             ? {
                 ...g,
                 checkout: currentTime,
                 duration: calculateDuration(g.checkIn, currentTime),
               }
             : g
-        );
+        )
+      );
 
-        setGuestList(updatedGuestList);
-
-        setModalState({
-          show: true,
-          type: "success",
-          message: `Cập nhật giờ ra thành công cho khách với ticketId ${scannedTicketId}`,
-        });
-      } else {
-        setModalState({
-          show: true,
-          type: "failure",
-          message: "Mã QR không tồn tại trong danh sách khách!",
-        });
-      }
+      setModalState({
+        show: true,
+        type: "success",
+        message: `Cập nhật giờ ra thành công cho khách với ticketId ${response.ticketId}`,
+      });
     } catch (error) {
       console.error("Lỗi khi xử lý mã QR:", error);
       setModalState({
         show: true,
         type: "failure",
-        message: ERROR_MESSAGES.INVALID_QR,
+        message:
+          typeof error === "string"
+            ? error
+            : error.message || ERROR_MESSAGES.INVALID_QR,
       });
     }
   };
@@ -151,7 +118,7 @@ const TicketCheck = () => {
         });
       }
     } catch (error) {
-      if (error.message.includes("No QR code found")) {
+      if (error.message && error.message.includes("No QR code found")) {
         setModalState({
           show: true,
           type: "failure",
@@ -167,6 +134,57 @@ const TicketCheck = () => {
       }
     }
   };
+
+  useEffect(() => {
+    // Lấy danh sách khách chưa có checkOut từ API khi component mount
+    const fetchAttendances = async () => {
+      try {
+        const attendances =
+          await AttendanceService.getAttendancesWithoutCheckOut();
+        const formattedAttendances = attendances.map((attendance) => ({
+          id: attendance.attendanceId,
+          checkIn: attendance.checkInTime
+            ? new Date(attendance.checkInTime).toLocaleTimeString("vi-VN", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "Chưa vào",
+          checkout: attendance.checkOutTime
+            ? new Date(attendance.checkOutTime).toLocaleTimeString("vi-VN", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "Chưa ra",
+          duration: attendance.checkOutTime
+            ? calculateDuration(
+                new Date(attendance.checkInTime).toLocaleTimeString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }),
+                new Date(attendance.checkOutTime).toLocaleTimeString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              )
+            : "Chưa ra",
+          studentId: attendance.studentId,
+          ticketId: attendance.ticketId,
+          penalty: attendance.penaltyAmount
+            ? `${attendance.penaltyAmount}đ`
+            : "0đ",
+        }));
+        setGuestList(formattedAttendances);
+      } catch (error) {
+        console.error(
+          "Lỗi khi lấy danh sách điểm danh chưa có checkOut:",
+          error
+        );
+        toast.error("Đã xảy ra lỗi khi lấy danh sách điểm danh.");
+      }
+    };
+
+    fetchAttendances();
+  }, [calculateDuration]);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -224,7 +242,9 @@ const TicketCheck = () => {
                         <td className="text-nowrap">{guest.checkIn}</td>
                         <td className="text-nowrap">{guest.checkout}</td>
                         <td className="text-nowrap">{guest.duration}</td>
-                        <td className="text-nowrap">{guest.studentId}</td>
+                        <td className="text-nowrap">
+                          {guest.studentId || "N/A"}
+                        </td>
                         <td className="text-nowrap">{guest.ticketId}</td>
                         <td className="text-nowrap">{guest.penalty}</td>
                       </tr>

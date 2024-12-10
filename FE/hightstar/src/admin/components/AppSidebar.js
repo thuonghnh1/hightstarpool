@@ -207,6 +207,17 @@ const AppSidebar = ({ isSidebarOpen }) => {
         </li>
 
         <li>
+          <NavLink
+            to="/admin/review-management"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            <i className="me-2 bi bi-chat-dots fs-5"></i> Đánh giá
+          </NavLink>
+        </li>
+
+        <li>
           <div
             className={`d-flex justify-content-center align-items-center ${menuState.stock ? "active-link" : "inactive-link"
               }`}

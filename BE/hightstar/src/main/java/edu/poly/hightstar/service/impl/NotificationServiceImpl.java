@@ -61,10 +61,23 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public List<NotificationDTO> getNotificationsByUserId(Long userId) {
+        try {
+            return notificationRepository.findByUser_UserId(userId).stream().map(notification -> {
+                return convertToNotificationDTO(notification);
+            }).collect(Collectors.toList());
+        } catch (Exception e) {
+            // Log lỗi để kiểm tra nguyên nhân
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi lấy thông báo.");
+        }
+    }
+
+    @Override
     public NotificationDTO createNotification(NotificationDTO notificationDTO) {
         // Tạo Notification từ NotificationDTO
         Notification notification = convertToNotification(notificationDTO);
-        if (notificationDTO.getRecipientType() != RecipientType.ALL) {
+        if (notification.getUser() != null) {
             notification.setStatus(true);
         }
         // Lưu Notification và chuyển đổi lại thành DTO
@@ -84,6 +97,16 @@ public class NotificationServiceImpl implements NotificationService {
         // Lưu lại thông báo đã cập nhật và chuyển đổi lại thành DTO
         Notification updatedNotification = notificationRepository.save(notification);
         return convertToNotificationDTO(updatedNotification);
+    }
+
+    public boolean updateNotificationStatus(Long notificationId, Boolean status) {
+        // Kiểm tra xem thông báo có tồn tại hay không
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new AppException("Thông báo này không tồn tại!", ErrorCode.NOTIFICATION_NOT_FOUND));
+        notification.setStatus(status);
+        notificationRepository.save(notification);
+
+        return true;
     }
 
     // Phương thức chuyển NotificationDTO sang Notification và kiểm tra UserId

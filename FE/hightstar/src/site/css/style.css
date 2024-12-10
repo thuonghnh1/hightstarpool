@@ -192,6 +192,28 @@ h6,
   }
 }
 
+/* Ẩn mũi tên dropdown */
+.box__notification .dropdown-toggle::after {
+  display: none;
+}
+
+/* Định dạng cho item trong header */
+.box__notification .box__item {
+  color: rgba(0, 0, 0, 0.548); /* Màu chữ cho item */
+  transition: 0.3s;
+}
+
+/* Hiệu ứng hover cho item */
+.box__notification .box__item:hover {
+  background: #00000011; /* Màu nền khi hover */
+}
+
+/* Định dạng cho item mới */
+.box__notification .box__item.new {
+  color: black;
+  background: #00000011; /* Màu nền cho item mới */
+}
+
 /*** Hero Header ***/
 .hero-header {
   background: linear-gradient(rgba(20, 20, 31, 0.7), rgba(20, 20, 31, 0.7)),
@@ -411,13 +433,6 @@ p {
   color: #000 !important;
 }
 
-/* Ở kích thước lớn hơn lg (≥1200px), đổi màu thành trắng */
-@media (min-width: 1200px) {
-  .icon-cart {
-    color: #fff !important;
-  }
-}
-
 @media (min-width: 768px) {
   .testimonial-carousel::before,
   .testimonial-carousel::after {
@@ -429,6 +444,9 @@ p {
   .testimonial-carousel::before,
   .testimonial-carousel::after {
     width: 300px;
+  }
+  .icon-cart {
+    color: #fff !important;
   }
 }
 

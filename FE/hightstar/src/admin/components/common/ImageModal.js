@@ -9,12 +9,23 @@ function ImageModal({ show, imageSrc, onClose }) {
       dialogClassName="border-0"
       contentClassName="bg-transparent border-0 d-flex justify-content-center align-items-center"
     >
-      <div className="position-relative" style={{ maxWidth: "90%" }}>
+      <div
+        className="position-relative image-modal-container"
+        style={{
+          width: "100%", // Để modal không bị vượt quá màn hình
+          height: "400px", // Tự động điều chỉnh chiều cao
+        }}
+      >
         <img
           src={imageSrc}
           alt="Large view"
           className="img-fluid"
-          style={{ width: "50vw", maxWidth: "100%", objectFit: "contain" }}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            borderRadius: "8px", // Tùy chọn làm bo góc
+          }}
         />
         <button
           type="button"
@@ -22,8 +33,8 @@ function ImageModal({ show, imageSrc, onClose }) {
           aria-label="Close"
           onClick={onClose}
           style={{
-            top: "10px", // Cách phía trên một chút để không che mất ảnh
-            right: "10px", // Cách phía phải một chút để không che mất ảnh
+            top: "10px", // Cách trên một chút
+            right: "10px", // Cách phải một chút
             borderRadius: "50%",
           }}
         ></button>

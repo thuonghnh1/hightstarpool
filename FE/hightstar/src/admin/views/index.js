@@ -5,6 +5,7 @@ import CourseManagement from "./courses/CourseManagement";
 import StudentManagement from "./students/StudentManagement";
 import DiscountManagement from "./discounts/DiscountManagement";
 import TrainerManagement from "./trainers/TrainerManagement";
+import ReviewManagement from "./reviews/ReviewManagement";
 import SalesManagement from "./sales/SalesManagement";
 import OrderManagement from "./orders/OrderManagement";
 import TimeSlotManagement from "./timeslots/TimeSlotManagement";
@@ -19,6 +20,7 @@ export {
   TrainerManagement,
   TicketManagement,
   StudentManagement,
+  ReviewManagement,
   DiscountManagement,
   SalesManagement,
   OrderManagement,

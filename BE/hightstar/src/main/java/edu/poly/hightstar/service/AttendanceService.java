@@ -7,6 +7,10 @@ import edu.poly.hightstar.model.AttendanceDTO;
 public interface AttendanceService {
     List<AttendanceDTO> getAllAttendances();
 
+    List<AttendanceDTO> getAttendancesWithoutCheckOut();
+
+    AttendanceDTO scanQRCode(String qrCodeBase64);
+
     AttendanceDTO getAttendanceById(Long id);
 
     AttendanceDTO createAttendance(AttendanceDTO attendanceDTO);

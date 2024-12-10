@@ -26,5 +26,7 @@ public class TicketDTO {
     private TicketStatus status;
     private Double ticketPrice;
     private Long studentId;
-
+    private String qrCodeBase64; // Trường này để gửi mã QR dưới dạng Base64
 }
+
+

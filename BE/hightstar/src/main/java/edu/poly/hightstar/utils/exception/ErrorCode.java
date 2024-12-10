@@ -27,6 +27,9 @@ public enum ErrorCode {
     ATTENDANCE_NOT_FOUND("ATTENDANCE_NOT_FOUND"), // không tìm thấy điểm danh
     NOTIFICATION_NOT_FOUND("NOTIFICATION_NOT_FOUND"), // không tìm thấy thông báo
     REVIEW_NOT_FOUND("REVIEW_NOT_FOUND"), // không tìm thấy thông báo
+    TICKET_PRICE_NOT_FOUND("TICKET_PRICE_NOT_FOUND"), // không tìm thấy giá vé
+
+    TICKET_EXPIRED("TICKET_EXPIRED"), // Vé đã hết hạn
 
     // Lỗi do dữ liệu xung đột (Conflict Errors)
     CONFLICT_ERROR("CONFLICT_ERROR"), // Xung đột dữ liệu tổng quát
@@ -43,6 +46,8 @@ public enum ErrorCode {
     INVALID_ORDER_DETAILS("INVALID_ORDER_DETAILS"), // Không có sản phẩm, khóa học hoặc vé nào tồn tại
     INVALID_EMAIL("INVALID_EMAIL"), // lỗi email không hợp lệ hoặc không tồn tại.
     INVALID_OTP("INVALID_OTP"), // lỗi otp không hợp lệ hoặc đã hết hạn.
+    INVALID_QR_CODE("INVALID_QR_CODE"), // Mã qr không hợp lệ
+    INVALID_OPERATION("INVALID_OPERATION"), // Vé đã được quét ra (đã quét ra khỏi hồ rồi)
 
     // Lỗi hệ thống và máy chủ (System and Server Errors)
     INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR"), // Lỗi máy chủ nội bộ

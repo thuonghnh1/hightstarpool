@@ -15,6 +15,7 @@ import {
   AttendanceManagement,
   NotificationManagement,
   MyProfile,
+  ReviewManagement,
 } from "../views/index";
 import "../css/style.css";
 import { ThemeProvider } from "../components/common/ThemeContext";
@@ -91,6 +92,10 @@ const AdminLayout = () => {
                 <Route
                   path="student-management"
                   element={<StudentManagement />}
+                />
+                <Route
+                  path="review-management"
+                  element={<ReviewManagement />}
                 />
                 <Route
                   path="ticket/ticket-management"
