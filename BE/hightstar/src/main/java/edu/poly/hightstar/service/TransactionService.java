@@ -93,7 +93,7 @@ public class TransactionService {
                             if (descriptionNode != null) {
                                 String description = descriptionNode.asText();
                                 // Kiểm tra xem description có chứa "CUSTOMER TT<OTP>"
-                                if (description.contains("CUSTOMER TT" + otp)) {
+                                if (description.contains("TT" + otp)) {
                                     System.out.println(
                                             "OTP " + otp + " found in transaction history. Verification successful.");
                                     otpFoundInHistory = true;
