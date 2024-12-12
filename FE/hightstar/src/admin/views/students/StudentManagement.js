@@ -15,6 +15,13 @@ const StudentManagement = () => {
   const [formData, setFormData] = useState({}); // State quản lý dữ liệu hiện tại
   const [imageFile, setImageFile] = useState(null); // State lưu trữ ảnh upload
   const [listUserOption, setListUserOption] = useState([]);
+  const button = {
+    btnAdd: true,
+    btnEdit: true,
+    btnDelete: true,
+    btnDetail: false,
+    btnSetting: false,
+  };
 
   const [errorFields, setErrorFields] = useState({}); // State quản lý lỗi
   const [statusFunction, setStatusFunction] = useState({
@@ -471,6 +478,7 @@ const StudentManagement = () => {
             isLoading={isLoading}
             statusFunction={statusFunction}
             onResetStatus={handleResetStatus}
+            buttonCustom={button}
           />
         </section>
       )}
