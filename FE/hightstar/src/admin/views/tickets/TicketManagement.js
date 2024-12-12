@@ -12,12 +12,14 @@ import { toast } from "react-toastify";
 import { Helmet } from "react-helmet-async";
 import Select from "react-select";
 import studentService from "../../services/StudentService";
+import SalesService from "../../services/SalesService";
 import { NumericFormat } from "react-number-format";
 import TicketPriceModal from "./TicketPriceModal";
 
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import TicketPriceService from "../../services/TicketPriceService";
 
 // Khai báo các plugin
 dayjs.extend(utc);
@@ -66,13 +68,13 @@ const TicketManagement = () => {
     { key: "expiryDate", label: "Ngày Hết Hạn" },
     { key: "ticketType", label: "Loại Vé" },
     { key: "status", label: "Trạng thái" },
-    { key: "ticketPrice", label: "Giá Vé" },
+    { key: "price", label: "Giá Vé" },
     { key: "studentId", label: "Mã Học Viên" },
   ];
 
   // Loại bỏ cột khỏi ticketColumns
   const defaultColumns = ticketColumns.filter(
-    (column) => column.key !== "ticketPrice"
+    (column) => column.key !== "price"
   );
 
   // Gọi API để lấy dữ liệu từ server
@@ -100,6 +102,17 @@ const TicketManagement = () => {
     } catch (error) {
       toast.error("Lỗi khi lấy danh sách học viên");
       console.log(error);
+    }
+  };
+
+  const fetchTicketPriceByTicketTypeData = async (ticketType) => {
+    try {
+      const price = await TicketPriceService.getTicketPriceByTicketType(
+        ticketType
+      );
+      return price;
+    } catch (error) {
+      return "";
     }
   };
 
@@ -133,9 +146,9 @@ const TicketManagement = () => {
         }
         break;
 
-      case "ticketPrice":
+      case "price":
         if (value === "" || value === null) {
-          error = "Giá vé không được để trống.";
+          error = "Vui lòng đợi hệ thống cập nhật giá vé.";
         } else if (isNaN(value) || value < 0) {
           error = "Giá vé phải là một số và không âm.";
         }
@@ -168,14 +181,18 @@ const TicketManagement = () => {
     if (!formData.ticketType || formData.ticketType.trim() === "") {
       newErrors.ticketType = "Loại vé không được để trống.";
     }
+
+    if (formData.ticketType === "STUDENT_TICKET" && !formData.studentId) {
+      newErrors.studentId = "Mã học viên không được để khống.";
+    }
+
     if (statusFunction.isEditing) {
-      if (formData.ticketPrice === "" || formData.ticketPrice === null) {
-        newErrors.ticketPrice = "Giá vé không được để trống.";
-      } else if (isNaN(formData.ticketPrice) || formData.ticketPrice < 0) {
-        newErrors.ticketPrice = "Giá vé phải là một số và không âm.";
+      if (formData.price === "" || formData.price === null) {
+        newErrors.price = "Giá vé không được để trống.";
+      } else if (isNaN(formData.price) || formData.price < 0) {
+        newErrors.price = "Giá vé phải là một số và không âm.";
       }
     }
-    console.log(newErrors);
     setErrorFields(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -206,7 +223,7 @@ const TicketManagement = () => {
   };
 
   // Hàm xử lý khi thay đổi giá trị input
-  const handleInputChange = (key, value) => {
+  const handleInputChange = async (key, value) => {
     let updatedFormData = { ...formData, [key]: value };
 
     if (key === "issueDate" && formData.ticketType) {
@@ -217,21 +234,21 @@ const TicketManagement = () => {
       );
     }
 
-    if (key === "ticketType" && formData.issueDate) {
+    if (key === "ticketType" && value && formData.issueDate) {
       // Tự động tính ngày hết hạn khi thay đổi loại vé
       updatedFormData.expiryDate = calculateExpiryDate(
         formData.issueDate,
         value
       );
+
+      // Tự động lấy giá vé theo loại vé
+      const ticketPriceObj = await fetchTicketPriceByTicketTypeData(value);
+      updatedFormData.price = ticketPriceObj.price;
     }
 
-    if (key === "studentId") {
-      // Tự động set lại loại vé
-      updatedFormData.ticketType = "STUDENT_TICKET";
-      updatedFormData.expiryDate = calculateExpiryDate(
-        formData.issueDate,
-        "STUDENT_TICKET"
-      );
+    // Clean studentId nếu người dùng đối sang loại vé khác nhưng đã chọn student
+    if (key === "ticketType" && value !== "STUDENT_TICKET") {
+      updatedFormData.studentId = "";
     }
 
     setFormData(updatedFormData);
@@ -255,7 +272,8 @@ const TicketManagement = () => {
       issueDate: formatDateTimeLocal(), // Ngày hiện tại
       expiryDate: "",
       ticketType: "",
-      ticketPrice: "",
+      price: "",
+      studentId: "",
     });
     handleResetStatus();
     setErrorFields({});
@@ -270,6 +288,30 @@ const TicketManagement = () => {
     });
     updateStatus({ isEditing: true });
     setErrorFields({});
+  };
+
+  const prepareOrderData = () => {
+    // Dữ liệu cho Order
+    const orderData = {
+      total: formData.price,
+      paymentMethod: "CASH",
+      shippingAddress: null,
+      discountId: null,
+      userId: null,
+    };
+
+    const detail = {
+      quantity: 1,
+      unitPrice: formData.price,
+    };
+
+    // Kết hợp dữ liệu Order và OrderDetails
+    const invoiceObj = {
+      order: orderData,
+      orderDetails: [detail],
+    };
+
+    return invoiceObj;
   };
 
   const handleSaveItem = async () => {
@@ -309,6 +351,8 @@ const TicketManagement = () => {
           issueDate: formatDateTimeToDMY(newTicket.issueDate),
           expiryDate: formatDateTimeToDMY(newTicket.expiryDate),
         };
+
+        await SalesService.createInvoice(prepareOrderData());
 
         // Cập nhật mảng ticketData với ticket vừa được thêm
         setTicketData([...ticketData, formattedTicket]);
@@ -375,31 +419,29 @@ const TicketManagement = () => {
             )}
           </Form.Group>
         </div>
+
         <div className="col-md-6 mb-3">
-          <Form.Group controlId="formStudentId">
+          <Form.Group controlId="formTicketPrice">
             <Form.Label>
-              Mã học viên <span className="text-danger">(*)</span>
+              Giá Vé <span className="text-danger">(*)</span>
             </Form.Label>
-            <Select
-              options={listStudentOption}
-              value={listStudentOption.find(
-                (option) => option.value === formData.studentId
-              )}
-              onChange={(selectedOption) =>
-                handleInputChange(
-                  "studentId",
-                  selectedOption ? selectedOption.value : ""
-                )
-              }
-              placeholder="Chọn học viên"
-              isClearable // Cho phép xóa chọn lựa
-              isSearchable // Bật tính năng tìm kiếm
+            <NumericFormat
+              thousandSeparator={true}
+              suffix=" VNĐ"
+              decimalScale={0} // Không cho phép số thập phân
+              value={formData.price}
+              onValueChange={(values) => {
+                const { floatValue } = values;
+                handleInputChange("price", floatValue); // Lấy giá trị số thực (floatValue là giá trị số thực không có dấu phân cách hay định dạng   )
+              }}
+              className="form-control"
+              placeholder="Không cần điền."
+              required
+              readOnly
             />
-            {errorFields.studentId && (
-              <div className="invalid-feedback d-block">
-                {errorFields.studentId}
-              </div>
-            )}
+            <Form.Control.Feedback type="invalid">
+              {errorFields.price}
+            </Form.Control.Feedback>
           </Form.Group>
         </div>
 
@@ -441,29 +483,32 @@ const TicketManagement = () => {
           </Form.Group>
         </div>
 
-        {statusFunction.isEditing && (
+        {formData.ticketType === "STUDENT_TICKET" && (
           <div className="col-md-6 mb-3">
-            <Form.Group controlId="formTicketPrice">
+            <Form.Group controlId="formStudentId">
               <Form.Label>
-                Giá Vé <span className="text-danger">(*)</span>
+                Mã học viên <span className="text-danger">(*)</span>
               </Form.Label>
-              <NumericFormat
-                thousandSeparator={true}
-                suffix=" VNĐ"
-                decimalScale={0} // Không cho phép số thập phân
-                value={formData.ticketPrice}
-                onValueChange={(values) => {
-                  const { floatValue } = values;
-                  handleInputChange("ticketPrice", floatValue); // Lấy giá trị số thực (floatValue là giá trị số thực không có dấu phân cách hay định dạng   )
-                }}
-                className="form-control"
-                placeholder="Nhập giá (VNĐ)"
-                required
-                readOnly
+              <Select
+                options={listStudentOption}
+                value={listStudentOption.find(
+                  (option) => option.value === formData.studentId
+                )}
+                onChange={(selectedOption) =>
+                  handleInputChange(
+                    "studentId",
+                    selectedOption ? selectedOption.value : ""
+                  )
+                }
+                placeholder="Chọn học viên"
+                isClearable // Cho phép xóa chọn lựa
+                isSearchable // Bật tính năng tìm kiếm
               />
-              <Form.Control.Feedback type="invalid">
-                {errorFields.ticketPrice}
-              </Form.Control.Feedback>
+              {errorFields.studentId && (
+                <div className="invalid-feedback d-block">
+                  {errorFields.studentId}
+                </div>
+              )}
             </Form.Group>
           </div>
         )}
