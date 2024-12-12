@@ -18,6 +18,7 @@ public class TicketDTO {
     private LocalDateTime issueDate;
     private LocalDateTime expiryDate;
     private TicketType ticketType;
+    @JsonProperty("price")
     private Double ticketPrice;
     private boolean ticketIsUsed;
     private Long studentId;

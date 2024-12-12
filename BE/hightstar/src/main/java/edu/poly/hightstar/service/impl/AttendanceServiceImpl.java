@@ -36,6 +36,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final QRCodeValidationService qrCodeValidationService;
 
     @Override
+    @Transactional
     public List<AttendanceDTO> getAllAttendances() {
         return attendanceRepository.findAll().stream().map(attendance -> {
             AttendanceDTO dto = new AttendanceDTO();
@@ -52,6 +53,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
+    @Transactional
     public List<AttendanceDTO> getAttendancesWithoutCheckOut() {
         return attendanceRepository.findByCheckOutTimeIsNull().stream().map(attendance -> {
             AttendanceDTO dto = new AttendanceDTO();
@@ -68,6 +70,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
+    @Transactional
     public AttendanceDTO getAttendanceById(Long id) {
         Attendance attendance = attendanceRepository.findById(id)
                 .orElseThrow(() -> new AppException("Điểm danh này không tồn tại!", ErrorCode.ATTENDANCE_NOT_FOUND));

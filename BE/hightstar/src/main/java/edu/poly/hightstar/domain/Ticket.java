@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 import edu.poly.hightstar.enums.TicketType;
 
 @Data
@@ -29,4 +31,7 @@ public class Ticket {
     private Student student;
     @Column(length = 4096)
     private String qrCodeBase64; // Lưu mã QR dưới dạng Base64 string
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Attendance> attendances;
 }

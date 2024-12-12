@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.poly.hightstar.domain.Student;
 import edu.poly.hightstar.domain.User;
@@ -23,6 +24,7 @@ public class StudentServiceImpl implements StudentService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public List<StudentDTO> getAllStudents() {
         return studentRepository.findAll().stream().map(student -> {
             StudentDTO dto = new StudentDTO();
@@ -35,6 +37,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @Transactional
     public StudentDTO getStudentById(Long id) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(
@@ -45,6 +48,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @Transactional
     public StudentDTO createStudent(StudentDTO studentDTO) {
         Student student = new Student();
         BeanUtils.copyProperties(studentDTO, student);
@@ -64,6 +68,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @Transactional
     public StudentDTO updateStudent(Long id, StudentDTO studentDTO) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new AppException("Không tìm thấy học viên với này", ErrorCode.STUDENT_NOT_FOUND));
