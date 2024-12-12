@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
 
 import edu.poly.hightstar.domain.Product;
 import edu.poly.hightstar.model.ProductDTO;
@@ -11,14 +12,15 @@ import edu.poly.hightstar.repository.ProductRepository;
 import edu.poly.hightstar.service.ProductService;
 import edu.poly.hightstar.utils.exception.AppException;
 import edu.poly.hightstar.utils.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
 
+@Service
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
    
-    public ProductServiceImpl(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-    }
+   
 
     @Override
     public List <ProductDTO> getAllProducts() {

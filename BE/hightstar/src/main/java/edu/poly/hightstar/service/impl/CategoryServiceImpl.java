@@ -6,18 +6,21 @@ import edu.poly.hightstar.repository.CategoryRepository;
 import edu.poly.hightstar.service.CategoryService;
 import edu.poly.hightstar.utils.exception.AppException;
 import edu.poly.hightstar.utils.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
 
+@Service
+@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
    
-    public CategoryServiceImpl(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
-    }
+    
     @Override
     public List <CategoryDTO> getAllCategorys() {
         return categoryRepository.findAll().stream().map(category -> {
