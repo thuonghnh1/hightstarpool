@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -43,6 +45,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     // Lấy hồ sơ người dùng theo userId
     @Override
+    @Transactional
     public UserProfileDTO getProfileByUserId(Long userId) {
         Optional<UserProfile> userProfile = userProfileRepository.findByUser_UserId(userId);
         if (userProfile.isEmpty()) {

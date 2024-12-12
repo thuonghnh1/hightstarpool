@@ -35,25 +35,30 @@ function Header() {
   // Hàm fetch thông báo
   const fetchNotification = useCallback(async () => {
     try {
-      const notificationsForAll =
-        await NotificationService.getNotificationsByRecipientType("ALL");
-      const commonNotifications =
-        await NotificationService.getNotificationsByRecipientType(user.role);
+      if (user) {
+        const notificationsForAll =
+          await NotificationService.getNotificationsByRecipientType("ALL");
+        const commonNotifications =
+          await NotificationService.getNotificationsByRecipientType(user.role);
 
-      // Kết hợp 2 mảng thông báo lại
-      const allNotifications = [...notificationsForAll, ...commonNotifications];
-      setNotifications(allNotifications);
+        // Kết hợp 2 mảng thông báo lại
+        const allNotifications = [
+          ...notificationsForAll,
+          ...commonNotifications,
+        ];
+        setNotifications(allNotifications);
 
-      const individualNotifications =
-        await NotificationService.getNotificationsByUserId(user.userId);
-      const notificationsWithIcon = individualNotifications.map(
-        (notification) => ({
-          ...notification,
-          imgSrc: iconBell,
-          createdAt: dayjs(notification.createdAt).fromNow(),
-        })
-      );
-      setRoleNotifications(notificationsWithIcon);
+        const individualNotifications =
+          await NotificationService.getNotificationsByUserId(user.userId);
+        const notificationsWithIcon = individualNotifications.map(
+          (notification) => ({
+            ...notification,
+            imgSrc: iconBell,
+            createdAt: dayjs(notification.createdAt).fromNow(),
+          })
+        );
+        setRoleNotifications(notificationsWithIcon);
+      }
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }
@@ -112,7 +117,7 @@ function Header() {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      logout();
       updateUser(null);
     } catch (error) {
       console.error("Error during logout:", error);

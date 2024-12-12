@@ -20,7 +20,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "attendances", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"student_id", "ticket_id", "attendance_date"})
+        @UniqueConstraint(columnNames = { "student_id", "ticket_id", "attendance_date" })
 })
 public class Attendance {
 
@@ -39,7 +39,7 @@ public class Attendance {
     private LocalTime checkOutTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = false)
+    @JoinColumn(name = "student_id")
     private Student student;
 
     @ManyToOne(fetch = FetchType.LAZY)

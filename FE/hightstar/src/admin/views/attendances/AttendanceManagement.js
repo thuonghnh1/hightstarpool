@@ -1,15 +1,18 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import TableManagement from "../../components/common/TableManagement";
 import AttendanceService from "../../services/AttendanceService";
 import Page500 from "../../../common/pages/Page500";
 import { Helmet } from "react-helmet-async";
-import studentService from "../../services/StudentService";
 import ticketService from "../../services/TicketService";
 import Select from "react-select";
 import { NumericFormat } from "react-number-format";
 import { Spinner, Form } from "react-bootstrap";
-import { getCurrentTime } from "../../utils/FormatDate";
+import {
+  formatDateToDMY,
+  formatDateToISO,
+  getCurrentTime,
+} from "../../utils/FormatDate";
 
 const AttendanceManagement = () => {
   // State để lưu trữ dữ liệu giảm giá từ API
@@ -25,8 +28,25 @@ const AttendanceManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
   const [errorServer, setErrorServer] = useState(null);
-  const [listStudentOption, setListStudentOption] = useState([]);
   const [listTicketOption, setListTicketOption] = useState([]);
+  const listTicketTypeOption = [
+    {
+      value: "ONETIME_TICKET",
+      label: "Vé một lần",
+    },
+    {
+      value: "WEEKLY_TICKET",
+      label: "Vé tuần",
+    },
+    {
+      value: "MONTHLY_TICKET",
+      label: "Vé tháng",
+    },
+    {
+      value: "STUDENT_TICKET",
+      label: "Vé học viên",
+    },
+  ];
 
   // Mảng cột của bảng
   const attendanceColumns = [
@@ -53,32 +73,24 @@ const AttendanceManagement = () => {
       setAttendanceData(data); // Lưu dữ liệu vào state
     } catch (err) {
       setErrorServer(err.message); // Lưu lỗi vào state nếu có
+      console.log(err);
     } finally {
       setLoadingPage(false);
-    }
-    try {
-      let students = await studentService.getStudents();
-      // Chuyển đổi danh sách học viên đã lọc thành định dạng phù hợp cho Select
-      const studentOptions = students.map((student) => ({
-        value: student.id,
-        label: `#${student.id} - ${student.fullName}`,
-      }));
-      // Cập nhật trạng thái danh sách tùy chọn cho Select
-      setListStudentOption(studentOptions);
-    } catch (error) {
-      toast.error("Lỗi khi lấy danh sách học viên");
-      console.log(error);
     }
 
     try {
       let tickets = await ticketService.getTickets();
       // Chuyển đổi danh sách vé đã lọc thành định dạng phù hợp cho Select
-      const studentOptions = tickets.map((ticket) => ({
+      const ticketOptions = tickets.map((ticket) => ({
         value: ticket.id,
-        label: `#${ticket.id} - ${ticket.ticketCode}`,
+        label: `#${ticket.id} - ${
+          listTicketTypeOption.find(
+            (option) => option.value === ticket.ticketType
+          )?.label
+        }`,
       }));
       // Cập nhật trạng thái danh sách tùy chọn cho Select
-      setListStudentOption(studentOptions);
+      setListTicketOption(ticketOptions);
     } catch (error) {
       toast.error("Lỗi khi lấy danh sách học viên");
       console.log(error);
@@ -107,11 +119,6 @@ const AttendanceManagement = () => {
         } else if (new Date(value) < new Date(formData.checkInTime)) {
           error =
             "Thời gian kết thúc điểm danh phải sau thời gian bắt đầu điểm danh.";
-        }
-        break;
-      case "studentId":
-        if (!value) {
-          error = "Mã học viên không được để trống.";
         }
         break;
       case "ticketId":
@@ -153,9 +160,6 @@ const AttendanceManagement = () => {
     ) {
       newErrors.checkOutTime =
         "Thời gian kết thúc điểm danh phải sau ngày bắt đầu.";
-    }
-    if (!formData.studentId) {
-      newErrors.studentId = "Mã học viên không được để trống.";
     }
     if (!formData.ticketId) {
       newErrors.ticketId = "Mã vé không được để trống.";
@@ -202,6 +206,7 @@ const AttendanceManagement = () => {
   const handleEdit = (item) => {
     setFormData({
       ...item,
+      attendanceDate: formatDateToISO(item.attendanceDate),
     });
     updateStatus({ isEditing: true });
     setErrorFields({});
@@ -223,6 +228,9 @@ const AttendanceManagement = () => {
         // Đổi định dạng ngày giờ trước khi lưu vào mảng
         const formattedAttendance = {
           ...updatedAttendance,
+          attendanceDate: formatDateToDMY(
+            updatedAttendance.attendanceDate.split("T")[0]
+          ),
         };
 
         // Cập nhật state attendanceData với attendance đã được sửa
@@ -243,6 +251,9 @@ const AttendanceManagement = () => {
         // Đổi định dạng ngày giờ trước khi lưu vào mảng
         const formattedAttendance = {
           ...newAttendance,
+          attendanceDate: formatDateToDMY(
+            newAttendance.attendanceDate.split("T")[0]
+          ),
         };
 
         // Cập nhật mảng attendanceData với item vừa được thêm
@@ -319,34 +330,6 @@ const AttendanceManagement = () => {
             <Form.Control.Feedback type="invalid">
               {errorFields.checkOutTime}
             </Form.Control.Feedback>
-          </Form.Group>
-        </div>
-
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formStudentId">
-            <Form.Label>
-              Mã học viên <span className="text-danger">(*)</span>
-            </Form.Label>
-            <Select
-              options={listStudentOption}
-              value={listStudentOption.find(
-                (option) => option.value === formData.studentId
-              )}
-              onChange={(selectedOption) =>
-                handleInputChange(
-                  "studentId",
-                  selectedOption ? selectedOption.value : ""
-                )
-              }
-              placeholder="Chọn học viên"
-              isClearable // Cho phép xóa chọn lựa
-              isSearchable // Bật tính năng tìm kiếm
-            />
-            {errorFields.studentId && (
-              <div className="invalid-feedback d-block">
-                {errorFields.studentId}
-              </div>
-            )}
           </Form.Group>
         </div>
 

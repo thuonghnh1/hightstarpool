@@ -3,6 +3,7 @@ package edu.poly.hightstar.service.impl;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
@@ -10,8 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.poly.hightstar.repository.TicketRepository;
+import edu.poly.hightstar.repository.AttendanceRepository;
 import edu.poly.hightstar.repository.StudentRepository;
 import edu.poly.hightstar.repository.TicketPriceRepository;
+import edu.poly.hightstar.domain.Attendance;
 import edu.poly.hightstar.domain.Student;
 import edu.poly.hightstar.domain.Ticket;
 import edu.poly.hightstar.domain.TicketPrice;
@@ -24,6 +27,7 @@ import edu.poly.hightstar.utils.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import com.google.zxing.WriterException;
 import java.io.IOException;
+
 import edu.poly.hightstar.utils.qr.QRCodeGenerator;
 
 @Service
@@ -33,9 +37,13 @@ public class TicketServiceImpl implements TicketService {
     private final StudentRepository studentRepository;
     private final TicketPriceRepository ticketPriceRepository;
     private final TicketCodeService ticketCodeService;
+    private final AttendanceRepository attendanceRepository;
     private final QRCodeGenerator qrCodeGenerator;
 
+    Date today = getCurrentDateWithoutTime();
+
     @Override
+    @Transactional
     public List<TicketDTO> getAllTickets() {
         return ticketRepository.findAll().stream().map(ticket -> {
             TicketDTO dto = new TicketDTO();
@@ -43,11 +51,31 @@ public class TicketServiceImpl implements TicketService {
             if (ticket.getStudent() != null) {
                 dto.setStudentId(ticket.getStudent().getStudentId());
             }
+            // Kiểm tra trạng thái vé ngày hôm nay đã dùng chưa
+            boolean isUsed = false;
+            if (ticket.getStudent() != null && ticket.getTicketType() == TicketType.STUDENT_TICKET) {
+                Optional<Attendance> optional = attendanceRepository
+                        .findByStudentStudentIdAndTicketTicketIdAndAttendanceDate(ticket.getStudent().getStudentId(),
+                                ticket.getTicketId(), today);
+                if (optional.isPresent()) {
+                    isUsed = true;
+                }
+            } else {
+                Optional<Attendance> optional = attendanceRepository
+                        .findByStudentIsNullAndTicketTicketIdAndAttendanceDate(
+                                ticket.getTicketId(), today);
+                if (optional.isPresent()) {
+                    isUsed = true;
+                }
+            }
+
+            dto.setTicketIsUsed(isUsed);
             return dto;
         }).collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public TicketDTO getTicketById(Long id) {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new AppException("Vé này không tồn tại!", ErrorCode.TICKET_NOT_FOUND));
@@ -65,13 +93,6 @@ public class TicketServiceImpl implements TicketService {
     @Override
     @Transactional
     public TicketDTO createTicket(TicketDTO ticketDTO) throws WriterException, IOException {
-        // Đặt issueDate là hiện tại
-        Date issueDate = new Date();
-        ticketDTO.setIssueDate(issueDate);
-
-        // Đặt expiryDate dựa trên ticketType
-        Date expiryDate = calculateExpiryDate(issueDate, ticketDTO.getTicketType());
-        ticketDTO.setExpiryDate(expiryDate);
 
         // Tạo entity từ DTO
         Ticket ticket = new Ticket();
@@ -89,7 +110,7 @@ public class TicketServiceImpl implements TicketService {
 
         // Truy vấn giá vé từ bảng TicketPrice dựa trên ticketType
         TicketPrice price = ticketPriceRepository.findByTicketType(ticket.getTicketType());
-        
+
         if (price != null) {
             ticket.setTicketPrice(price.getPrice());
         }
@@ -142,11 +163,6 @@ public class TicketServiceImpl implements TicketService {
             ticket.setStudent(null);
         }
 
-        // Cập nhật expiryDate dựa trên ticketType nếu cần thiết
-        Date issueDate = ticket.getIssueDate();
-        Date expiryDate = calculateExpiryDate(issueDate, ticket.getTicketType());
-        ticket.setExpiryDate(expiryDate);
-
         // Tạo ticketCode mới nếu cần (nếu bạn muốn cập nhật mã QR khi cập nhật vé)
         String ticketCode = ticketCodeService.generateTicketCode(convertToDTO(ticket));
         ticket.setTicketCode(ticketCode);
@@ -186,34 +202,6 @@ public class TicketServiceImpl implements TicketService {
         return ticketDTO;
     }
 
-    // Phương thức tính toán ngày hết hạn dựa trên loại vé
-    private Date calculateExpiryDate(Date issueDate, TicketType ticketType) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(issueDate);
-        switch (ticketType) {
-            case ONETIME_TICKET:
-                // Hạn vé trong ngày tạo đến hết ngày đó (23:59:59)
-                calendar.set(Calendar.HOUR_OF_DAY, 23);
-                calendar.set(Calendar.MINUTE, 59);
-                calendar.set(Calendar.SECOND, 59);
-                calendar.set(Calendar.MILLISECOND, 999);
-                break;
-            case WEEKLY_TICKET:
-                calendar.add(Calendar.DAY_OF_MONTH, 7); // Thêm 7 ngày
-                break;
-            case MONTHLY_TICKET:
-                calendar.add(Calendar.DAY_OF_MONTH, 30); // Thêm 30 ngày
-                break;
-            case STUDENT_TICKET:
-                calendar.add(Calendar.YEAR, 1); // Thêm 1 năm
-                break;
-            default:
-                calendar.add(Calendar.DAY_OF_MONTH, 30); // Mặc định 30 ngày
-                break;
-        }
-        return calendar.getTime();
-    }
-
     // Phương thức chuyển đổi từ Ticket entity sang TicketDTO
     private TicketDTO convertToDTO(Ticket ticket) {
         TicketDTO dto = new TicketDTO();
@@ -224,5 +212,15 @@ public class TicketServiceImpl implements TicketService {
             dto.setStudentId(null);
         }
         return dto;
+    }
+
+    // Phương thức trợ giúp để lấy ngày hiện tại mà không có thời gian
+    private Date getCurrentDateWithoutTime() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
     }
 }

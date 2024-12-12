@@ -294,7 +294,7 @@ const MyProfile = () => {
                             style={{ cursor: "pointer" }}
                             onClick={(e) => setShowChangeBio(true)}
                           >
-                            <i class="bi bi-pencil me-2"></i>{profile.bio || "(Thêm tiểu sử của bạn)"}
+                            <i className="bi bi-pencil me-2"></i>{profile.bio || "(Thêm tiểu sử của bạn)"}
                           </div>
                         </div>
                       </Col>

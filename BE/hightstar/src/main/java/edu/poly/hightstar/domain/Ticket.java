@@ -2,8 +2,8 @@ package edu.poly.hightstar.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.Date;
-import edu.poly.hightstar.enums.TicketStatus;
+
+import java.time.LocalDateTime;
 import edu.poly.hightstar.enums.TicketType;
 
 @Data
@@ -17,15 +17,12 @@ public class Ticket {
     private Long ticketId;
     @Column(length = 500, unique = true)
     private String ticketCode;
-    @Temporal(TemporalType.DATE)
-    private Date issueDate;
-    @Temporal(TemporalType.DATE)
-    private Date expiryDate;
-    @Column(length = 20)
+    @Column(name = "issue_date")
+    private LocalDateTime issueDate;
+    @Column(name = "expiry_date")
+    private LocalDateTime expiryDate;
     @Enumerated(EnumType.STRING)
     private TicketType ticketType; // OneTime_ticket, Weekly_ticket ,Monthly_ticket.
-    @Enumerated(EnumType.STRING)
-    private TicketStatus status; // Còn hiệu lực, hết hiệu lực
     private Double ticketPrice;
     @ManyToOne
     @JoinColumn(name = "studentId", referencedColumnName = "studentId")

@@ -1,7 +1,5 @@
-// src/services/AttendanceService.js
-
 import axiosInstance from "../../services/axiosInstance";
-import { formatDateToDMY } from "../utils/FormatDate";
+import { formatDateToDMY, formatTime } from "../utils/FormatDate";
 
 const API_URL = "/employee/attendances";
 
@@ -9,7 +7,13 @@ const API_URL = "/employee/attendances";
 const getAttendances = async () => {
   try {
     const response = await axiosInstance.get(API_URL);
-    return response.data;
+    const attendances = response.data;
+    return attendances.map((attendance) => ({
+      ...attendance,
+      checkInTime: formatTime(attendance.checkInTime),
+      checkOutTime: formatTime(attendance.checkOutTime),
+      attendanceDate: formatDateToDMY(attendance.attendanceDate),
+    }));
   } catch (error) {
     console.error("Lỗi khi lấy danh sách điểm danh:", error);
     throw error;
@@ -19,8 +23,14 @@ const getAttendances = async () => {
 // Hàm lấy tất cả điểm danh
 const getAttendancesWithoutCheckOut = async () => {
   try {
-    const response = await axiosInstance.get(API_URL);
-    return response.data;
+    const response = await axiosInstance.get(`${API_URL}/without-checkout`);
+    const attendances = response.data;
+    return attendances.map((attendance) => ({
+      ...attendance,
+      checkInTime: formatTime(attendance.checkInTime),
+      checkOutTime: formatTime(attendance.checkOutTime),
+      attendanceDate: formatDateToDMY(attendance.attendanceDate),
+    }));
   } catch (error) {
     console.error("Lỗi khi lấy danh sách khách trong hồ:", error);
     throw error;
@@ -74,10 +84,10 @@ const deleteAttendance = async (id) => {
 };
 
 // Hàm scan QR Code để ghi nhận điểm danh
-const scanQRCode = async (qrCodeBase64) => {
+const scanQRCode = async (ticketCode) => {
   try {
-    const response = await axiosInstance.post(`/admin/attendance/scan`, {
-      qrCodeBase64,
+    const response = await axiosInstance.post(`${API_URL}/scan`, {
+      ticketCode,
     });
     return response.data;
   } catch (error) {

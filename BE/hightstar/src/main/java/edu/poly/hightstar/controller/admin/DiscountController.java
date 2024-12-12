@@ -23,6 +23,13 @@ public class DiscountController {
                 return discountService.getAllDiscounts();
         }
 
+
+        @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+        @GetMapping("/active")
+        public List<DiscountDTO> getActiveDiscounts() {
+                return discountService.getActiveDiscounts();
+        }
+
         @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
         @GetMapping("/{id}")
         public DiscountDTO getDiscountById(@PathVariable Long id) {

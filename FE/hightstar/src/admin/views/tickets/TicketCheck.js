@@ -6,7 +6,7 @@ import { Helmet } from "react-helmet-async";
 import QrScanner from "qr-scanner";
 import { toast } from "react-toastify";
 import "../../css/ticket/ticket-check.css";
-import AttendanceService from "../../services/AttendanceService"; // Đảm bảo đường dẫn đúng
+import AttendanceService from "../../services/AttendanceService";
 
 const ERROR_MESSAGES = {
   CAMERA_ACCESS: "Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập!",
@@ -29,6 +29,9 @@ const TicketCheck = () => {
   // Danh sách khách
   const [guestList, setGuestList] = useState([]);
 
+  // Flag để ngăn chặn việc xử lý quét liên tục
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const calculateDuration = useCallback((checkIn, checkOut) => {
     const [checkInHours, checkInMinutes] = checkIn.split(":").map(Number);
     const [checkOutHours, checkOutMinutes] = checkOut.split(":").map(Number);
@@ -46,50 +49,75 @@ const TicketCheck = () => {
   const handleScanSuccessRef = useRef();
 
   handleScanSuccessRef.current = async (decodedData) => {
-    try {
-      const qrCodeBase64 = decodedData.data; // Lấy qrCodeBase64 từ dữ liệu quét được
+    if (isProcessing || modalState.show) {
+      // Nếu đang xử lý hoặc modal đang mở, không xử lý tiếp
+      return;
+    }
 
-      // Gọi API scanQRCode với qrCodeBase64
-      const response = await AttendanceService.scanQRCode(qrCodeBase64);
+    setIsProcessing(true);
+
+    try {
+      const qrCodeData = decodedData.data; // Lấy dữ liệu từ QR code
+
+      // Gọi API scanQRCode với qrCodeData
+      const response = await AttendanceService.scanQRCode(qrCodeData);
+
+      // Tìm bản ghi điểm danh hiện tại trong guestList
+      const existingAttendance = guestList.find(
+        (g) => g.ticketId === response.ticketId
+      );
+
+      let message = "";
+      let operation = "";
+
+      if (existingAttendance) {
+        if (existingAttendance.checkout === "Chưa ra") {
+          // Nếu chưa có giờ ra, đây là check-out
+          message = `Cập nhật giờ ra thành công cho khách với mã vé ${response.ticketId}`;
+          operation = "checkout";
+        } else {
+          // // Nếu đã có giờ ra, đây là check-in
+          // message = `Cập nhật giờ vào thành công cho khách với ticketId ${response.ticketId}`;
+          // operation = "checkin";
+        }
+      } else {
+        // Nếu không tìm thấy bản ghi nào, đây là check-in
+        message = `Cập nhật giờ vào thành công cho khách với mã vé ${response.ticketId}`;
+        operation = "checkin";
+      }
 
       const currentTime = new Date().toLocaleTimeString("vi-VN", {
         hour: "2-digit",
         minute: "2-digit",
       });
 
-      // Cập nhật danh sách khách
-      setGuestList((prevGuestList) =>
-        prevGuestList.map((g) =>
-          g.ticketId === response.ticketId
-            ? {
-                ...g,
-                checkout: currentTime,
-                duration: calculateDuration(g.checkIn, currentTime),
-              }
-            : g
-        )
-      );
-
       setModalState({
         show: true,
         type: "success",
-        message: `Cập nhật giờ ra thành công cho khách với ticketId ${response.ticketId}`,
+        message: message,
       });
+
+      await fetchAttendances();
     } catch (error) {
       console.error("Lỗi khi xử lý mã QR:", error);
+      let errorMsg = ERROR_MESSAGES.GENERIC_ERROR;
+      if (error.response && error.response.data) {
+        // Nếu backend trả về thông báo lỗi cụ thể
+        errorMsg = error.response.data;
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
       setModalState({
         show: true,
         type: "failure",
-        message:
-          typeof error === "string"
-            ? error
-            : error.message || ERROR_MESSAGES.INVALID_QR,
+        message: errorMsg,
       });
     }
   };
 
   const handleCloseModal = () => {
     setModalState({ ...modalState, show: false });
+    setIsProcessing(false);
   };
 
   const handleFileUpload = async (event) => {
@@ -118,14 +146,14 @@ const TicketCheck = () => {
         });
       }
     } catch (error) {
-      if (error.message && error.message.includes("No QR code found")) {
+      if (error && error.includes("No QR code found")) {
         setModalState({
           show: true,
           type: "failure",
           message: ERROR_MESSAGES.NO_QR_FOUND,
         });
       } else {
-        console.error("Lỗi khi quét mã QR từ ảnh:", error);
+        console.error(error);
         setModalState({
           show: true,
           type: "failure",
@@ -135,56 +163,33 @@ const TicketCheck = () => {
     }
   };
 
-  useEffect(() => {
-    // Lấy danh sách khách chưa có checkOut từ API khi component mount
-    const fetchAttendances = async () => {
-      try {
-        const attendances =
-          await AttendanceService.getAttendancesWithoutCheckOut();
-        const formattedAttendances = attendances.map((attendance) => ({
-          id: attendance.attendanceId,
-          checkIn: attendance.checkInTime
-            ? new Date(attendance.checkInTime).toLocaleTimeString("vi-VN", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : "Chưa vào",
-          checkout: attendance.checkOutTime
-            ? new Date(attendance.checkOutTime).toLocaleTimeString("vi-VN", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : "Chưa ra",
-          duration: attendance.checkOutTime
-            ? calculateDuration(
-                new Date(attendance.checkInTime).toLocaleTimeString("vi-VN", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }),
-                new Date(attendance.checkOutTime).toLocaleTimeString("vi-VN", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              )
-            : "Chưa ra",
-          studentId: attendance.studentId,
-          ticketId: attendance.ticketId,
-          penalty: attendance.penaltyAmount
-            ? `${attendance.penaltyAmount}đ`
-            : "0đ",
-        }));
-        setGuestList(formattedAttendances);
-      } catch (error) {
-        console.error(
-          "Lỗi khi lấy danh sách điểm danh chưa có checkOut:",
-          error
-        );
-        toast.error("Đã xảy ra lỗi khi lấy danh sách điểm danh.");
-      }
-    };
-
-    fetchAttendances();
+  const fetchAttendances = useCallback(async () => {
+    try {
+      const attendances =
+        await AttendanceService.getAttendancesWithoutCheckOut();
+      const formattedAttendances = attendances.map((attendance) => ({
+        id: attendance.id,
+        checkIn: attendance.checkInTime || "Chưa vào",
+        checkout: attendance.checkOutTime || "Chưa ra",
+        duration: attendance.checkOutTime
+          ? calculateDuration(attendance.checkInTime, attendance.checkOutTime)
+          : "Chưa ra",
+        studentId: attendance.studentId,
+        ticketId: attendance.ticketId,
+        penalty: attendance.penaltyAmount
+          ? `${attendance.penaltyAmount}đ`
+          : "0đ",
+      }));
+      setGuestList(formattedAttendances);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách điểm danh chưa có checkOut:", error);
+      toast.error("Đã xảy ra lỗi khi lấy danh sách điểm danh.");
+    }
   }, [calculateDuration]);
+
+  useEffect(() => {
+    fetchAttendances();
+  }, [fetchAttendances]);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -218,12 +223,12 @@ const TicketCheck = () => {
       <section className="row m-0 p-0 bg-white rounded-3 h-100">
         <div className="row g-0">
           <div className="col-lg-8 p-4">
-            <Card className="border-0">
+            <Card className="border-0 h-100">
               <Card.Body className="overflow-y-auto table-responsive custom-scrollbar">
                 <h5 className="text-uppercase fw-bold mb-4">
                   Bảng quản lý số lượng khách trong hồ
                 </h5>
-                <Table hover>
+                <Table hover className="flex-grow-1">
                   <thead>
                     <tr>
                       <th>Mã điểm danh</th>

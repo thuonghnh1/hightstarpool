@@ -8,6 +8,8 @@ public interface DiscountService {
 
     List<DiscountDTO> getAllDiscounts();
 
+    List<DiscountDTO> getActiveDiscounts();
+
     DiscountDTO getDiscountById(Long id);
 
     DiscountDTO createDiscount(DiscountDTO discountDTO);

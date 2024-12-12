@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import TableManagement from "../../components/common/TableManagement";
 import TicketService from "../../services/TicketService";
 import Page500 from "../../../common/pages/Page500";
-import { formatDateToISO, formatDateToDMY } from "../../utils/FormatDate";
+import {
+  formatDateTimeLocal,
+  formatDateTimeToDMY,
+  formatDateTimeToISO,
+} from "../../utils/FormatDate";
 import { Spinner, Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { Helmet } from "react-helmet-async";
@@ -10,6 +14,14 @@ import Select from "react-select";
 import studentService from "../../services/StudentService";
 import { NumericFormat } from "react-number-format";
 import TicketPriceModal from "./TicketPriceModal";
+
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+// Khai báo các plugin
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const TicketManagement = () => {
   // State để lưu trữ dữ liệu giảm giá từ API
@@ -46,25 +58,6 @@ const TicketManagement = () => {
     },
   ];
 
-  const listTicketStatus = [
-    {
-      value: "ACTIVE",
-      label: "Còn hiệu lực",
-    },
-    {
-      value: "EXPIRED",
-      label: "Đã hết hạn",
-    },
-    {
-      value: "USED",
-      label: "Đã sử dụng",
-    },
-    {
-      value: "CANCELED",
-      label: "Đã hủy",
-    },
-  ];
-
   // Mảng cột của bảng
   const ticketColumns = [
     { key: "id", label: "ID" },
@@ -87,9 +80,9 @@ const TicketManagement = () => {
     setLoadingPage(true);
     try {
       const data = await TicketService.getTickets();
-      setTicketData(data); // Lưu dữ liệu vào state
+      setTicketData(data);
     } catch (err) {
-      setErrorServer(err.message); // Lưu lỗi vào state nếu có
+      setErrorServer(err.message);
       console.log(err);
     } finally {
       setLoadingPage(false);
@@ -188,19 +181,28 @@ const TicketManagement = () => {
   };
 
   const calculateExpiryDate = (issueDate, ticketType) => {
+    // Chuyển đổi input datetime-local thành đối tượng Date
     const date = new Date(issueDate);
 
     if (ticketType === "ONETIME_TICKET") {
-      date.setDate(date.getDate()); // lấy ngày hiện tại
+      date.setHours(23, 59, 59, 999); // Cộng thêm giờ để hết ngày hiện tại
     } else if (ticketType === "WEEKLY_TICKET") {
       date.setDate(date.getDate() + 7); // Cộng thêm 7 ngày
     } else if (ticketType === "MONTHLY_TICKET") {
       date.setMonth(date.getMonth() + 1); // Cộng thêm 1 tháng
     } else if (ticketType === "STUDENT_TICKET") {
-      date.setMonth(date.getMonth() + 2); // Cộng thêm 2 tháng
+      date.setMonth(date.getMonth() + 6); // Cộng thêm 6 tháng
     }
 
-    return date.toISOString().split("T")[0]; // Trả về định dạng YYYY-MM-DD
+    // Format theo giờ địa phương (Việt Nam)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    const formattedDate = `${year}-${month}-${day}T${hours}:${minutes}`;
+    return formattedDate; // Trả về định dạng YYYY-MM-DDTHH:mm
   };
 
   // Hàm xử lý khi thay đổi giá trị input
@@ -223,6 +225,15 @@ const TicketManagement = () => {
       );
     }
 
+    if (key === "studentId") {
+      // Tự động set lại loại vé
+      updatedFormData.ticketType = "STUDENT_TICKET";
+      updatedFormData.expiryDate = calculateExpiryDate(
+        formData.issueDate,
+        "STUDENT_TICKET"
+      );
+    }
+
     setFormData(updatedFormData);
     validateField(key, value); // Gọi validateField nếu cần
   };
@@ -241,10 +252,9 @@ const TicketManagement = () => {
   const handleReset = () => {
     setFormData({
       qrCodeBase64: "",
-      issueDate: new Date().toISOString().split("T")[0], // Ngày hiện tại
+      issueDate: formatDateTimeLocal(), // Ngày hiện tại
       expiryDate: "",
       ticketType: "",
-      status: "ACTIVE",
       ticketPrice: "",
     });
     handleResetStatus();
@@ -255,8 +265,8 @@ const TicketManagement = () => {
   const handleEdit = (item) => {
     setFormData({
       ...item,
-      issueDate: formatDateToISO(item.issueDate),
-      expiryDate: formatDateToISO(item.expiryDate),
+      issueDate: formatDateTimeToISO(item.issueDate),
+      expiryDate: formatDateTimeToISO(item.expiryDate),
     });
     updateStatus({ isEditing: true });
     setErrorFields({});
@@ -278,8 +288,8 @@ const TicketManagement = () => {
         // Đổi định dạng ngày trước khi lưu vào mảng
         const formattedTicket = {
           ...updatedTicket,
-          issueDate: formatDateToDMY(updatedTicket.issueDate),
-          expiryDate: formatDateToDMY(updatedTicket.expiryDate),
+          issueDate: formatDateTimeToDMY(updatedTicket.issueDate),
+          expiryDate: formatDateTimeToDMY(updatedTicket.expiryDate),
         };
 
         // Cập nhật state ticketData với ticket đã được sửa
@@ -296,8 +306,8 @@ const TicketManagement = () => {
         // Đổi định dạng ngày trước khi lưu vào mảng
         const formattedTicket = {
           ...newTicket,
-          issueDate: formatDateToDMY(newTicket.issueDate),
-          expiryDate: formatDateToDMY(newTicket.expiryDate),
+          issueDate: formatDateTimeToDMY(newTicket.issueDate),
+          expiryDate: formatDateTimeToDMY(newTicket.expiryDate),
         };
 
         // Cập nhật mảng ticketData với ticket vừa được thêm
@@ -399,7 +409,7 @@ const TicketManagement = () => {
               Ngày Phát Hành <span className="text-danger">(*)</span>
             </Form.Label>
             <Form.Control
-              type="date"
+              type="datetime-local"
               name="issueDate"
               value={formData.issueDate}
               onChange={(e) => handleInputChange("issueDate", e.target.value)}
@@ -418,7 +428,7 @@ const TicketManagement = () => {
               Ngày Hết Hạn <span className="text-danger">(*)</span>
             </Form.Label>
             <Form.Control
-              type="date"
+              type="datetime-local"
               name="expiryDate"
               value={formData.expiryDate}
               onChange={(e) => handleInputChange("expiryDate", e.target.value)}
@@ -458,31 +468,6 @@ const TicketManagement = () => {
           </div>
         )}
 
-        {statusFunction.isEditing && (
-          <div className="col-md-6 mb-3">
-            <Form.Group controlId="formStatus">
-              <Form.Label>
-                Trạng thái vé<span className="text-danger">(*)</span>
-              </Form.Label>
-              <Form.Select
-                name="status"
-                value={formData.status}
-                onChange={(e) => handleInputChange("status", e.target.value)}
-                isInvalid={!!errorFields.status}
-                required
-              >
-                {listTicketStatus.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </Form.Select>
-              <Form.Control.Feedback type="invalid">
-                {errorFields.status}
-              </Form.Control.Feedback>
-            </Form.Group>
-          </div>
-        )}
         {statusFunction.isEditing && (
           <div className="col-md-12 my-1 text-center">
             <img

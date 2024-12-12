@@ -15,6 +15,18 @@ const getDiscounts = async () => {
   }));
 };
 
+// Hàm lấy tất cả giảm giá
+const getActiveDiscounts = async () => {
+  const response = await axiosInstance.get(`${API_URL}/active`);
+  const discounts = response.data;
+
+  return discounts.map((discount) => ({
+    ...discount,
+    startDate: formatDateTimeToDMY(discount.startDate),
+    endDate: formatDateTimeToDMY(discount.endDate),
+  }));
+};
+
 // Hàm lấy một giảm giá theo ID
 const getDiscountById = async (id) => {
   const response = await axiosInstance.get(`${API_URL}/${id}`);
@@ -46,6 +58,7 @@ const deleteDiscount = async (id) => {
 
 const DiscountService = {
   getDiscounts,
+  getActiveDiscounts,
   getDiscountById,
   createDiscount,
   updateDiscount,

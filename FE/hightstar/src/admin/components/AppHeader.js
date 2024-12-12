@@ -33,29 +33,36 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
   // Hàm fetch thông báo
   const fetchNotification = useCallback(async () => {
     try {
-      const notificationsForAll =
-        await await NotificationService.getNotificationsByRecipientType("ALL");
+      if (user) {
+        const notificationsForAll =
+          await await NotificationService.getNotificationsByRecipientType(
+            "ALL"
+          );
 
-      const commonNotifications =
-        await await NotificationService.getNotificationsByRecipientType(
-          user.role
+        const commonNotifications =
+          await await NotificationService.getNotificationsByRecipientType(
+            user.role
+          );
+
+        //  kết hợp 2 mảng thông báo lại
+        const allNotifications = [
+          ...notificationsForAll,
+          ...commonNotifications,
+        ];
+        setNotifications(allNotifications);
+
+        const individualNotifications =
+          await NotificationService.getNotificationsByUserId(user.userId);
+
+        const notificationsWithIcon = individualNotifications.map(
+          (notification) => ({
+            ...notification,
+            imgSrc: iconBell,
+            createdAt: dayjs(notification.createdAt).fromNow(),
+          })
         );
-
-      //  kết hợp 2 mảng thông báo lại
-      const allNotifications = [...notificationsForAll, ...commonNotifications];
-      setNotifications(allNotifications);
-
-      const individualNotifications =
-        await NotificationService.getNotificationsByUserId(user.userId);
-
-      const notificationsWithIcon = individualNotifications.map(
-        (notification) => ({
-          ...notification,
-          imgSrc: iconBell,
-          createdAt: dayjs(notification.createdAt).fromNow(),
-        })
-      );
-      setRoleNotifications(notificationsWithIcon);
+        setRoleNotifications(notificationsWithIcon);
+      }
     } catch (error) {
       console.error("Lỗi khi lấy thông báo:", error);
     }

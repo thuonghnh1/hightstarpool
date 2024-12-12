@@ -59,7 +59,8 @@ public class AttendanceController {
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @PostMapping("/scan")
     public ResponseEntity<AttendanceDTO> scanQRCode(@RequestBody QRCodeValidationRequest request) {
-        AttendanceDTO attendance = attendanceService.scanQRCode(request.getQrCodeBase64());
+        // System.out.println("-------"+ request.getTicketCode());
+        AttendanceDTO attendance = attendanceService.scanQRCode(request.getTicketCode());
         return ResponseEntity.ok(attendance);
     }
 

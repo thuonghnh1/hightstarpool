@@ -26,7 +26,7 @@ public enum ErrorCode {
     TIMESLOT_NOT_FOUND("TIMESLOT_NOT_FOUND"), // Không tìm thấy suất học
     ATTENDANCE_NOT_FOUND("ATTENDANCE_NOT_FOUND"), // không tìm thấy điểm danh
     NOTIFICATION_NOT_FOUND("NOTIFICATION_NOT_FOUND"), // không tìm thấy thông báo
-    REVIEW_NOT_FOUND("REVIEW_NOT_FOUND"), // không tìm thấy thông báo
+    REVIEW_NOT_FOUND("REVIEW_NOT_FOUND"), // không tìm thấy đánh giá
     TICKET_PRICE_NOT_FOUND("TICKET_PRICE_NOT_FOUND"), // không tìm thấy giá vé
 
     TICKET_EXPIRED("TICKET_EXPIRED"), // Vé đã hết hạn

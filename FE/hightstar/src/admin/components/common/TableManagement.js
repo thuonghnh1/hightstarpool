@@ -288,6 +288,7 @@ const TableManagement = ({
         );
 
       case "total":
+      case "penaltyAmount":
       case "price":
         const formattedPrice = new Intl.NumberFormat("vi-VN", {
           style: "currency",
@@ -356,7 +357,10 @@ const TableManagement = ({
             )}
           </span>
         );
-
+      case "checkInTime":
+        return item[column.key] || "Chưa vào";
+      case "checkOutTime":
+        return item[column.key] || "Chưa ra";
       case "qrCodeBase64":
         return (
           <img
