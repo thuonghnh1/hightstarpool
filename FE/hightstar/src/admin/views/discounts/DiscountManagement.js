@@ -25,6 +25,13 @@ const DiscountManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
   const [errorServer, setErrorServer] = useState(null);
+  const button = {
+    btnAdd: true,
+    btnEdit: true,
+    btnDelete: true,
+    btnDetail: false,
+    btnSetting: false,
+  };
 
   // Mảng cột của bảng
   const discountColumns = [
@@ -379,6 +386,7 @@ const DiscountManagement = () => {
             isLoading={isLoading}
             statusFunction={statusFunction}
             onResetStatus={handleResetStatus}
+            buttonCustom={button}
           />
         </section>
       )}

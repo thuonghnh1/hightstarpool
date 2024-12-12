@@ -19,7 +19,13 @@ const TrainerManagement = () => {
   const [loadingPage, setLoadingPage] = useState(false);
   const [errorServer, setErrorServer] = useState(null);
   const [imageFile, setImageFile] = useState(null); // State lưu trữ ảnh upload
-
+  const button = {
+    btnAdd: true,
+    btnEdit: true,
+    btnDelete: true,
+    btnDetail: false,
+    btnSetting: false,
+  };
   const trainerColumns = [
     { key: "id", label: "ID" },
     { key: "avatar", label: "Ảnh đại diện" },
@@ -515,6 +521,7 @@ const TrainerManagement = () => {
             isLoading={isLoading}
             statusFunction={statusFunction}
             onResetStatus={handleResetStatus}
+            buttonCustom={button}
           />
         </section>
       )}

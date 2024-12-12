@@ -29,6 +29,13 @@ const AttendanceManagement = () => {
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
   const [errorServer, setErrorServer] = useState(null);
   const [listTicketOption, setListTicketOption] = useState([]);
+  const button = {
+    btnAdd: true,
+    btnEdit: true,
+    btnDelete: true,
+    btnDetail: false,
+    btnSetting: false,
+  };
   const listTicketTypeOption = [
     {
       value: "ONETIME_TICKET",
@@ -83,11 +90,10 @@ const AttendanceManagement = () => {
       // Chuyển đổi danh sách vé đã lọc thành định dạng phù hợp cho Select
       const ticketOptions = tickets.map((ticket) => ({
         value: ticket.id,
-        label: `#${ticket.id} - ${
-          listTicketTypeOption.find(
-            (option) => option.value === ticket.ticketType
-          )?.label
-        }`,
+        label: `#${ticket.id} - ${listTicketTypeOption.find(
+          (option) => option.value === ticket.ticketType
+        )?.label
+          }`,
       }));
       // Cập nhật trạng thái danh sách tùy chọn cho Select
       setListTicketOption(ticketOptions);
@@ -416,6 +422,7 @@ const AttendanceManagement = () => {
             isLoading={isLoading}
             statusFunction={statusFunction}
             onResetStatus={handleResetStatus}
+            buttonCustom={button}
           />
         </section>
       )}

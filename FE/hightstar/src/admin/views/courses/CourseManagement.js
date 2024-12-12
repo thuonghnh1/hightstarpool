@@ -21,7 +21,13 @@ const CourseManagement = () => {
   const [isLoading, setIsLoading] = useState(false); // State để xử lý trạng thái tải dữ liệu
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
   const [errorServer, setErrorServer] = useState(null);
-
+  const button = {
+    btnAdd: true,
+    btnEdit: true,
+    btnDelete: true,
+    btnDetail: false,
+    btnSetting: false,
+  };
   // Mảng cột của bảng
   const courseColumns = [
     { key: "id", label: "Mã khóa học" },
@@ -75,7 +81,7 @@ const CourseManagement = () => {
       case "maxStudents":
         if (value === "" || value === null) {
           error = "Số lượng học viên tối đa không được để trống.";
-        } else if (isNaN(value) || value <= 0) {
+} else if (isNaN(value) || value <= 0) {
           error = "Số lượng học viên tối đa phải là một số dương.";
         }
         break;
@@ -166,7 +172,7 @@ const CourseManagement = () => {
   };
 
   // Hàm reset form khi thêm mới
-  const handleReset = () => {
+const handleReset = () => {
     setFormData({
       courseName: "",
       image: "",
@@ -343,7 +349,7 @@ const CourseManagement = () => {
             </div>
             <div className="mb-3 p-0">
               <Form.Group controlId="formPrice">
-                <Form.Label>Giá khóa học</Form.Label>
+              <Form.Label>Giá khóa học</Form.Label>
                 <NumericFormat
                   thousandSeparator={true}
                   suffix=" VNĐ"
@@ -420,7 +426,7 @@ const CourseManagement = () => {
           <TableManagement
             data={courseData} // Đổi thành courseData
             columns={courseColumns} // Đổi thành courseColumns
-            title={"Quản lý khóa học"} // Đổi tiêu đề thành "Quản lý khóa học"
+title={"Quản lý khóa học"} // Đổi tiêu đề thành "Quản lý khóa học"
             defaultColumns={defaultColumns} // Truyền mảng cột đã lọc
             modalContent={modalContent}
             handleReset={handleReset}
@@ -430,6 +436,7 @@ const CourseManagement = () => {
             isLoading={isLoading}
             statusFunction={statusFunction}
             onResetStatus={handleResetStatus}
+            buttonCustom={button}
           />
         </section>
       )}

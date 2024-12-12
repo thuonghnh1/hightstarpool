@@ -41,6 +41,13 @@ const TicketManagement = () => {
   const [errorServer, setErrorServer] = useState(null);
   const [listStudentOption, setListStudentOption] = useState([]);
   const [showModalTicketPrice, setShowModalTicketPrice] = useState(false);
+  const button = {
+    btnAdd: true,
+    btnEdit: true,
+    btnDelete: true,
+    btnDetail: false,
+    btnSetting: true,
+  };
   const listTicketTypeOption = [
     {
       value: "ONETIME_TICKET",
@@ -91,8 +98,9 @@ const TicketManagement = () => {
     }
 
     try {
-      let students = await studentService.getStudents();
+      const students = await studentService.getStudents();
       // Chuyển đổi danh sách học viên đã lọc thành định dạng phù hợp cho Select
+      if (students.length === 0) { return; }
       const studentOptions = students.map((student) => ({
         value: student.id,
         label: `#${student.id} - ${student.fullName}`,
@@ -100,7 +108,6 @@ const TicketManagement = () => {
       // Cập nhật trạng thái danh sách tùy chọn cho Select
       setListStudentOption(studentOptions);
     } catch (error) {
-      toast.error("Lỗi khi lấy danh sách học viên");
       console.log(error);
     }
   };
@@ -555,6 +562,7 @@ const TicketManagement = () => {
             statusFunction={statusFunction}
             onResetStatus={handleResetStatus}
             onSetting={() => setShowModalTicketPrice(true)}
+            buttonCustom={button}
           />
         </section>
       )}

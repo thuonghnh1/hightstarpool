@@ -23,7 +23,13 @@ const NotificationManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
   const [errorServer, setErrorServer] = useState(null);
-
+  const button = {
+    btnAdd: true,
+    btnEdit: true,
+    btnDelete: true,
+    btnDetail: false,
+    btnSetting: false,
+  };
   // Mảng cột của bảng
   const notificationColumns = [
     { key: "id", label: "Mã thông báo" },
@@ -315,6 +321,7 @@ const NotificationManagement = () => {
             isLoading={isLoading}
             statusFunction={statusFunction}
             onResetStatus={handleResetStatus}
+            buttonCustom={button}
           />
         </section>
       )}

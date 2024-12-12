@@ -27,7 +27,7 @@ const OrderManagement = () => {
     btnEdit: true,
     btnDelete: false,
     btnDetail: true,
-    btnFilter: true,
+    btnSetting: false,
   };
   // Mảng cột của bảng
   const orderColumns = [
