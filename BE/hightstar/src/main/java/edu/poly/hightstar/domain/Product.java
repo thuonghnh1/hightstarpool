@@ -1,5 +1,6 @@
 package edu.poly.hightstar.domain;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -37,8 +38,8 @@ public class Product {
     private Integer stock;
     @Column(nullable = false)
     private double discount;
-    private Date createdAt;
-    private Date updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "categoryId", referencedColumnName = "categoryId")
