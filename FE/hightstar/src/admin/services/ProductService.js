@@ -22,24 +22,41 @@ const getProductById = async (id) => {
   }
 };
 
-// Hàm tạo sản phẩm mới
-const createProduct = async (productData) => {
+const createProduct = async (productData, file) => {
+  const formData = new FormData();
+  formData.append("product", JSON.stringify(productData));
+  formData.append("file", file);
+
   try {
-    const response = await axiosInstance.post(API_URL, productData);
-    return response.data; // Trả về sản phẩm đã tạo
+    const response = await axiosInstance.post(API_URL, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
   } catch (error) {
-    console.error("Lỗi khi thêm mới sản phẩm:", error);
+    console.error("Lỗi khi thêm mới khóa học:", error);
     throw error;
   }
 };
 
-// Hàm cập nhật sản phẩm
-const updateProduct = async (id, productData) => {
+// Hàm cập nhật khóa học
+const updateProduct = async (id, productData, file) => {
+  const formData = new FormData();
+  formData.append("product", JSON.stringify(productData));
+  if (file) {
+    formData.append("file", file);
+  }
+
   try {
-    const response = await axiosInstance.put(`${API_URL}/${id}`, productData);
-    return response.data; // Trả về sản phẩm đã cập nhật
+    const response = await axiosInstance.put(`${API_URL}/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
   } catch (error) {
-    console.error(`Lỗi khi cập nhật sản phẩm với ID: ${id}`, error);
+    console.error(`Lỗi khi cập nhật khóa học với ID: ${id}`, error);
     throw error;
   }
 };

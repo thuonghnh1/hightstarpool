@@ -50,12 +50,14 @@ const updateCategory = async (id, categoryData) => {
 // Hàm xóa danh mục
 const deleteCategory = async (id) => {
   try {
-    await axiosInstance.delete(`${API_URL}/${id}`);
+    const response = await axiosInstance.delete(`${API_URL}/${id}`);
+    return response.data; // Trả về thông tin phản hồi khi xóa thành công
   } catch (error) {
     console.error(`Lỗi khi xóa danh mục với ID: ${id}`, error);
-    throw error;
+    throw error; // Ném lỗi để các component gọi hàm này có thể xử lý
   }
 };
+
 
 // Export các hàm dưới dạng object
 const CategoryService = {

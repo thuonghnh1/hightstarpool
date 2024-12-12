@@ -1,8 +1,10 @@
 package edu.poly.hightstar.domain;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,14 +40,18 @@ public class Product {
     private Integer stock;
     @Column(nullable = false)
     private double discount;
+    @CreationTimestamp
+    @Column(updatable = false)
     private LocalDateTime createdAt;
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    // Mối quan hệ Many-to-One với Category
     @ManyToOne
-    @JoinColumn(name = "categoryId", referencedColumnName = "categoryId")
+    @JoinColumn(name = "category_id", referencedColumnName = "categoryId", nullable = false)
     private Category category;
 
     // Mối quan hệ One-to-Many với Review
     @OneToMany(mappedBy = "product")
-    private List<Review> reviews;  // Trường này sẽ lưu trữ danh sách các đánh giá liên quan tới sản phẩm
+    private List<Review> reviews; // Trường này sẽ lưu trữ danh sách các đánh giá liên quan tới sản phẩm
 }
