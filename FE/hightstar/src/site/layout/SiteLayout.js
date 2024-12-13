@@ -12,6 +12,7 @@ import CourseDetail from "../views/courses/CourseDetail";
 import { MyProfile } from "../../admin/views";
 import PrivateRoute from "../../common/PrivateRoute";
 import ShoppingCart from "../views/shopping-carts/ShoppingCart";
+import Product from "../views/product/Product";
 
 const SiteLayout = () => {
   return (
@@ -24,6 +25,7 @@ const SiteLayout = () => {
         <Route path="/course" element={<Course />} />
         <Route path="/course/:courseId" element={<CourseDetail />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/product" element={<Product />} />
 
         <Route
           path="/my-profile"
