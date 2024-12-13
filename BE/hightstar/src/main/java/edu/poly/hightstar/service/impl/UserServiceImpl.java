@@ -71,6 +71,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public LoginResponse loginUser(LoginDTO loginDTO, HttpServletResponse response) {
         Optional<User> userOptional = userRepository.findByUsername(loginDTO.getUsername());
         if (!userOptional.isPresent()
@@ -102,6 +103,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public boolean resetPassword(String phoneNumber, String newPassword) {
         // Tìm người dùng theo số điện thoại
         Optional<User> userOptional = userRepository.findByUsername(phoneNumber);
@@ -120,6 +122,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream().map(user -> {
             UserDTO dto = new UserDTO();
@@ -143,6 +146,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public boolean verifyPassword(Long userId, String password) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (!userOptional.isPresent()) {
@@ -155,6 +159,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public boolean changePassword(Long userId, String password, String newPassword) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (!userOptional.isPresent()) {
@@ -170,6 +175,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDTO getUserByUsername(String username) {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isPresent()) {
@@ -187,6 +193,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDTO createUser(UserDTO userDto) {
         if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
             throw new AppException("Email đã tồn tại!", ErrorCode.EMAIL_ALREADY_EXISTS);
@@ -221,6 +228,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDTO updateUser(Long id, UserDTO userDto) {
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isPresent()) {

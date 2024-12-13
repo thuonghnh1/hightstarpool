@@ -5,12 +5,16 @@ import CourseManagement from "./courses/CourseManagement";
 import StudentManagement from "./students/StudentManagement";
 import DiscountManagement from "./discounts/DiscountManagement";
 import TrainerManagement from "./trainers/TrainerManagement";
+import ReviewManagement from "./reviews/ReviewManagement";
 import SalesManagement from "./sales/SalesManagement";
 import OrderManagement from "./orders/OrderManagement";
 import TimeSlotManagement from "./timeslots/TimeSlotManagement";
 import AttendanceManagement from "./attendances/AttendanceManagement";
 import NotificationManagement from "./notification/NotificationManagement";
 import MyProfile from "./profiles/myProfile/MyProfile";
+import CategoryManagement from "./category/CategoryManagement"
+import ProductManagement from "./product/ProductManagement"
+
 
 export {
   Dashboard,
@@ -19,6 +23,7 @@ export {
   TrainerManagement,
   TicketManagement,
   StudentManagement,
+  ReviewManagement,
   DiscountManagement,
   SalesManagement,
   OrderManagement,
@@ -26,4 +31,6 @@ export {
   AttendanceManagement,
   NotificationManagement,
   MyProfile,
+  CategoryManagement,
+  ProductManagement, 
 };

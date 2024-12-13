@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api") // Đường dẫn công khai cho các phương thức GET
 @RequiredArgsConstructor
-public class ReviewController {
+public class ReviewSiteController {
 
     private final ReviewService reviewService;
     private final CloudinaryService cloudinaryService;
@@ -52,12 +51,8 @@ public class ReviewController {
     }
 
     @GetMapping("/public/reviews")
-    public ResponseEntity<List<ReviewDTO>> getAllReviews(
-            @RequestParam(required = false) Long productId,
-            @RequestParam(required = false) Long courseId,
-            @RequestParam(required = false) Long trainerId) {
-        List<ReviewDTO> reviews = reviewService.getAllReviews(productId, courseId, trainerId);
-        return ResponseEntity.ok(reviews);
+    public List<ReviewDTO> getAllReviews() {
+        return reviewService.getAllReviews();
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER', 'USER')")

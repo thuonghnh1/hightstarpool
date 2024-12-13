@@ -21,6 +21,13 @@ const OrderDetailManagement = ({ orderId }) => {
     }
   };
 
+  const nameTicketType = {
+    ONETIME_TICKET: "Vé dùng 1 lần",
+    WEEKLY_TICKET: "Vé tuần",
+    MONTHLY_TICKET: "Vé tháng",
+    STUDENT_TICKET: "Vé học viên",
+  };
+
   return (
     <>
       <Helmet>
@@ -39,19 +46,21 @@ const OrderDetailManagement = ({ orderId }) => {
         <tbody>
           {details.map((detail) => (
             <tr key={detail.id}>
-              <td>{detail.id}</td>
-              <td>
+              <td className="align-middle">{detail.id}</td>
+              <td className="align-middle">
                 <img
-                  src={detail.image || "default-image-path.jpg"} // Kiểm tra nếu không có image thì sử dụng mặc định
-                  alt={detail.name}
+                  src={detail.image || "/assets/img/defaultOrderDetail.png"} // Kiểm tra nếu không có image thì sử dụng mặc định
+                  alt={nameTicketType[detail.name] || detail.name}
                   className="object-fit-cover rounded-circle"
                   style={{ width: "45px", height: "45px" }}
                 />
               </td>
-              <td>{detail.name}</td>
-              <td>{detail.quantity}</td>
-              <td>
-              {detail.unitPrice
+              <td className="align-middle">
+                {nameTicketType[detail.name] || detail.name}
+              </td>
+              <td className="align-middle">{detail.quantity}</td>
+              <td className="align-middle">
+                {detail.unitPrice
                   ? new Intl.NumberFormat("vi-VN").format(detail.unitPrice) +
                     "đ"
                   : "N/A"}

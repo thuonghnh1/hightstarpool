@@ -37,6 +37,21 @@ export function formatDateTimeLocal() {
   return `${year}-${month}-${day}T${hours}:${minutes}`; // trả về định dạng yyyy-MM-ddThh:mm
 }
 
+export function formatTime(inputTime) {
+  if (!inputTime) return null; // Kiểm tra chuỗi đầu vào hợp lệ
+
+  // Tách chuỗi theo ký tự `:` và `.`
+  const [timePart] = inputTime.split("."); // Loại bỏ phần mili-giây
+  const [hours, minutes, seconds] = timePart.split(":");
+
+  // Đảm bảo mỗi thành phần luôn có 2 chữ số
+  const formattedHours = hours.padStart(2, "0");
+  const formattedMinutes = minutes.padStart(2, "0");
+  const formattedSeconds = seconds.padStart(2, "0");
+
+  return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+}
+
 export function getCurrentTime() {
   const now = new Date();
   const hours = now.getHours().toString().padStart(2, "0");

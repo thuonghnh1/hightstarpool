@@ -13,10 +13,14 @@ public interface NotificationService {
 
     List<NotificationDTO> getNotificationsByRecipientType(RecipientType recipientType);
 
+    List<NotificationDTO> getNotificationsByUserId(Long userId);
+
     NotificationDTO createNotification(NotificationDTO notificationDTO);
 
     NotificationDTO updateNotification(Long id, NotificationDTO notificationDTO);
 
     void deleteNotification(Long id);
+
+    boolean updateNotificationStatus(Long notificationId, Boolean status);
 
 }

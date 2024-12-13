@@ -16,5 +16,5 @@ public interface ReviewService {
 
     List<ReviewDTO> getReviewsByTrainerId(Long trainerId);
 
-    List<ReviewDTO> getAllReviews(Long productId, Long courseId, Long trainerId);
+    List<ReviewDTO> getAllReviews();
 }

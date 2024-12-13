@@ -22,6 +22,7 @@ const TableManagement = ({
   onViewDetail,
   handleSaveItem,
   onDelete,
+  onSetting,
   isLoading,
   buttonCustom,
   onResetStatus,
@@ -48,7 +49,7 @@ const TableManagement = ({
       btnEdit: true,
       btnDelete: true,
       btnDetail: false,
-      btnFilter: true,
+      btnSetting: true,
     };
 
     // Sử dụng buttonCustom nếu có, nếu không thì lấy defaultButtonConfig
@@ -101,7 +102,7 @@ const TableManagement = ({
             statusText = "Chưa xem";
             break;
           case false:
-            statusClass = "text-bg-muted";
+            statusClass = "text-bg-secondary";
             statusText = "Đã xem";
             break;
           default:
@@ -131,7 +132,51 @@ const TableManagement = ({
             }}
           />
         );
-
+      case "images":
+        return item[column.key] ? (
+          <div
+            className="py-3"
+            style={{
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              gap: "0",
+            }}
+          >
+            {item[column.key]
+              .split(",") // Tách chuỗi thành mảng các URL
+              .map((image, index) => (
+                <img
+                  key={index}
+                  src={image.trim() || defaultImage} // Xóa khoảng trắng dư thừa
+                  alt={`Ảnh ${index + 1}`}
+                  className="rounded-circle"
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    position: "absolute",
+                    left: `${index * 10}px`, // Dịch chuyển một chút sang phải
+                    zIndex: index, // Mỗi ảnh có z-index tương ứng
+                    cursor: "pointer",
+                    transition: "transform 0.2s, z-index 0.2s",
+                    border: "2px solid white", // Tạo đường viền giữa các ảnh
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.zIndex = 100; // Đưa ảnh lên trên cùng khi hover
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.zIndex = index; // Trả lại z-index ban đầu khi không hover
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Ngăn chặn sự kiện lan truyền
+                    handleImageClick(image.trim());
+                  }}
+                />
+              ))}
+          </div>
+        ) : (
+          "Không có"
+        );
       case "rating":
         const stars = [];
 
@@ -194,15 +239,52 @@ const TableManagement = ({
           </span>
         );
 
-      case "ticketType":
-        const ticketTypeLabels = {
-          ONETIME_TICKET: "Vé một lần",
-          WEEKLY_TICKET: "Vé tuần",
-          MONTHLY_TICKET: "Vé tháng",
+      case "paymentMethod":
+        const paymentMethodLabels = {
+          CASH: "Tiền mặt",
+          CREDIT_CARD: "Thẻ tính dụng",
+          BANK_TRANSFER: "Chuyển khoản",
+          E_WALLET: "Ví điện tử",
+          UNKNOWN: "Chưa xác định",
         };
         return (
           <span className={`rounded-3 px-2 py-1`}>
-            {ticketTypeLabels[item.ticketType]}
+            {paymentMethodLabels[item.paymentMethod]}
+          </span>
+        );
+
+      case "ticketType":
+        let ticketTypeClass = "";
+        let ticketTypeText = "";
+
+        switch (item.ticketType) {
+          case "ONETIME_TICKET":
+            ticketTypeClass = "text-bg-info"; // Vé cơ bản
+            ticketTypeText = "Vé một lần";
+            break;
+          case "WEEKLY_TICKET":
+            ticketTypeClass = "text-bg-primary"; // Vé tuần
+            ticketTypeText = "Vé tuần";
+            break;
+          case "MONTHLY_TICKET":
+            ticketTypeClass = "text-bg-warning"; // Vé tháng (ưu đãi cao)
+            ticketTypeText = "Vé tháng";
+            break;
+          case "STUDENT_TICKET":
+            ticketTypeClass = "text-bg-danger"; // Vé học viên
+            ticketTypeText = "Vé học viên";
+            break;
+          default:
+            ticketTypeClass = "text-bg-muted"; // Trường hợp mặc định
+            ticketTypeText = "Không xác định";
+        }
+
+        return (
+          <span
+            className={`rounded-3 fw-bold px-2 py-1 ${ticketTypeClass}`}
+            style={{ fontSize: "13px" }}
+          >
+            {ticketTypeText}
           </span>
         );
 
@@ -242,6 +324,8 @@ const TableManagement = ({
         );
 
       case "total":
+      case "penaltyAmount":
+      case "discountedPrice":
       case "price":
         const formattedPrice = new Intl.NumberFormat("vi-VN", {
           style: "currency",
@@ -251,7 +335,8 @@ const TableManagement = ({
         return <span>{formattedPrice}</span>;
 
       case "percentage":
-        return <span>{item.percentage} %</span>;
+      case "discount":
+        return <span>{item[column.key]} %</span>;
       case "orderDate":
         return <span>{formatDateTimeToDMY(item.orderDate)}</span>;
       case "recipientType":
@@ -309,6 +394,26 @@ const TableManagement = ({
               </>
             )}
           </span>
+        );
+      case "checkInTime":
+        return item[column.key] || "Chưa vào";
+      case "checkOutTime":
+        return item[column.key] || "Chưa ra";
+      case "qrCodeBase64":
+        return (
+          <img
+            src={`data:image/png;base64,${item.qrCodeBase64}`}
+            alt="QR Code"
+            width={45}
+            height={45}
+            style={{ objectFit: "cover", cursor: "pointer" }}
+            onClick={(e) => {
+              e.stopPropagation(); // ngăn chặn sự kiện lan truyền sang cha.
+              handleImageClick(
+                `data:image/png;base64,${item.qrCodeBase64}` || defaultImage
+              );
+            }}
+          />
         );
       default:
         return item[column.key] || "Không có"; // Trả về giá trị mặc định nếu không cần custom
@@ -449,9 +554,12 @@ const TableManagement = ({
           />
         </div>
         <div className="col-lg-4 col-12 d-flex justify-content-lg-end mt-3 mt-lg-0">
-          {handleRenderBtn().btnFilter && (
-            <button className="btn btn-success me-2 text-nowrap">
-              <i className="bi bi-filter"></i> Lọc
+          {handleRenderBtn().btnSetting && (
+            <button
+              className="btn btn-success me-2 text-nowrap"
+              onClick={onSetting}
+            >
+              <i className="bi bi-gear me-2"></i>Cài đặt
             </button>
           )}
           {handleRenderBtn().btnAdd && (
@@ -539,7 +647,7 @@ const TableManagement = ({
                           {renderCustomCell(column, item)}
                         </td>
                       ))}
-                    <td className="align-middle">
+                    <td className="align-middle text-end">
                       <button
                         className="btn btn__show p-1"
                         onClick={(e) => {
@@ -567,12 +675,12 @@ const TableManagement = ({
                               .map((column) => (
                                 <li
                                   key={column.key}
-                                  className="py-2 w-75 m-0 text-truncate"
+                                  className="py-2 w-75 m-0 text-truncate d-flex align-items-center"
                                 >
                                   <strong className="me-3 p-0">
                                     {column.label}:
                                   </strong>
-                                  <span className=" p-0">
+                                  <span className="p-0">
                                     {renderCustomCell(column, item)}
                                   </span>
                                 </li>

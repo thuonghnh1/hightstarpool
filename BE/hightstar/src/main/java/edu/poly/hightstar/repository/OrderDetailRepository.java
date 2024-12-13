@@ -10,4 +10,5 @@ import edu.poly.hightstar.domain.OrderDetail;
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
     List<OrderDetail> findByOrderOrderId(Long orderId);
+    boolean existsByTicketTicketId(Long ticketId);
 }

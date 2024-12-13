@@ -92,7 +92,7 @@ public class TrainerServiceImpl implements TrainerService {
         // Tìm Trainer theo id
         Trainer trainer = trainerRepository.findById(trainerId)
                 .orElseThrow(() -> new AppException("Không tìm thấy HLV này trong hệ thống!",
-                ErrorCode.TRAINER_NOT_FOUND));
+                        ErrorCode.TRAINER_NOT_FOUND));
         // Kiểm tra số điện thoại đã tồn tại
         if (isPhoneNumberExistsForUpdate(trainerDTO.getPhoneNumber(), trainerDTO.getUserId())) {
             throw new AppException("Số điện thoại này đã được sử dụng!",
@@ -113,15 +113,15 @@ public class TrainerServiceImpl implements TrainerService {
         // Cập nhật User và UserProfile liên quan
         User user = userRepository.findById(trainerDTO.getUserId())
                 .orElseThrow(() -> new AppException(
-                "Không tìm thấy tài khoản của HLV này trong hệ thống!",
-                ErrorCode.USER_NOT_FOUND));
+                        "Không tìm thấy tài khoản của HLV này trong hệ thống!",
+                        ErrorCode.USER_NOT_FOUND));
         user.setEmail(trainerDTO.getEmail());
         user.setStatus(trainerDTO.getStatus());
         userRepository.save(user);
 
         UserProfile userProfile = userProfileRepository.findByUser_UserId(trainerDTO.getUserId())
                 .orElseThrow(() -> new AppException("Không tìm thấy hồ sơ của HLV này trong hệ thống!",
-                ErrorCode.USER_PROFILE_NOT_FOUND));
+                        ErrorCode.USER_PROFILE_NOT_FOUND));
         userProfile.setFullName(trainerDTO.getFullName());
         userProfile.setPhoneNumber(trainerDTO.getPhoneNumber());
         userProfile.setGender(trainerDTO.isGender());
@@ -132,6 +132,7 @@ public class TrainerServiceImpl implements TrainerService {
     }
 
     @Override
+    @Transactional
     public List<TrainerDTO> getAllTrainers() {
 
         // Lấy tất cả các Trainer từ repository và chuyển đổi sang TrainerDto
@@ -142,24 +143,25 @@ public class TrainerServiceImpl implements TrainerService {
                     UserProfile userProfile = userProfileRepository
                             .findByUser_UserId(user.getUserId())
                             .orElseThrow(() -> new AppException(
-                            "Không tìm thấy HLV này trong hệ thống!",
-                            ErrorCode.TRAINER_NOT_FOUND));
+                                    "Không tìm thấy HLV này trong hệ thống!",
+                                    ErrorCode.TRAINER_NOT_FOUND));
                     return convertToDto(trainer, user, userProfile);
                 })
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public TrainerDTO getTrainerById(Long id) {
 
         // Tìm Trainer theo id và chuyển đổi sang TrainerDto
         Trainer trainer = trainerRepository.findById(id)
                 .orElseThrow(() -> new AppException("Không tìm thấy HLV này trong hệ thống!",
-                ErrorCode.TRAINER_NOT_FOUND));
+                        ErrorCode.TRAINER_NOT_FOUND));
         User user = trainer.getUser();
         UserProfile userProfile = userProfileRepository.findByUser_UserId(user.getUserId())
                 .orElseThrow(() -> new AppException("Không tìm thấy HLV này trong hệ thống!",
-                ErrorCode.TRAINER_NOT_FOUND));
+                        ErrorCode.TRAINER_NOT_FOUND));
         return convertToDto(trainer, user, userProfile);
     }
 
@@ -168,7 +170,7 @@ public class TrainerServiceImpl implements TrainerService {
     public void deleteTrainer(Long id) {
         Trainer trainer = trainerRepository.findById(id)
                 .orElseThrow(() -> new AppException("Không tìm thấy HLV này trong hệ thống!",
-                ErrorCode.TRAINER_NOT_FOUND));
+                        ErrorCode.TRAINER_NOT_FOUND));
         // Xóa UserProfile và User liên quan
         User user = trainer.getUser();
         userProfileRepository.deleteByUser_UserId(user.getUserId());
@@ -176,7 +178,7 @@ public class TrainerServiceImpl implements TrainerService {
         trainerRepository.delete(trainer);
     }
 
-// Phương thức cập nhật đánh giá trung bình cho huấn luyện viên
+    // Phương thức cập nhật đánh giá trung bình cho huấn luyện viên
     @Override
     @Transactional
     public void updateRating(Long trainerId) {
@@ -200,7 +202,7 @@ public class TrainerServiceImpl implements TrainerService {
         Trainer trainer = trainerRepository.findById(trainerId)
                 .orElseThrow(() -> new RuntimeException("Trainer không tồn tại"));
 
-        trainer.setRating(averageRating);  // Cập nhật rating trung bình
+        trainer.setRating(averageRating); // Cập nhật rating trung bình
 
         // Lưu lại Trainer với rating mới
         trainerRepository.save(trainer);

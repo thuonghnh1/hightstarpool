@@ -14,12 +14,6 @@ import edu.poly.hightstar.model.ReviewDTO;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-        // Tìm đánh giá dựa trên bất kỳ id nào
-        @Query("SELECT r FROM Review r " +
-                        "WHERE (r.product.productId = :productId OR r.course.courseId = :courseId OR r.trainer.trainerId = :trainerId)")
-        List<Review> findAllReviews(@Param("productId") Long productId, @Param("courseId") Long courseId,
-                        @Param("trainerId") Long trainerId);
-
         // Lấy tất cả các review của một huấn luyện viên
         @Query("SELECT new edu.poly.hightstar.model.ReviewDTO(r.reviewId, r.rating, r.comment, r.images, r.createdAt, "
                         +

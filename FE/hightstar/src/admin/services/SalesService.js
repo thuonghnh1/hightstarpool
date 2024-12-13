@@ -91,6 +91,17 @@ const fetchDiscounts = async () => {
   }
 };
 
+const fetchActiveDiscounts = async () => {
+  try {
+    const data = await DiscountService.getActiveDiscounts();
+    return formatDiscountData(data);
+  } catch (error) {
+    console.error("Error fetching discounts:", error);
+    return [];
+  }
+};
+
+
 const createInvoice = async (invoiceData) => {
   try {
     const response = await axiosInstance.post(
@@ -120,6 +131,7 @@ const SalesService = {
   fetchTickets,
   fetchCourses,
   fetchDiscounts,
+  fetchActiveDiscounts,
   createInvoice,
   createInvoiceHaveCourse,
 };

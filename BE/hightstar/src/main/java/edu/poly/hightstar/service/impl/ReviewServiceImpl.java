@@ -55,6 +55,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    @Transactional
     public ReviewDTO getReviewById(Long reviewId) {
         // Lấy review từ database theo ID, ném ngoại lệ nếu không tìm thấy
         Review review = reviewRepository.findById(reviewId)
@@ -66,8 +67,9 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<ReviewDTO> getAllReviews(Long productId, Long courseId, Long trainerId) {
-        List<Review> reviews = reviewRepository.findAllReviews(productId, courseId, trainerId);
+    @Transactional
+    public List<ReviewDTO> getAllReviews() {
+        List<Review> reviews = reviewRepository.findAll();
         return reviews.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
