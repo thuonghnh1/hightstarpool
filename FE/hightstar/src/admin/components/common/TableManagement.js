@@ -102,7 +102,7 @@ const TableManagement = ({
             statusText = "Chưa xem";
             break;
           case false:
-            statusClass = "text-bg-muted";
+            statusClass = "text-bg-secondary";
             statusText = "Đã xem";
             break;
           default:
@@ -239,16 +239,52 @@ const TableManagement = ({
           </span>
         );
 
-      case "ticketType":
-        const ticketTypeLabels = {
-          ONETIME_TICKET: "Vé một lần",
-          WEEKLY_TICKET: "Vé tuần",
-          MONTHLY_TICKET: "Vé tháng",
-          STUDENT_TICKET: "Vé học viên",
+      case "paymentMethod":
+        const paymentMethodLabels = {
+          CASH: "Tiền mặt",
+          CREDIT_CARD: "Thẻ tính dụng",
+          BANK_TRANSFER: "Chuyển khoản",
+          E_WALLET: "Ví điện tử",
+          UNKNOWN: "Chưa xác định",
         };
         return (
           <span className={`rounded-3 px-2 py-1`}>
-            {ticketTypeLabels[item.ticketType]}
+            {paymentMethodLabels[item.paymentMethod]}
+          </span>
+        );
+
+      case "ticketType":
+        let ticketTypeClass = "";
+        let ticketTypeText = "";
+
+        switch (item.ticketType) {
+          case "ONETIME_TICKET":
+            ticketTypeClass = "text-bg-info"; // Vé cơ bản
+            ticketTypeText = "Vé một lần";
+            break;
+          case "WEEKLY_TICKET":
+            ticketTypeClass = "text-bg-primary"; // Vé tuần
+            ticketTypeText = "Vé tuần";
+            break;
+          case "MONTHLY_TICKET":
+            ticketTypeClass = "text-bg-warning"; // Vé tháng (ưu đãi cao)
+            ticketTypeText = "Vé tháng";
+            break;
+          case "STUDENT_TICKET":
+            ticketTypeClass = "text-bg-danger"; // Vé học viên
+            ticketTypeText = "Vé học viên";
+            break;
+          default:
+            ticketTypeClass = "text-bg-muted"; // Trường hợp mặc định
+            ticketTypeText = "Không xác định";
+        }
+
+        return (
+          <span
+            className={`rounded-3 fw-bold px-2 py-1 ${ticketTypeClass}`}
+            style={{ fontSize: "13px" }}
+          >
+            {ticketTypeText}
           </span>
         );
 
@@ -289,6 +325,7 @@ const TableManagement = ({
 
       case "total":
       case "penaltyAmount":
+      case "discountedPrice":
       case "price":
         const formattedPrice = new Intl.NumberFormat("vi-VN", {
           style: "currency",
@@ -298,7 +335,8 @@ const TableManagement = ({
         return <span>{formattedPrice}</span>;
 
       case "percentage":
-        return <span>{item.percentage} %</span>;
+      case "discount":
+        return <span>{item[column.key]} %</span>;
       case "orderDate":
         return <span>{formatDateTimeToDMY(item.orderDate)}</span>;
       case "recipientType":
@@ -609,7 +647,7 @@ const TableManagement = ({
                           {renderCustomCell(column, item)}
                         </td>
                       ))}
-                    <td className="align-middle">
+                    <td className="align-middle text-end">
                       <button
                         className="btn btn__show p-1"
                         onClick={(e) => {

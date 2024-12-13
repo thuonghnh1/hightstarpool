@@ -6,7 +6,10 @@ import ProductService from "../../services/ProductService";
 import Page500 from "../../../common/pages/Page500";
 import { Helmet } from "react-helmet-async";
 import { Spinner, Form } from "react-bootstrap";
-import { formatDateTimeToDMY, formatDateTimeToISO } from "../../utils/FormatDate";
+import {
+  formatDateTimeToDMY,
+  formatDateTimeToISO,
+} from "../../utils/FormatDate";
 
 const ProductManagement = () => {
   // State để lưu trữ dữ liệu sản phẩm từ API
@@ -38,9 +41,9 @@ const ProductManagement = () => {
     { key: "image", label: "Hình Ảnh" },
     { key: "description", label: "Mô tả" },
     { key: "price", label: "Giá gốc" },
+    { key: "discount", label: "Giảm giá (%)" },
     { key: "discountedPrice", label: "Giá KM" },
     { key: "stock", label: "Tổng trong kho" },
-    { key: "discount", label: "Giảm giá (%)" },
     { key: "categoryId", label: "Mã loại sản phẩm" },
     { key: "createdAt", label: "Ngày tạo" },
     { key: "updatedAt", label: "Ngày cập nhật" },
@@ -57,18 +60,16 @@ const ProductManagement = () => {
     setLoadingPage(true);
     try {
       const data = await ProductService.getProducts();
-      const formatData = data.map((product) => (
-        {
-          ...product,
-          discount: product.discount * 100,
-          discountedPrice: product.price - (product.price * product.discount),
-          createdAt: formatDateTimeToDMY(product.createdAt),
-          updatedAt: formatDateTimeToDMY(product.updatedAt)
-        }
-      ))
+      const formatData = data.map((product) => ({
+        ...product,
+        discount: product.discount * 100,
+        discountedPrice: product.price - product.price * product.discount,
+        createdAt: formatDateTimeToDMY(product.createdAt),
+        updatedAt: formatDateTimeToDMY(product.updatedAt),
+      }));
       setProductData(formatData); // Lưu dữ liệu vào state
     } catch (err) {
-    setErrorServer(err.message); // Lưu lỗi vào state nếu có
+      setErrorServer(err.message); // Lưu lỗi vào state nếu có
     } finally {
       setLoadingPage(false);
     }
@@ -135,10 +136,19 @@ const ProductManagement = () => {
   const handleInputChange = (key, value) => {
     let formatData = { ...formData, [key]: value };
     if (key === "discount") {
-      formatData = { ...formData, discount: value / 100, discountedPrice: formData.price - (formData.price * (value / 100 || 0)) || "" }
+      formatData = {
+        ...formData,
+        discount: value / 100,
+        discountedPrice:
+          formData.price - formData.price * (value / 100 || 0) || "",
+      };
     }
     if (key === "price") {
-      formatData = { ...formData, [key]: value, discountedPrice: value - (value * (formData.discount || 0)) || "" }
+      formatData = {
+        ...formData,
+        [key]: value,
+        discountedPrice: value - value * (formData.discount || 0) || "",
+      };
     }
     setFormData({ ...formatData });
     validateField(key, value);
@@ -177,7 +187,7 @@ const ProductManagement = () => {
       image: item.image || "", // Đảm bảo trường image tồn tại
       discount: item.discount / 100,
       createdAt: formatDateTimeToISO(item.createdAt),
-      updatedAt: formatDateTimeToISO(item.updatedAt)
+      updatedAt: formatDateTimeToISO(item.updatedAt),
     });
     updateStatus({ isEditing: true });
     setErrorFields({});
@@ -187,7 +197,6 @@ const ProductManagement = () => {
     if (!validateForm()) return false;
 
     setIsLoading(true);
-
 
     try {
       if (statusFunction.isEditing) {
@@ -200,28 +209,31 @@ const ProductManagement = () => {
 
         const formattedProduct = {
           ...updatedProduct,
+          discount: updatedProduct.discount * 100,
           createdAt: formatDateTimeToDMY(updatedProduct.createdAt),
-          updatedAt: formatDateTimeToDMY(updatedProduct.updatedAt)
+          updatedAt: formatDateTimeToDMY(updatedProduct.updatedAt),
         };
 
         // Cập nhật state productData với product đã được sửa
         const updatedProducts = productData.map((product) =>
-          product.id === formattedProduct.id
-            ? formattedProduct
-            : product
+          product.id === formattedProduct.id ? formattedProduct : product
         );
 
         setProductData(updatedProducts);
         toast.success("Cập nhật thành công!");
       } else if (statusFunction.isAdd) {
         // Nếu đang ở trạng thái thêm mới
-        const newDiscount = await ProductService.createProduct(formData, imageFile);
+        const newDiscount = await ProductService.createProduct(
+          formData,
+          imageFile
+        );
 
         // Đổi định dạng ngày giờ trước khi lưu vào mảng
         const formattedProduct = {
           ...newDiscount,
+          discount: newDiscount.discount * 100,
           createdAt: formatDateTimeToDMY(newDiscount.createdAt),
-          updatedAt: formatDateTimeToDMY(newDiscount.updatedAt)
+          updatedAt: formatDateTimeToDMY(newDiscount.updatedAt),
         };
 
         // Cập nhật mảng productData với item vừa được thêm
@@ -233,7 +245,7 @@ const ProductManagement = () => {
       handleReset();
       return true;
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return false;
     } finally {
       setIsLoading(false);
@@ -319,9 +331,7 @@ const ProductManagement = () => {
               name="productName"
               value={formData.productName}
               maxLength={100}
-              onChange={(e) =>
-                handleInputChange("productName", e.target.value)
-              }
+              onChange={(e) => handleInputChange("productName", e.target.value)}
               isInvalid={!!errorFields.productName}
               placeholder="Nhập vào tên sản phẩm"
               required
@@ -331,7 +341,6 @@ const ProductManagement = () => {
             </Form.Control.Feedback>
           </Form.Group>
         </div>
-
 
         <div className="col-md-6 mb-3">
           <Form.Group controlId="formDiscount">

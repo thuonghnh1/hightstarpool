@@ -71,17 +71,17 @@ const TicketManagement = () => {
   const ticketColumns = [
     { key: "id", label: "ID" },
     { key: "qrCodeBase64", label: "Mã QR" },
+    { key: "ticketType", label: "Loại Vé" },
     { key: "issueDate", label: "Ngày Phát Hành" },
     { key: "expiryDate", label: "Ngày Hết Hạn" },
-    { key: "ticketType", label: "Loại Vé" },
+    { key: "studentId", label: "Mã Học Viên" },
     { key: "status", label: "Trạng thái" },
     { key: "price", label: "Giá Vé" },
-    { key: "studentId", label: "Mã Học Viên" },
   ];
 
   // Loại bỏ cột khỏi ticketColumns
   const defaultColumns = ticketColumns.filter(
-    (column) => column.key !== "price"
+    (column) => column.key !== ""
   );
 
   // Gọi API để lấy dữ liệu từ server
@@ -100,7 +100,9 @@ const TicketManagement = () => {
     try {
       const students = await studentService.getStudents();
       // Chuyển đổi danh sách học viên đã lọc thành định dạng phù hợp cho Select
-      if (students.length === 0) { return; }
+      if (students.length === 0) {
+        return;
+      }
       const studentOptions = students.map((student) => ({
         value: student.id,
         label: `#${student.id} - ${student.fullName}`,
@@ -297,12 +299,12 @@ const TicketManagement = () => {
     setErrorFields({});
   };
 
-  const prepareOrderData = () => {
+  const prepareOrderData = (ticketId) => {
     // Dữ liệu cho Order
     const orderData = {
       total: formData.price,
-      paymentMethod: "CASH",
-      shippingAddress: null,
+      paymentMethod: "UNKNOWN",
+      shippingAddress: "Tại quầy",
       discountId: null,
       userId: null,
     };
@@ -310,6 +312,7 @@ const TicketManagement = () => {
     const detail = {
       quantity: 1,
       unitPrice: formData.price,
+      ticketId,
     };
 
     // Kết hợp dữ liệu Order và OrderDetails
@@ -351,15 +354,15 @@ const TicketManagement = () => {
       } else if (statusFunction.isAdd) {
         // Nếu đang ở trạng thái thêm mới
         const newTicket = await TicketService.createTicket(formData);
-
+        if (newTicket) {
+          await SalesService.createInvoice(prepareOrderData(newTicket.id));
+        }
         // Đổi định dạng ngày trước khi lưu vào mảng
         const formattedTicket = {
           ...newTicket,
           issueDate: formatDateTimeToDMY(newTicket.issueDate),
           expiryDate: formatDateTimeToDMY(newTicket.expiryDate),
         };
-
-        await SalesService.createInvoice(prepareOrderData());
 
         // Cập nhật mảng ticketData với ticket vừa được thêm
         setTicketData([...ticketData, formattedTicket]);
@@ -388,8 +391,6 @@ const TicketManagement = () => {
         setTicketData(ticketData.filter((ticket) => ticket.id !== deleteId));
         toast.success("Xóa thành công!");
       } catch (error) {
-        console.error("Lỗi khi xóa ticket:", error);
-        toast.error("Đã xảy ra lỗi khi xóa. Vui lòng thử lại.");
       } finally {
         setIsLoading(false);
       }
@@ -418,6 +419,7 @@ const TicketManagement = () => {
               placeholder="Chọn Loại Vé"
               isClearable // Cho phép xóa chọn lựa
               isSearchable // Bật tính năng tìm kiếm
+              isDisabled={statusFunction.isEditing}
             />
             {errorFields.ticketType && (
               <div className="invalid-feedback d-block">

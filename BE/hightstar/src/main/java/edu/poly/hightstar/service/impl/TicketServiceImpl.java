@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import edu.poly.hightstar.repository.TicketRepository;
 import edu.poly.hightstar.repository.AttendanceRepository;
+import edu.poly.hightstar.repository.OrderDetailRepository;
 import edu.poly.hightstar.repository.StudentRepository;
 import edu.poly.hightstar.repository.TicketPriceRepository;
 import edu.poly.hightstar.domain.Attendance;
@@ -39,6 +40,7 @@ public class TicketServiceImpl implements TicketService {
     private final TicketCodeService ticketCodeService;
     private final AttendanceRepository attendanceRepository;
     private final QRCodeGenerator qrCodeGenerator;
+    private final OrderDetailRepository orderDetailRepository;
 
     Date today = getCurrentDateWithoutTime();
 
@@ -184,6 +186,12 @@ public class TicketServiceImpl implements TicketService {
         if (!ticketRepository.existsById(id)) {
             throw new AppException("Vé này không tồn tại!", ErrorCode.TICKET_NOT_FOUND);
         }
+
+        // Kiểm tra xem vé có đang được sử dụng trong đơn hàng hay không
+        if (orderDetailRepository.existsByTicketTicketId(id)) {
+            throw new AppException("Vé này không thể xóa vì đã tồn tại trong đơn hàng!", ErrorCode.TICKET_IN_USE);
+        }
+
         ticketRepository.deleteById(id);
     }
 

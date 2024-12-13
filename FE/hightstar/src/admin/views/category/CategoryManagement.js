@@ -66,7 +66,7 @@ const CategoryManagement = () => {
       ...prevErrors,
       [key]: error,
     }));
-  }
+  };
   // Hàm validate toàn bộ form
   const validateForm = () => {
     const newErrors = {};
@@ -98,7 +98,6 @@ const CategoryManagement = () => {
   const handleReset = () => {
     setFormData({
       categoryName: "",
-
     });
     handleResetStatus();
     setErrorFields({});
@@ -123,8 +122,6 @@ const CategoryManagement = () => {
           formData.id,
           formData
         );
-
-
 
         // Cập nhật state CategoryData với Category đã được sửa
         const updateCategorydData = categoryData.map((category) =>
@@ -186,7 +183,7 @@ const CategoryManagement = () => {
                 handleInputChange("categoryName", e.target.value)
               }
               isInvalid={!!errorFields.categoryName}
-              placeholder="Nhập vào tên giảm giá"
+              placeholder="Nhập vào tên danh mục"
               required
             />
             <Form.Control.Feedback type="invalid">
@@ -197,7 +194,6 @@ const CategoryManagement = () => {
       </div>
     </>
   );
-
 
   return (
     <>
@@ -232,7 +228,6 @@ const CategoryManagement = () => {
       )}
     </>
   );
-
-}
+};
 
 export default CategoryManagement;

@@ -37,6 +37,7 @@ public enum ErrorCode {
     DUPLICATE_TIMESLOT("DUPLICATE_TIMESLOT"), // Suất học này đã tồn tại
     EMAIL_ALREADY_USED("EMAIL_ALREADY_USED"), // Email đã được sử dụng
     PHONE_ALREADY_USED("PHONE_ALREADY_USED"), // Số điện thoại đã được sử dụng
+    TICKET_IN_USE("TICKET_IN_USE"), // Vé này đã tồn tại trong đơn hàng
 
     // Lỗi hợp lệ dữ liệu (Validation Errors)
     INVALID_INPUT("INVALID_INPUT"), // Dữ liệu đầu vào không hợp lệ

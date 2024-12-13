@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import TableManagement from "../../components/common/TableManagement";
 import AttendanceService from "../../services/AttendanceService";
@@ -36,24 +36,28 @@ const AttendanceManagement = () => {
     btnDetail: false,
     btnSetting: false,
   };
-  const listTicketTypeOption = [
-    {
-      value: "ONETIME_TICKET",
-      label: "Vé một lần",
-    },
-    {
-      value: "WEEKLY_TICKET",
-      label: "Vé tuần",
-    },
-    {
-      value: "MONTHLY_TICKET",
-      label: "Vé tháng",
-    },
-    {
-      value: "STUDENT_TICKET",
-      label: "Vé học viên",
-    },
-  ];
+
+  const memoizedTicketTypeOption = useMemo(
+    () => [
+      {
+        value: "ONETIME_TICKET",
+        label: "Vé một lần",
+      },
+      {
+        value: "WEEKLY_TICKET",
+        label: "Vé tuần",
+      },
+      {
+        value: "MONTHLY_TICKET",
+        label: "Vé tháng",
+      },
+      {
+        value: "STUDENT_TICKET",
+        label: "Vé học viên",
+      },
+    ],
+    []
+  ); // Dependency array rỗng, nghĩa là nó sẽ chỉ được tính toán một lần khi component mount
 
   // Mảng cột của bảng
   const attendanceColumns = [
@@ -61,6 +65,7 @@ const AttendanceManagement = () => {
     { key: "attendanceDate", label: "Ngày điểm danh" },
     { key: "checkInTime", label: "Thời gian vào" },
     { key: "checkOutTime", label: "Thời gian ra" },
+    { key: "duration", label: "Thời gian bơi" },
     { key: "studentId", label: "Mã học viên" },
     { key: "ticketId", label: "Mã vé" },
     { key: "penaltyAmount", label: "Tiền phạt" },
@@ -72,12 +77,31 @@ const AttendanceManagement = () => {
     (column) => !keysToRemove.includes(column.key)
   );
 
+  const calculateDuration = useCallback((checkIn, checkOut) => {
+    const [checkInHours, checkInMinutes] = checkIn.split(":").map(Number);
+    const [checkOutHours, checkOutMinutes] = checkOut.split(":").map(Number);
+    const totalMinutes =
+      checkOutHours * 60 +
+      checkOutMinutes -
+      (checkInHours * 60 + checkInMinutes);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    return `${hours} giờ ${minutes} phút`;
+  }, []);
+
   // Gọi API để lấy dữ liệu từ server
-  const fetchAttendanceData = async () => {
+  const fetchAttendanceData = useCallback(async () => {
     setLoadingPage(true);
     try {
       const data = await AttendanceService.getAttendances();
-      setAttendanceData(data); // Lưu dữ liệu vào state
+      const formatData = data.map((attendance) => ({
+        ...attendance,
+        duration: attendance.checkOutTime
+          ? calculateDuration(attendance.checkInTime, attendance.checkOutTime)
+          : "Chưa ra",
+      }));
+      setAttendanceData(formatData); // Lưu dữ liệu vào state
     } catch (err) {
       setErrorServer(err.message); // Lưu lỗi vào state nếu có
       console.log(err);
@@ -90,10 +114,11 @@ const AttendanceManagement = () => {
       // Chuyển đổi danh sách vé đã lọc thành định dạng phù hợp cho Select
       const ticketOptions = tickets.map((ticket) => ({
         value: ticket.id,
-        label: `#${ticket.id} - ${listTicketTypeOption.find(
-          (option) => option.value === ticket.ticketType
-        )?.label
-          }`,
+        label: `#${ticket.id} - ${
+          memoizedTicketTypeOption.find(
+            (option) => option.value === ticket.ticketType
+          )?.label
+        }`,
       }));
       // Cập nhật trạng thái danh sách tùy chọn cho Select
       setListTicketOption(ticketOptions);
@@ -101,12 +126,12 @@ const AttendanceManagement = () => {
       toast.error("Lỗi khi lấy danh sách học viên");
       console.log(error);
     }
-  };
+  }, [calculateDuration, memoizedTicketTypeOption]);
 
   // Gọi API khi component mount
   useEffect(() => {
     fetchAttendanceData();
-  }, []);
+  }, [fetchAttendanceData]);
 
   // Hàm validate cho từng trường input
   const validateField = (key, value) => {

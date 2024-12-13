@@ -24,8 +24,11 @@ function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
   const [errorServer, setErrorServer] = useState(null);
-
   const currentYear = new Date().getFullYear();
+
+  useEffect(() => {
+    
+  }, []);
   // Example data for charts
   const data = [
     {

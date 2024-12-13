@@ -81,7 +81,7 @@ function ResetPasswordPage() {
                 Nhập mật khẩu mới của bạn để hoàn tất quá trình đặt lại mật
                 khẩu.
               </p>
-            </div>r
+            </div>
           </div>
           <div className="col-lg-6 col-md-8 mx-auto bg-body-secondary p-4 py-5 p-sm-5">
             <h3 className="mb-4 text-center text-uppercase fw-bold">

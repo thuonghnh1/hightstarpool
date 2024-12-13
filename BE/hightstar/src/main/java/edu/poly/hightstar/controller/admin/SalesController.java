@@ -18,6 +18,7 @@ public class SalesController {
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @PostMapping("/createInvoice")
     public ResponseEntity<?> createOrder(@RequestBody OrderRequest request) {
+        System.out.println(request);
         OrderDTO savedOrder = orderService.createInvoice(request);
         return ResponseEntity.ok(savedOrder);
     }

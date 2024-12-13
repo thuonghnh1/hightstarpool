@@ -32,19 +32,6 @@ const TicketCheck = () => {
   // Flag để ngăn chặn việc xử lý quét liên tục
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const calculateDuration = useCallback((checkIn, checkOut) => {
-    const [checkInHours, checkInMinutes] = checkIn.split(":").map(Number);
-    const [checkOutHours, checkOutMinutes] = checkOut.split(":").map(Number);
-    const totalMinutes =
-      checkOutHours * 60 +
-      checkOutMinutes -
-      (checkInHours * 60 + checkInMinutes);
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-
-    return `${hours} giờ ${minutes} phút`;
-  }, []);
-
   // Hàm xử lý khi quét thành công
   const handleScanSuccessRef = useRef();
 
@@ -57,9 +44,7 @@ const TicketCheck = () => {
     setIsProcessing(true);
 
     try {
-      const qrCodeData = decodedData.data; // Lấy dữ liệu từ QR code
-
-      // Gọi API scanQRCode với qrCodeData
+      const qrCodeData = decodedData.data;
       const response = await AttendanceService.scanQRCode(qrCodeData);
 
       // Tìm bản ghi điểm danh hiện tại trong guestList
@@ -68,28 +53,19 @@ const TicketCheck = () => {
       );
 
       let message = "";
-      let operation = "";
 
       if (existingAttendance) {
         if (existingAttendance.checkout === "Chưa ra") {
-          // Nếu chưa có giờ ra, đây là check-out
-          message = `Cập nhật giờ ra thành công cho khách với mã vé ${response.ticketId}`;
-          operation = "checkout";
-        } else {
-          // // Nếu đã có giờ ra, đây là check-in
-          // message = `Cập nhật giờ vào thành công cho khách với ticketId ${response.ticketId}`;
-          // operation = "checkin";
+          message = `Cập nhật giờ ra thành công cho khách với mã vé ${response.ticketId} và tiền phạt  ${response.penalty}`;
         }
       } else {
-        // Nếu không tìm thấy bản ghi nào, đây là check-in
         message = `Cập nhật giờ vào thành công cho khách với mã vé ${response.ticketId}`;
-        operation = "checkin";
       }
 
-      const currentTime = new Date().toLocaleTimeString("vi-VN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      // const currentTime = new Date().toLocaleTimeString("vi-VN", {
+      //   hour: "2-digit",
+      //   minute: "2-digit",
+      // });
 
       setModalState({
         show: true,
@@ -102,7 +78,6 @@ const TicketCheck = () => {
       console.error("Lỗi khi xử lý mã QR:", error);
       let errorMsg = ERROR_MESSAGES.GENERIC_ERROR;
       if (error.response && error.response.data) {
-        // Nếu backend trả về thông báo lỗi cụ thể
         errorMsg = error.response.data;
       } else if (error.message) {
         errorMsg = error.message;
@@ -170,10 +145,7 @@ const TicketCheck = () => {
       const formattedAttendances = attendances.map((attendance) => ({
         id: attendance.id,
         checkIn: attendance.checkInTime || "Chưa vào",
-        checkout: attendance.checkOutTime || "Chưa ra",
-        duration: attendance.checkOutTime
-          ? calculateDuration(attendance.checkInTime, attendance.checkOutTime)
-          : "Chưa ra",
+        checkout: attendance.checkOutTime || "Chưa ra",    
         studentId: attendance.studentId,
         ticketId: attendance.ticketId,
         penalty: attendance.penaltyAmount
@@ -185,7 +157,7 @@ const TicketCheck = () => {
       console.error("Lỗi khi lấy danh sách điểm danh chưa có checkOut:", error);
       toast.error("Đã xảy ra lỗi khi lấy danh sách điểm danh.");
     }
-  }, [calculateDuration]);
+  }, []);
 
   useEffect(() => {
     fetchAttendances();
@@ -213,7 +185,7 @@ const TicketCheck = () => {
         scannerRef.current?.stop();
       };
     }
-  }, []); // Không có dependency để đảm bảo chỉ chạy một lần
+  }, []);
 
   return (
     <>
@@ -234,7 +206,6 @@ const TicketCheck = () => {
                       <th>Mã điểm danh</th>
                       <th>Giờ vào</th>
                       <th>Giờ ra</th>
-                      <th>Thời gian bơi</th>
                       <th>Mã học viên</th>
                       <th>Mã vé</th>
                       <th>Tiền phạt</th>
@@ -246,7 +217,6 @@ const TicketCheck = () => {
                         <td className="text-nowrap">{guest.id}</td>
                         <td className="text-nowrap">{guest.checkIn}</td>
                         <td className="text-nowrap">{guest.checkout}</td>
-                        <td className="text-nowrap">{guest.duration}</td>
                         <td className="text-nowrap">
                           {guest.studentId || "N/A"}
                         </td>

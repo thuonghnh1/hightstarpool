@@ -148,8 +148,8 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
               </NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" to="/admin/user-management">
-                Người dùng
+              <NavLink className="nav-link" to="/admin/ticket/ticket-check">
+                Soát vé
               </NavLink>
             </li>
             <li className="nav-item">
