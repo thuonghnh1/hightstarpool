@@ -58,6 +58,8 @@ const AppSidebar = ({ isSidebarOpen }) => {
             <i className="me-2 fa fa-shopping-cart"></i> Bán hàng
           </NavLink>
         </li>
+
+
         {/* menu có menu con */}
         <li>
           <div
@@ -102,6 +104,31 @@ const AppSidebar = ({ isSidebarOpen }) => {
             </ul>
           </Collapse>
         </li>
+
+
+        <li>
+          <NavLink
+            to="/admin/vietqrgenerator-management"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            <i class="me-2 bi bi-credit-card"></i> Tạo Qr Thanh Toán
+          </NavLink>
+        </li>
+
+        <li>
+          <NavLink
+            to="/admin/transactionhistory-management"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            <i class="me-2 bi bi-cash-coin"></i> Lịch sử chuyển khoản
+          </NavLink>
+        </li>
+
+
 
         <li>
           <NavLink

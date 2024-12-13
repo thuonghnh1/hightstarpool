@@ -17,13 +17,14 @@ import {
   MyProfile,
   ReviewManagement,
   CategoryManagement,
-  ProductManagement
-
+  ProductManagement,
 } from "../views/index";
 import "../css/style.css";
 import { ThemeProvider } from "../components/common/ThemeContext";
 import TicketCheck from "../views/tickets/TicketCheck";
 import BackToTop from "../../common/components/BackToTop";
+import TransactionHistory from "../views/Payment/TransactionHistory";
+import VietQRGenerator from "../views/Payment/VietQRGenerator";
 
 
 const AdminLayout = () => {
@@ -123,6 +124,17 @@ const AdminLayout = () => {
                   path="products-management"
                   element={<ProductManagement />}
                 />
+
+                <Route
+                  path="transactionhistory-management"
+                  element={<TransactionHistory />}
+                />
+
+                <Route
+                  path="vietqrgenerator-management"
+                  element={<VietQRGenerator />}
+                />
+
                 <Route path="*" element={<Navigate to={"/admin"} />} />
               </Routes>
               <Outlet /> {/* Để hiển thị các component con */}
