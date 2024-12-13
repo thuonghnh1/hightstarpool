@@ -5,7 +5,6 @@ import { NavLink, useNavigate } from "react-router-dom";
 import avatarDefault from "../../assets/images/avatars/user.png";
 // import iconAddUser from "../../assets/images/icons/add-user.png";
 import iconBell from "../../assets/images/icons/notification.png";
-import { useTheme } from "./common/ThemeContext";
 // import { toast } from "react-toastify";
 import { logout } from "../../site/services/AuthService";
 import { UserContext } from "../../contexts/UserContext";
@@ -13,6 +12,7 @@ import NotificationService from "../../site/services/NotificationService";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi"; // Import locale tiếng Việt
+import { useTheme } from "../../contexts/ThemeContext";
 
 // Cấu hình Day.js với plugin relativeTime và locale tiếng Việt
 dayjs.extend(relativeTime);
