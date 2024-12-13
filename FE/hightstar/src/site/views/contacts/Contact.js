@@ -8,13 +8,13 @@ function Contact() {
         <div className="container py-5">
           <div className="row justify-content-center py-5">
             <div className="col-lg-10 pt-lg-5 mt-lg-5 text-center">
-              <h1 className="display-3 text-white">
-                Liên Hệ
-              </h1>
+              <h1 className="display-3 text-white">Liên Hệ</h1>
               <nav aria-label="breadcrumb">
                 <ol className="breadcrumb justify-content-center">
                   <li className="breadcrumb-item">
-                    <NavLink to={"/"}>Trang Chủ</NavLink>
+                    <NavLink to={"/"} className={"text-decoration-none"}>
+                      Trang Chủ
+                    </NavLink>
                   </li>
                   <li
                     className="breadcrumb-item text-white active"
