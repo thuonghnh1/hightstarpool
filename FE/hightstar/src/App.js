@@ -12,12 +12,16 @@ import Page500 from "./common/pages/Page500";
 import { UserProvider } from "./contexts/UserContext";
 import VerifyOtpPage from "./site/views/auth/VerifyOtpPage";
 import ResetPasswordPage from "./site/views/auth/ResetPasswordPage";
+
 // import VietQRGenerator from "./site/views/Payment/VietQRGenerator";
 // import TransactionHistory from "./site/views/Payment/TransactionHistory";
-
+import { useTheme } from "./contexts/ThemeContext";
 function App() {
+  const { theme } = useTheme();
   return (
-    <div className="app w-100" >
+    <div
+      className={`app w-100 ${theme === "dark" ? "dark-theme" : "light-theme"}`}
+    >
       <Router>
         <UserProvider>
           <Routes>

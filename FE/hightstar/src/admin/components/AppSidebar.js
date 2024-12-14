@@ -1,8 +1,8 @@
 import { useState } from "react";
-import Logo from "../../assets/brand/Logo";
+// import Logo from "../../assets/brand/Logo";
 import { Collapse } from "react-bootstrap";
 import { NavLink } from "react-router-dom"; // Sử dụng NavLink để có trạng thái active
-import { useTheme } from "./common/ThemeContext";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const AppSidebar = ({ isSidebarOpen }) => {
   const { theme } = useTheme();
@@ -31,7 +31,12 @@ const AppSidebar = ({ isSidebarOpen }) => {
         style={{ height: "66px" }}
       >
         <NavLink to="/admin/dashboard">
-          <Logo />
+          <img
+            src="/assets/img/logoNgang.png"
+            className="object-fit-contain"
+            width="200" // Thu nhỏ ảnh lại
+            height="100%"
+          />
         </NavLink>
       </div>
       <ul className="menu list-unstyled overflow-auto custom-scrollbar">

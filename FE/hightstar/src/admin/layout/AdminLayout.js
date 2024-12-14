@@ -20,12 +20,10 @@ import {
   ProductManagement,
 } from "../views/index";
 import "../css/style.css";
-import { ThemeProvider } from "../components/common/ThemeContext";
 import TicketCheck from "../views/tickets/TicketCheck";
 import BackToTop from "../../common/components/BackToTop";
 import TransactionHistory from "../views/Payment/TransactionHistory";
 import VietQRGenerator from "../views/Payment/VietQRGenerator";
-
 
 const AdminLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true); // Quản lý trạng thái ẩn/hiện sidebar
@@ -58,7 +56,7 @@ const AdminLayout = () => {
   }, []);
 
   return (
-    <ThemeProvider>
+    
       <div className="container__admin overflow-hidden">
         <AppSidebar className="" isSidebarOpen={isSidebarOpen} />
         <div
@@ -144,7 +142,6 @@ const AdminLayout = () => {
         </div>
         <BackToTop />
       </div>
-    </ThemeProvider>
   );
 };
 

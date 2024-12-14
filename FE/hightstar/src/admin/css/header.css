@@ -11,20 +11,6 @@
   transition: left 0.3s ease;
 }
 
-/* Theme tối */
-.header.dark-theme {
-  background-color: #1a2035; /* Màu nền tối */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Đường viền dưới nhạt hơn */
-  color: white; /* Màu chữ */
-}
-
-/* Theme sáng */
-.header.light-theme {
-  background-color: #f5f5f5; /* Màu nền sáng */
-  border-bottom: 1px solid #ddd; /* Đường viền dưới */
-  color: #333; /* Màu chữ */
-}
-
 /* Định dạng cho biểu tượng menu */
 .menu-icon {
   font-size: 24px;

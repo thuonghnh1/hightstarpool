@@ -25,7 +25,7 @@ const TicketCheck = () => {
     type: "success", // "success" hoặc "failure"
     message: "",
   });
-
+  const isSuccess = modalState.type === "success";
   // Danh sách khách
   const [guestList, setGuestList] = useState([]);
 
@@ -56,7 +56,7 @@ const TicketCheck = () => {
 
       if (existingAttendance) {
         if (existingAttendance.checkout === "Chưa ra") {
-          message = `Cập nhật giờ ra thành công cho khách với mã vé ${response.ticketId} và tiền phạt  ${response.penalty}`;
+          message = `Cập nhật giờ ra thành công cho khách với mã vé ${response.ticketId} và tiền phạt 0đ`;
         }
       } else {
         message = `Cập nhật giờ vào thành công cho khách với mã vé ${response.ticketId}`;
@@ -145,7 +145,7 @@ const TicketCheck = () => {
       const formattedAttendances = attendances.map((attendance) => ({
         id: attendance.id,
         checkIn: attendance.checkInTime || "Chưa vào",
-        checkout: attendance.checkOutTime || "Chưa ra",    
+        checkout: attendance.checkOutTime || "Chưa ra",
         studentId: attendance.studentId,
         ticketId: attendance.ticketId,
         penalty: attendance.penaltyAmount
@@ -276,35 +276,50 @@ const TicketCheck = () => {
           centered
           backdrop="static"
           keyboard={false}
+          size="md"
+          aria-labelledby="notification-modal-title"
         >
-          <Modal.Header closeButton>
-            <Modal.Title>
-              {modalState.type === "success" ? (
-                <>
-                  <i
-                    className="bi bi-check-circle-fill text-success me-2"
-                    style={{ fontSize: "1.5rem" }}
-                  ></i>
-                  Thành công
-                </>
-              ) : (
-                <>
-                  <i
-                    className="bi bi-x-circle-fill text-danger me-2"
-                    style={{ fontSize: "1.5rem" }}
-                  ></i>
-                  Thất bại
-                </>
-              )}
+          <Modal.Header
+            closeButton
+            className={`bg-${isSuccess ? "success" : "danger"} text-white`}
+          >
+            <Modal.Title
+              id="notification-modal-title"
+              className="d-flex align-items-center text-white"
+            >
+              <i
+                className={`bi ${
+                  isSuccess ? "bi-check-circle-fill" : "bi bi-x-octagon fs-3"
+                } me-2`}
+                style={{ fontSize: "1.5rem" }}
+                aria-hidden="true"
+              ></i>
+              {isSuccess ? "Thành công" : "Thất bại"}
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <p>{modalState.message}</p>
+            <div className="d-flex align-items-center">
+              <i
+                className={`bi ${
+                  isSuccess ? "bi-check-circle" : "bi-exclamation-circle"
+                } me-3`}
+                style={{
+                  fontSize: "2rem",
+                  color: isSuccess ? "#28a745" : "#dc3545",
+                }}
+                aria-hidden="true"
+              ></i>
+              <div>
+                <p className="mb-1 fs-5">{modalState.message}</p>
+                {/* Bạn có thể thêm thông tin bổ sung ở đây nếu cần */}
+              </div>
+            </div>
           </Modal.Body>
           <Modal.Footer>
             <Button
-              variant={modalState.type === "success" ? "success" : "danger"}
+              variant={isSuccess ? "success" : "danger"}
               onClick={handleCloseModal}
+              className="w-100"
             >
               Đóng
             </Button>

@@ -2,6 +2,40 @@
 @import url("./header.css");
 @import url("./footer.css");
 
+.app {
+  background-color: #f3f4f7;
+}
+
+/* .app.light-theme {
+  background-color: #f3f4f7;
+} */
+
+/* .app.dark-theme {
+  background-color: #1a2035;
+  color: white;
+} */
+
+/* Theme sáng */
+.header {
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+  color: #333; 
+}
+
+/* Theme tối */
+/* .header.dark-theme {
+  background-color: #1a2035 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: white !important;
+} */
+
+/* Theme sáng */
+/* .header.light-theme {
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+  color: #333; 
+} */
+
 .right__box {
   max-width: 100%;
   box-sizing: border-box; /* Bao gồm padding và border trong phép tính chiều rộng */
@@ -42,4 +76,3 @@
   flex-direction: column;
   flex-grow: 1;
 }
-
