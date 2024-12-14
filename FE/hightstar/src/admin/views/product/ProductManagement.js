@@ -6,6 +6,8 @@ import ProductService from "../../services/ProductService";
 import Page500 from "../../../common/pages/Page500";
 import { Helmet } from "react-helmet-async";
 import { Spinner, Form } from "react-bootstrap";
+import Select from "react-select";
+import CategoryService from "../../services/CategoryService";
 import {
   formatDateTimeToDMY,
   formatDateTimeToISO,
@@ -22,6 +24,9 @@ const ProductManagement = () => {
     isEditing: false,
     isViewDetail: false,
   }); // Trạng thái để biết đang thêm mới hay chỉnh sửa hay xem chi tiết
+
+  const [listCategoryOption, setListCategoryOption] = useState([]);
+
   // State để xử lý trạng thái tải dữ liệu và lỗi
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false); // để load cho toàn bộ trang dữ liệu
@@ -41,9 +46,9 @@ const ProductManagement = () => {
     { key: "image", label: "Hình Ảnh" },
     { key: "description", label: "Mô tả" },
     { key: "price", label: "Giá gốc" },
-    { key: "discount", label: "Giảm giá (%)" },
     { key: "discountedPrice", label: "Giá KM" },
     { key: "stock", label: "Tổng trong kho" },
+    { key: "discount", label: "Giảm giá (%)" },
     { key: "categoryId", label: "Mã loại sản phẩm" },
     { key: "createdAt", label: "Ngày tạo" },
     { key: "updatedAt", label: "Ngày cập nhật" },
@@ -72,6 +77,18 @@ const ProductManagement = () => {
       setErrorServer(err.message); // Lưu lỗi vào state nếu có
     } finally {
       setLoadingPage(false);
+    }
+    try {
+      let categories = await CategoryService.getCategories();
+      // Chuyển đổi danh sách người dùng đã lọc thành định dạng phù hợp cho Select
+      const categoryOptions = categories.map((category) => ({
+        value: category.id,
+        label: `#${category.id} - ${category.categoryName}`,
+      }));
+      // Cập nhật trạng thái danh sách tùy chọn cho Select
+      setListCategoryOption(categoryOptions);
+    } catch (error) {
+      toast.error("Lỗi khi lấy danh sách loại sản phẩm");
     }
   };
 
@@ -126,6 +143,33 @@ const ProductManagement = () => {
     ) {
       newErrors.discount =
         "Tỷ lệ giảm giá phải là một số từ lớn hơn 0 đến 100.";
+    }
+    // Kiểm tra giá sản phẩm
+    if (
+      formData.price === "" ||
+      formData.price === null ||
+      isNaN(formData.price)
+    ) {
+      newErrors.price = "Giá gốc không được để trống.";
+    } else if (formData.price <= 0) {
+      newErrors.price = "Giá gốc phải lớn hơn 0.";
+    }
+
+    // Kiểm tra số lượng tồn kho
+    if (formData.stock === "" || formData.stock === null) {
+      newErrors.stock = "Số lượng tồn kho không được để trống.";
+    } else if (isNaN(formData.stock) || formData.stock < 0) {
+      newErrors.stock = "Số lượng tồn kho phải là số không âm.";
+    }
+
+    // Kiểm tra hình ảnh sản phẩm
+    if (!formData.image || formData.image.trim() === "") {
+      newErrors.image = "Hình ảnh sản phẩm không được để trống.";
+    }
+
+    // Kiểm tra loại sản phẩm
+    if (!formData.categoryId || formData.categoryId === "") {
+      newErrors.categoryId = "Loại sản phẩm không được để trống.";
     }
 
     setErrorFields(newErrors);
@@ -194,6 +238,7 @@ const ProductManagement = () => {
   };
 
   const handleSaveItem = async () => {
+    console.log("hellloooô");
     if (!validateForm()) return false;
 
     setIsLoading(true);
@@ -209,9 +254,11 @@ const ProductManagement = () => {
 
         const formattedProduct = {
           ...updatedProduct,
-          discount: updatedProduct.discount * 100,
           createdAt: formatDateTimeToDMY(updatedProduct.createdAt),
           updatedAt: formatDateTimeToDMY(updatedProduct.updatedAt),
+          discountedPrice:
+            updatedProduct.price -
+            updatedProduct.price * updatedProduct.discount,
         };
 
         // Cập nhật state productData với product đã được sửa
@@ -231,9 +278,10 @@ const ProductManagement = () => {
         // Đổi định dạng ngày giờ trước khi lưu vào mảng
         const formattedProduct = {
           ...newDiscount,
-          discount: newDiscount.discount * 100,
           createdAt: formatDateTimeToDMY(newDiscount.createdAt),
           updatedAt: formatDateTimeToDMY(newDiscount.updatedAt),
+          discountedPrice:
+            newDiscount.price - newDiscount.price * newDiscount.discount,
         };
 
         // Cập nhật mảng productData với item vừa được thêm
@@ -274,7 +322,9 @@ const ProductManagement = () => {
       <div className="row">
         <div className="col-md-6 mb-3">
           {/* Phần hiển thị hình ảnh */}
-          <Form.Label>Hình ảnh khóa học</Form.Label>
+          <Form.Label>
+            Hình ảnh sản phẩm <span className="text-danger">(*)</span>
+          </Form.Label>
           <div
             className="d-flex justify-content-center align-items-center mb-3 rounded bg-light"
             style={{
@@ -319,6 +369,38 @@ const ProductManagement = () => {
               {errorFields.image}
             </Form.Control.Feedback>
           </Form.Group>
+
+          <Form.Group controlId="formCategory" className="mt-3">
+            <Form.Label>
+              Loại sản phẩm <span className="text-danger">(*)</span>
+            </Form.Label>
+            <Select
+              options={listCategoryOption} // Danh sách các tùy chọn loại sản phẩm
+              value={listCategoryOption.find(
+                (option) => option.value === formData.categoryId
+              )}
+              onChange={(selectedOption) =>
+                handleInputChange(
+                  "categoryId",
+                  selectedOption ? selectedOption.value : ""
+                )
+              }
+              placeholder="Chọn loại sản phẩm"
+              isInvalid={!!errorFields.categoryId}
+              isClearable // Cho phép xóa chọn lựa
+              isSearchable // Bật tính năng tìm kiếm
+              styles={{
+                menu: (provided) => ({
+                  ...provided,
+                }),
+              }}
+            />
+            {errorFields.categoryId && (
+              <div className="invalid-feedback d-block">
+                {errorFields.categoryId}
+              </div>
+            )}
+          </Form.Group>
         </div>
 
         <div className="col-md-6 mb-3">
@@ -340,10 +422,32 @@ const ProductManagement = () => {
               {errorFields.productName}
             </Form.Control.Feedback>
           </Form.Group>
-        </div>
 
-        <div className="col-md-6 mb-3">
-          <Form.Group controlId="formDiscount">
+          <Form.Group controlId="formPrice" className="mt-3">
+            <Form.Label>
+              Giá gốc <span className="text-danger">(*)</span>
+            </Form.Label>
+            <NumericFormat
+              thousandSeparator={true}
+              suffix=" VNĐ"
+              decimalScale={0} // Không cho phép số thập phân
+              value={formData.price}
+              onValueChange={(values) => {
+                const { floatValue } = values;
+                handleInputChange("price", floatValue); // Lấy giá trị số thực (floatValue là giá trị số thực không có dấu phân cách hay định dạng   )
+              }}
+              className={`form-control ${
+                errorFields.price ? "is-invalid" : ""
+              }`}
+              placeholder="Nhập giá (VNĐ)"
+              required
+            />
+            <Form.Control.Feedback type="invalid">
+              {errorFields.price}
+            </Form.Control.Feedback>
+          </Form.Group>
+
+          <Form.Group controlId="formDiscount" className="mt-3">
             <Form.Label>
               Tỷ lệ giảm giá (%) <span className="text-danger">(*)</span>
             </Form.Label>
@@ -362,11 +466,46 @@ const ProductManagement = () => {
               {errorFields.discount}
             </Form.Control.Feedback>
           </Form.Group>
-        </div>
-      </div>
 
-      <div className="row">
-        <div className="col-md-12 mb-3">
+          <Form.Group controlId="discountPrice" className="mt-3">
+            <Form.Label>Giá KM</Form.Label>
+            <NumericFormat
+              thousandSeparator={true}
+              suffix=" VNĐ"
+              decimalScale={0} // Không cho phép số thập phân
+              value={formData.discountedPrice}
+              className="form-control"
+              placeholder="Nhập giá (VNĐ)"
+              required
+              readOnly
+            />
+            <Form.Control.Feedback type="invalid">
+              {errorFields.discountedPrice}
+            </Form.Control.Feedback>
+          </Form.Group>
+
+          <Form.Group controlId="formDiscount" className="mt-3">
+            <Form.Label>
+              Tổng Số lượng<span className="text-danger">(*)</span>
+            </Form.Label>
+            <Form.Control
+              type="number"
+              name="stock"
+              min={0}
+              step={1}
+              value={formData.stock}
+              onChange={(e) => handleInputChange("stock", e.target.value)}
+              isInvalid={!!errorFields.stock}
+              required
+            />
+            <Form.Control.Feedback type="invalid">
+              {errorFields.stock}
+            </Form.Control.Feedback>
+          </Form.Group>
+        </div>
+
+        {/* <div className="row"> */}
+        <div className="col-md-12 mb-2">
           <Form.Group controlId="formDescription">
             <Form.Label>Mô tả</Form.Label>
             <Form.Control
@@ -379,88 +518,7 @@ const ProductManagement = () => {
             />
           </Form.Group>
         </div>
-      </div>
-      <div className="mb-3 p-0">
-        <Form.Group controlId="formPrice">
-          <Form.Label>Giá gốc</Form.Label>
-          <NumericFormat
-            thousandSeparator={true}
-            suffix=" VNĐ"
-            decimalScale={0} // Không cho phép số thập phân
-            value={formData.price}
-            onValueChange={(values) => {
-              const { floatValue } = values;
-              handleInputChange("price", floatValue); // Lấy giá trị số thực (floatValue là giá trị số thực không có dấu phân cách hay định dạng   )
-            }}
-            className="form-control"
-            placeholder="Nhập giá (VNĐ)"
-            required
-          />
-          <Form.Control.Feedback type="invalid">
-            {errorFields.price}
-          </Form.Control.Feedback>
-        </Form.Group>
-      </div>
-
-      <div className="mb-3 p-0">
-        <Form.Group controlId="discountPrice">
-          <Form.Label>Giá KM</Form.Label>
-          <NumericFormat
-            thousandSeparator={true}
-            suffix=" VNĐ"
-            decimalScale={0} // Không cho phép số thập phân
-            value={formData.discountedPrice}
-            className="form-control"
-            placeholder="Nhập giá (VNĐ)"
-            required
-            readOnly
-          />
-          <Form.Control.Feedback type="invalid">
-            {errorFields.discountedPrice}
-          </Form.Control.Feedback>
-        </Form.Group>
-      </div>
-
-      <div className="col-md-6 mb-3">
-        <Form.Group controlId="formDiscount">
-          <Form.Label>
-            Tổng Số lượng<span className="text-danger">(*)</span>
-          </Form.Label>
-          <Form.Control
-            type="number"
-            name="stock"
-            min={0}
-            step={1}
-            value={formData.stock}
-            onChange={(e) => handleInputChange("stock", e.target.value)}
-            isInvalid={!!errorFields.stock}
-            required
-          />
-          <Form.Control.Feedback type="invalid">
-            {errorFields.stock}
-          </Form.Control.Feedback>
-        </Form.Group>
-      </div>
-
-      <div className="col-md-6 mb-3">
-        <Form.Group controlId="formCategory">
-          <Form.Label>
-            Loại sản phẩm<span className="text-danger">(*)</span>
-          </Form.Label>
-          <Form.Control
-            type="number"
-            name="categoryId"
-            min={0}
-            step={1}
-            value={formData.categoryId}
-            onChange={(e) => handleInputChange("categoryId", e.target.value)}
-            isInvalid={!!errorFields.categoryId}
-            required
-          />
-          <Form.Control.Feedback type="invalid">
-            {errorFields.categoryId}
-          </Form.Control.Feedback>
-        </Form.Group>
+        {/* </div> */}
       </div>
     </>
   );
