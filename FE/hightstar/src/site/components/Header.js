@@ -215,7 +215,9 @@ function Header() {
               <NavLink to="/course" className="nav-item nav-link">
                 Khóa học
               </NavLink>
-
+              <NavLink to="/product" className="nav-item nav-link">
+                Sản phẩm
+              </NavLink>
               <Dropdown align="start">
                 <Dropdown.Toggle
                   id="dropdown-basic"
