@@ -11,6 +11,8 @@ public interface AttendanceService {
 
     AttendanceDTO scanQRCode(String qrCodeBase64);
 
+    boolean hasCheckedOutWithTicket(Long ticketId);
+
     AttendanceDTO getAttendanceById(Long id);
 
     AttendanceDTO createAttendance(AttendanceDTO attendanceDTO);

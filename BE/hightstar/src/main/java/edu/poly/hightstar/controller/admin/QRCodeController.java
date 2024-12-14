@@ -19,7 +19,7 @@ public class QRCodeController {
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @PostMapping("/validate")
     public ResponseEntity<QRCodeValidationResponse> validateQRCode(@RequestBody QRCodeValidationRequest request) {
-        QRCodeValidationResponse response = qrCodeValidationService.validateQRCode(request.getQrCodeBase64());
+        QRCodeValidationResponse response = qrCodeValidationService.validateQRCode(request.getTicketCode());
         return ResponseEntity.ok(response);
     }
 }

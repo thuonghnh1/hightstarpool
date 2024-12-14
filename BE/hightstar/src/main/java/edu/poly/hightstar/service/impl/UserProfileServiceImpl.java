@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,6 +27,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     // Lấy tất cả hồ sơ người dùng
     @Override
+    @Transactional
     public List<UserProfileDTO> getAllUserProfiles() {
         return userProfileRepository.findAll().stream()
                 .map(this::convertToDTO)
@@ -33,6 +36,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     // Lấy hồ sơ người dùng theo ID
     @Override
+    @Transactional
     public UserProfileDTO getUserProfileById(Long id) {
         Optional<UserProfile> userProfile = userProfileRepository.findById(id);
         if (userProfile.isEmpty()) {
@@ -43,6 +47,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     // Lấy hồ sơ người dùng theo userId
     @Override
+    @Transactional
     public UserProfileDTO getProfileByUserId(Long userId) {
         Optional<UserProfile> userProfile = userProfileRepository.findByUser_UserId(userId);
         if (userProfile.isEmpty()) {
@@ -54,6 +59,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     // Cập nhật hồ sơ người dùng
     @Override
+    @Transactional
     public UserProfileDTO updateUserProfile(Long id, UserProfileDTO userProfileDTO) {
         Optional<UserProfile> existingProfile = userProfileRepository.findById(id);
         if (existingProfile.isEmpty()) {

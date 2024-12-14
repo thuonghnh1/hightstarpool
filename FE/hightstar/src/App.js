@@ -12,10 +12,14 @@ import Page500 from "./common/pages/Page500";
 import { UserProvider } from "./contexts/UserContext";
 import VerifyOtpPage from "./site/views/auth/VerifyOtpPage";
 import ResetPasswordPage from "./site/views/auth/ResetPasswordPage";
+import { useTheme } from "./contexts/ThemeContext";
 
 function App() {
+  const { theme } = useTheme();
   return (
-    <div className="app w-100" style={{ backgroundColor: "#f3f4f7" }}>
+    <div
+      className={`app w-100 ${theme === "dark" ? "dark-theme" : "light-theme"}`}
+    >
       <Router>
         <UserProvider>
           <Routes>

@@ -32,13 +32,12 @@ const UserManagement = () => {
     isViewDetail: false,
   });
 
-  // Danh sách button
   const button = {
     btnAdd: true,
     btnEdit: true,
     btnDelete: true,
     btnDetail: true,
-    btnFilter: true,
+    btnSetting: false,
   };
 
   const [isLoading, setIsLoading] = useState(false);

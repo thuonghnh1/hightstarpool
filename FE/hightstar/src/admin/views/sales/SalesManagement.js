@@ -87,7 +87,7 @@ const SalesManagement = () => {
           // const data = await SalesService.fetchProducts();
           // setProducts(data);
         }
-        const data = await SalesService.fetchDiscounts();
+        const data = await SalesService.fetchActiveDiscounts();
         setListDiscountOption(data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -120,7 +120,9 @@ const SalesManagement = () => {
 
       if (isCourse && existingItem) {
         setTimeout(() => {
-          toast.error("Khóa học này đã có trong giỏ hàng!", { toastId: item.id });
+          toast.error("Khóa học này đã có trong giỏ hàng!", {
+            toastId: item.id,
+          });
         }, 0);
         return prevItems;
       }
@@ -255,11 +257,11 @@ const SalesManagement = () => {
   const handleConfirmPayment = async () => {
     // Kiểm tra nếu giỏ hàng chứa khóa học
     const hasCourse = cartItems.some((item) => item.id.includes("KH"));
-    // if (hasCourse) {
-    //   // Hiển thị modal
-    //   handleShowModal("modalConfirmInfo"); // hiển thị modal xác nhận trước khi thanh toán.
-    //   return;
-    // }
+    if (hasCourse) {
+      // Hiển thị modal
+      handleShowModal("modalConfirmInfo"); // hiển thị modal xác nhận trước khi thanh toán.
+      return;
+    }
 
     const invoice = prepareOrderData(
       cartItems,

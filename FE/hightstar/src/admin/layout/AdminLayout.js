@@ -16,9 +16,10 @@ import {
   NotificationManagement,
   MyProfile,
   ReviewManagement,
+  CategoryManagement,
+  ProductManagement,
 } from "../views/index";
 import "../css/style.css";
-import { ThemeProvider } from "../components/common/ThemeContext";
 import TicketCheck from "../views/tickets/TicketCheck";
 import BackToTop from "../../common/components/BackToTop";
 
@@ -53,7 +54,7 @@ const AdminLayout = () => {
   }, []);
 
   return (
-    <ThemeProvider>
+    
       <div className="container__admin overflow-hidden">
         <AppSidebar className="" isSidebarOpen={isSidebarOpen} />
         <div
@@ -111,6 +112,14 @@ const AdminLayout = () => {
                   path="attendance-management"
                   element={<AttendanceManagement />}
                 />
+                <Route
+                  path="category-management"
+                  element={<CategoryManagement />}
+                />
+                <Route
+                  path="products-management"
+                  element={<ProductManagement />}
+                />
                 <Route path="*" element={<Navigate to={"/admin"} />} />
               </Routes>
               <Outlet /> {/* Để hiển thị các component con */}
@@ -120,7 +129,6 @@ const AdminLayout = () => {
         </div>
         <BackToTop />
       </div>
-    </ThemeProvider>
   );
 };
 

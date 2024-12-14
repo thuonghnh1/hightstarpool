@@ -12,7 +12,7 @@ function ImageModal({ show, imageSrc, onClose }) {
       <div
         className="position-relative image-modal-container"
         style={{
-          width: "100%", // Để modal không bị vượt quá màn hình
+          width: "400px", // Để modal không bị vượt quá màn hình
           height: "400px", // Tự động điều chỉnh chiều cao
         }}
       >

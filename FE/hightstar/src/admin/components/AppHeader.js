@@ -5,7 +5,6 @@ import { NavLink, useNavigate } from "react-router-dom";
 import avatarDefault from "../../assets/images/avatars/user.png";
 // import iconAddUser from "../../assets/images/icons/add-user.png";
 import iconBell from "../../assets/images/icons/notification.png";
-import { useTheme } from "./common/ThemeContext";
 // import { toast } from "react-toastify";
 import { logout } from "../../site/services/AuthService";
 import { UserContext } from "../../contexts/UserContext";
@@ -13,6 +12,7 @@ import NotificationService from "../../site/services/NotificationService";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi"; // Import locale tiếng Việt
+import { useTheme } from "../../contexts/ThemeContext";
 
 // Cấu hình Day.js với plugin relativeTime và locale tiếng Việt
 dayjs.extend(relativeTime);
@@ -33,29 +33,36 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
   // Hàm fetch thông báo
   const fetchNotification = useCallback(async () => {
     try {
-      const notificationsForAll =
-        await await NotificationService.getNotificationsByRecipientType("ALL");
+      if (user) {
+        const notificationsForAll =
+          await await NotificationService.getNotificationsByRecipientType(
+            "ALL"
+          );
 
-      const commonNotifications =
-        await await NotificationService.getNotificationsByRecipientType(
-          user.role
+        const commonNotifications =
+          await await NotificationService.getNotificationsByRecipientType(
+            user.role
+          );
+
+        //  kết hợp 2 mảng thông báo lại
+        const allNotifications = [
+          ...notificationsForAll,
+          ...commonNotifications,
+        ];
+        setNotifications(allNotifications);
+
+        const individualNotifications =
+          await NotificationService.getNotificationsByUserId(user.userId);
+
+        const notificationsWithIcon = individualNotifications.map(
+          (notification) => ({
+            ...notification,
+            imgSrc: iconBell,
+            createdAt: dayjs(notification.createdAt).fromNow(),
+          })
         );
-
-      //  kết hợp 2 mảng thông báo lại
-      const allNotifications = [...notificationsForAll, ...commonNotifications];
-      setNotifications(allNotifications);
-
-      const individualNotifications =
-        await NotificationService.getNotificationsByUserId(user.userId);
-
-      const notificationsWithIcon = individualNotifications.map(
-        (notification) => ({
-          ...notification,
-          imgSrc: iconBell,
-          createdAt: dayjs(notification.createdAt).fromNow(),
-        })
-      );
-      setRoleNotifications(notificationsWithIcon);
+        setRoleNotifications(notificationsWithIcon);
+      }
     } catch (error) {
       console.error("Lỗi khi lấy thông báo:", error);
     }
@@ -141,8 +148,8 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
               </NavLink>
             </li>
             <li className="nav-item">
-              <NavLink className="nav-link" to="/admin/user-management">
-                Người dùng
+              <NavLink className="nav-link" to="/admin/ticket/ticket-check">
+                Soát vé
               </NavLink>
             </li>
             <li className="nav-item">

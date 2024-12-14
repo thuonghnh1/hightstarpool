@@ -17,12 +17,12 @@ import javax.imageio.ImageIO;
 @Component
 public class QRCodeGenerator {
 
-    public String generateQRCodeBase64(String data, int width, int height) throws WriterException, IOException {
+    public String generateQRCodeBase64(String ticketCode, int width, int height) throws WriterException, IOException {
         // Tạo đối tượng QRCodeWriter để tạo mã QR
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
 
         // Tạo BitMatrix từ dữ liệu input
-        BitMatrix bitMatrix = qrCodeWriter.encode(data, BarcodeFormat.QR_CODE, width, height);
+        BitMatrix bitMatrix = qrCodeWriter.encode(ticketCode, BarcodeFormat.QR_CODE, width, height);
 
         // Chuyển BitMatrix thành BufferedImage
         BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix);

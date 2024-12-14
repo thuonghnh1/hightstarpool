@@ -1,27 +1,32 @@
 package edu.poly.hightstar.service;
 
 import edu.poly.hightstar.enums.TicketType;
-import edu.poly.hightstar.enums.TicketStatus;
 import edu.poly.hightstar.model.TicketDTO;
+import edu.poly.hightstar.utils.exception.AppException;
+import edu.poly.hightstar.utils.exception.ErrorCode;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Date;
 
 @Component
 public class TicketCodeService {
 
-    // private static final long JWT_EXPIRATION = 3600000L; // 1 giờ cho access token
+    // private static final long JWT_EXPIRATION = 3600000L; // 1 giờ cho access
+    // token
 
     private final String jwtSecretKey;
 
-    // Constructor lấy giá trị JWT_SECRET_KEY từ biến môi trường
     public TicketCodeService() {
         this.jwtSecretKey = loadSecretKey();
     }
@@ -44,21 +49,24 @@ public class TicketCodeService {
 
     // Tạo ticketCode bằng JWT
     public String generateTicketCode(TicketDTO ticketDTO) {
-        Date now = new Date();
-        Date expiryDate = ticketDTO.getExpiryDate(); // Ngày hết hạn của vé
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expiryDate = ticketDTO.getExpiryDate(); // Ngày hết hạn của vé
+
+        // Chuyển LocalDateTime thành Date
+        Date issueDate = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
+        Date expiryDateConverted = Date.from(expiryDate.atZone(ZoneId.systemDefault()).toInstant());
 
         // Tạo JWT cho mã vé
         return Jwts.builder()
                 .setSubject(String.valueOf(ticketDTO.getTicketId())) // ticketId làm subject
                 .claim("ticketId", ticketDTO.getTicketId())
                 .claim("ticketType", ticketDTO.getTicketType().name()) // Vé loại gì (tháng, tuần, ngày)
-                .claim("ticketStatus", ticketDTO.getStatus().name()) // Trạng thái vé
                 // Chỉ thêm studentId nếu không null
                 .claim("studentId", ticketDTO.getStudentId() != null ? ticketDTO.getStudentId() : "")
-                .claim("issueDate", now.getTime()) // Thêm issueDate dưới dạng timestamp
+                .claim("issueDate", issueDate.getTime()) // Thêm issueDate dưới dạng timestamp
                 .setIssuer("hightstar.com") // Nguồn phát hành
-                .setIssuedAt(now)
-                .setExpiration(expiryDate) // Thời gian hết hạn
+                .setIssuedAt(issueDate)
+                .setExpiration(expiryDateConverted) // Thời gian hết hạn
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512) // Mã hóa bằng HS512 và khóa bí mật
                 .compact();
     }
@@ -71,22 +79,34 @@ public class TicketCodeService {
         ticketDTO.setTicketId(claims.get("ticketId", Long.class));
         ticketDTO.setTicketCode(ticketCode); // Giữ nguyên ticketCode
         ticketDTO.setTicketType(TicketType.valueOf(claims.get("ticketType", String.class)));
-        ticketDTO.setStatus(TicketStatus.valueOf(claims.get("ticketStatus", String.class)));
+
         // Xử lý studentId có thể là null
         Object studentIdObj = claims.get("studentId");
-        if (studentIdObj instanceof Long) {
-            ticketDTO.setStudentId((Long) studentIdObj);
-        } else if (studentIdObj instanceof String && !((String) studentIdObj).isEmpty()) {
-            ticketDTO.setStudentId(Long.valueOf((String) studentIdObj));
-        } else {
+        try {
+            if (studentIdObj != null) {
+                if (studentIdObj instanceof String && !((String) studentIdObj).isEmpty()) {
+                    ticketDTO.setStudentId(Long.valueOf((String) studentIdObj));
+                } else {
+                    ticketDTO.setStudentId(Long.parseLong(studentIdObj.toString()));
+                }
+            } else {
+                ticketDTO.setStudentId(null);
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Không thể chuyển đổi studentIdObj sang Long: " + studentIdObj);
             ticketDTO.setStudentId(null);
         }
-        ticketDTO.setExpiryDate(claims.getExpiration()); // Thời gian hết hạn
 
-        // Lấy issueDate từ JWT
+        // Chuyển đổi expiryDate từ Date (JWT) sang LocalDateTime
+        Instant expiryInstant = claims.getExpiration().toInstant();
+        LocalDateTime expiryDate = LocalDateTime.ofInstant(expiryInstant, ZoneId.systemDefault());
+        ticketDTO.setExpiryDate(expiryDate);
+
+        // Chuyển đổi issueDate từ long timestamp (JWT) sang LocalDateTime
         Long issueTimestamp = claims.get("issueDate", Long.class);
-        ticketDTO.setIssueDate(new Date(issueTimestamp));
-
+        Instant issueInstant = Instant.ofEpochMilli(issueTimestamp);
+        LocalDateTime issueDate = LocalDateTime.ofInstant(issueInstant, ZoneId.systemDefault());
+        ticketDTO.setIssueDate(issueDate);
         return ticketDTO;
     }
 
@@ -101,13 +121,17 @@ public class TicketCodeService {
     }
 
     // Xác minh tính hợp lệ của ticketCode (JWT)
-    public boolean validateTicketCode(String ticketCode) {
+    public void validateTicketCode(String ticketCode) {
         try {
-            parseClaims(ticketCode); // Nếu parse được thì là hợp lệ
-            return true;
+            // Parse JWT để kiểm tra tính hợp lệ
+            parseClaims(ticketCode);
+        } catch (ExpiredJwtException e) {
+            throw new AppException("Vé này đã hết hạn!", ErrorCode.TICKET_EXPIRED);
         } catch (Exception e) {
-            System.out.println("Invalid ticket code: " + e.getClass().getName() + ": " + e.getMessage());
-            return false;
+            // Nếu có lỗi khác
+            // e.printStackTrace();
+            throw new AppException("Mã QR không hợp lệ!", ErrorCode.INVALID_QR_CODE);
         }
     }
+
 }

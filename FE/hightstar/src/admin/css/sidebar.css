@@ -27,21 +27,17 @@
 
 /* Theme sáng */
 .sidebar.light-theme {
-  background-color: #f5f5f5; /* Màu nền sáng */
-  color: #333; /* Màu chữ */
+  background-color: #ffffff; /* Màu nền sáng */
+  color: #000000; /* Màu chữ */
+  font-weight: bo;
 }
 
 .sidebar.light-theme .inactive-link {
-  color: rgba(
-    0,
-    0,
-    0,
-    0.771
-  ); /* Màu chữ cho link không được chọn trong theme sáng */
+  color: rgb(0, 0, 0); /* Màu chữ cho link không được chọn trong theme sáng */
 }
 
 .sidebar.light-theme .active-link {
-  background-color: #ddd; /* Màu nền cho link được chọn trong theme sáng */
+  background-color: #00000023; /* Màu nền cho link được chọn trong theme sáng */
   color: #333; /* Màu chữ cho link được chọn trong theme sáng */
 }
 
@@ -87,8 +83,18 @@
   border-radius: 6px;
 }
 
+/* Optional: Hiệu ứng hover */
+.light-theme .inactive-link:hover {
+  background-color: #00000023; /* Màu nền khi hover */
+  border-radius: 6px;
+}
+
 .inactive-link i {
   opacity: 30%;
+}
+
+.light-theme .inactive-link i {
+  opacity: 50%;
 }
 
 /* Sidebar khi đóng */

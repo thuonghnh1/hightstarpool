@@ -6,5 +6,5 @@ import lombok.Data;
 public class QRCodeValidationResponse {
     private boolean valid;
     private String message;
-    private TicketDTO ticket; // Thông tin vé nếu hợp lệ
+    private TicketDTO ticketDto; // Thông tin vé nếu hợp lệ
 }

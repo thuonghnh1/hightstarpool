@@ -10,6 +10,8 @@ import edu.poly.hightstar.utils.exception.ErrorCode;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +31,24 @@ public class DiscountServiceImpl implements DiscountService {
             BeanUtils.copyProperties(discount, dto);
             return dto;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DiscountDTO> getActiveDiscounts() {
+        List<DiscountDTO> allDiscounts = getAllDiscounts();
+        List<DiscountDTO> activeDiscounts = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+
+        for (DiscountDTO discount : allDiscounts) {
+            if (isActive(discount, now)) {
+                activeDiscounts.add(discount);
+            }
+        }
+        return activeDiscounts;
+    }
+
+    private static boolean isActive(DiscountDTO discount, LocalDateTime now) {
+        return now.isAfter(discount.getStartDate()) && now.isBefore(discount.getEndDate());
     }
 
     @Override

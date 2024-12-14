@@ -3,6 +3,7 @@ package edu.poly.hightstar.domain;
 import java.time.LocalTime;
 import java.util.Date;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,7 +21,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "attendances", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"student_id", "ticket_id", "attendance_date"})
+        @UniqueConstraint(columnNames = { "student_id", "ticket_id", "attendance_date" })
 })
 public class Attendance {
 
@@ -39,12 +40,13 @@ public class Attendance {
     private LocalTime checkOutTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = false)
+    @JoinColumn(name = "student_id")
     private Student student;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "ticket_id", nullable = false)
     private Ticket ticket;
+    
 
     @Column(name = "penalty_amount")
     private Double penaltyAmount;
