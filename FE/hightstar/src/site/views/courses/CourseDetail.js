@@ -31,6 +31,7 @@ const CourseDetail = () => {
   const [showModal, setShowModal] = useState(false);
   const handleClose = () => setShowModal(false);
   const handleShow = () => setShowModal(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -147,13 +148,13 @@ const CourseDetail = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        setLoadingPage(true);
+        setIsSubmitting(true);
+        // setLoadingPage(true);
         await SiteService.sendInfoRegister(formData);
         handleResetForm();
         toast.success("Chúng tôi sẽ sớm liên hệ tư vấn cho bạn!");
         handleClose();
       } catch (error) {
-        console.error("Error registering course:", error);
         toast.error("Đăng ký thất bại. Vui lòng thử lại!");
       } finally {
         setLoadingPage(false);
