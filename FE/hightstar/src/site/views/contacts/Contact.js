@@ -12,11 +12,7 @@ function Contact() {
               <nav aria-label="breadcrumb">
                 <ol className="breadcrumb justify-content-center">
                   <li className="breadcrumb-item">
-<<<<<<< HEAD
-                    <NavLink to={"/"} className="text-decoration-none">
-=======
                     <NavLink to={"/"} className={"text-decoration-none"}>
->>>>>>> 57242e787256678e304eebe9641125dba4bcaa03
                       Trang Chủ
                     </NavLink>
                   </li>
