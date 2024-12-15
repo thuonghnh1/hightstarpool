@@ -10,7 +10,7 @@ import { UserContext } from "../../../contexts/UserContext";
 import { formatCurrency } from "../utils/formatCurrency";
 import TrainerList from "./TrainerList";
 import Select from "react-select"; // thư viện tạo select có hỗ trợ search
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 
 export default function Home() {
   const { user } = useContext(UserContext);
@@ -171,6 +171,7 @@ export default function Home() {
       <Helmet>
         <title>Trang chủ - Hight Star</title>
       </Helmet>
+      <ToastContainer />
       {loadingPage ? (
         <div className="w-100 h-100 d-flex justify-content-center align-items-center">
           <Spinner animation="border" variant="primary" className=""></Spinner>
