@@ -1,67 +1,136 @@
-// src/contexts/CartContext.js
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { UserContext } from "./UserContext";
+import { toast } from "react-toastify";
 
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  // Khởi tạo giỏ hàng từ localStorage hoặc mảng rỗng
-  const initialCartItems = JSON.parse(localStorage.getItem("shoppingCartItems")) || [];
-  const [cartItems, setCartItems] = useState(initialCartItems);
+  const { user } = useContext(UserContext);
+  const [shoppingCartItems, setShoppingCartItems] = useState([]);
 
-  // Cập nhật localStorage khi giỏ hàng thay đổi
   useEffect(() => {
-    localStorage.setItem("shoppingCartItems", JSON.stringify(cartItems));
-  }, [cartItems]);
+    if (user && user.userId) {
+      const storedCart =
+        JSON.parse(localStorage.getItem(`shoppingCartItems_${user.userId}`)) ||
+        [];
+      setShoppingCartItems(storedCart);
+    } else {
+      setShoppingCartItems([]);
+    }
+  }, [user]);
 
-  // Hàm thêm sản phẩm vào giỏ hàng
-  const addToCart = (product) => {
-    setCartItems((prevCart) => {
-      // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng chưa
-      const existingItem = prevCart.find(
-        (item) => item.product.productId === product.productId && item.type === product.type
+  useEffect(() => {
+    if (user && user.userId) {
+      localStorage.setItem(
+        `shoppingCartItems_${user.userId}`,
+        JSON.stringify(shoppingCartItems)
       );
+    }
+  }, [shoppingCartItems, user]);
 
-      if (existingItem) {
-        // Nếu sản phẩm đã tồn tại, tăng số lượng
-        return prevCart.map((item) =>
-          item.cartItemId === existingItem.cartItemId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      } else {
-        // Nếu sản phẩm chưa tồn tại, thêm mới
-        const newItem = {
-          cartItemId: new Date().getTime(), // Unique ID cho cart item
-          ...product,
-          quantity: 1, // Khởi tạo số lượng là 1
-        };
-        return [...prevCart, newItem];
+  const addToCart = (item) => {
+    if (!user) {
+      toast.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
+    const existingItemIndex = shoppingCartItems.findIndex(
+      (cartItem) =>
+        cartItem.product.productId === item.productId &&
+        cartItem.size === item.selectedSize
+    );
+
+    let updatedCartItems = [];
+
+    if (existingItemIndex !== -1) {
+      const existingItem = shoppingCartItems[existingItemIndex];
+      const newQuantity = existingItem.quantity + item.quantity;
+
+      if (newQuantity > item.stock) {
+        toast.error(`Số lượng tối đa cho sản phẩm này là ${item.stock}.`, {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        return;
       }
+
+      updatedCartItems = shoppingCartItems.map((cartItem, index) => {
+        if (index === existingItemIndex) {
+          return {
+            ...cartItem,
+            quantity: newQuantity,
+          };
+        }
+        return cartItem;
+      });
+    } else {
+      if (item.quantity > item.stock) {
+        toast.error(`Số lượng tối đa cho sản phẩm này là ${item.stock}.`, {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        return;
+      }
+
+      const cartItem = {
+        cartItemId: new Date().getTime(),
+        product: {
+          productId: item.productId,
+          name: item.title,
+          image: item.image || "",
+        },
+        quantity: item.quantity,
+        unitPrice: parseFloat(item.unitPrice),
+        size: item.selectedSize || null,
+      };
+      updatedCartItems = [...shoppingCartItems, cartItem];
+    }
+
+    setShoppingCartItems(updatedCartItems);
+    toast.success("Đã thêm sản phẩm vào giỏ hàng!", {
+      position: "top-right",
+      autoClose: 2000,
     });
   };
 
-  // Hàm xóa sản phẩm khỏi giỏ hàng
   const removeFromCart = (itemId) => {
-    setCartItems((prevCart) => prevCart.filter((item) => item.cartItemId !== itemId));
-  };
-
-  // Hàm cập nhật số lượng sản phẩm
-  const updateQuantity = (itemId, newQuantity) => {
-    setCartItems((prevCart) =>
-      prevCart.map((item) =>
-        item.cartItemId === itemId ? { ...item, quantity: newQuantity } : item
-      )
+    const updatedItems = shoppingCartItems.filter(
+      (item) => item.cartItemId !== itemId
     );
+    setShoppingCartItems(updatedItems);
   };
 
-  // Hàm làm trống giỏ hàng
+  const updateQuantity = (itemId, newQuantity) => {
+    const updatedItems = shoppingCartItems.map((item) => {
+      if (item.cartItemId === itemId) {
+        return { ...item, quantity: newQuantity };
+      }
+      return item;
+    });
+    setShoppingCartItems(updatedItems);
+  };
+
   const clearCart = () => {
-    setCartItems([]);
+    setShoppingCartItems([]);
+    toast.info("Giỏ hàng đã được làm trống.", {
+      position: "top-right",
+      autoClose: 2000,
+    });
   };
 
   return (
     <CartContext.Provider
-      value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart }}
+      value={{
+        shoppingCartItems,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        setShoppingCartItems,
+      }}
     >
       {children}
     </CartContext.Provider>
