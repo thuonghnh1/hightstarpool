@@ -212,7 +212,7 @@ const CategoryManagement = () => {
           <TableManagement
             columns={categoryColumns}
             data={categoryData}
-            title={"Quản lý giảm giá"}
+            title={"Quản lý danh mục"}
             defaultColumns={categoryColumns}
             modalContent={modalContent}
             handleReset={handleReset}
