@@ -16,6 +16,7 @@ import NotificationService from "../services/NotificationService";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi"; // Import locale tiếng Việt
+import { CartContext } from "../../contexts/CartContext";
 
 // Cấu hình Day.js với plugin relativeTime và locale tiếng Việt
 dayjs.extend(relativeTime);
@@ -23,7 +24,7 @@ dayjs.locale("vi"); // Cài đặt ngôn ngữ tiếng Việt
 
 function Header() {
   const { user, updateUser } = useContext(UserContext);
-  const listCartItems = JSON.parse(localStorage.getItem("shoppingCartItems"));
+  const { shoppingCartItems } = useContext(CartContext);
   const [notifications, setNotifications] = useState([]);
   const [roleNotifications, setRoleNotifications] = useState([]);
   const [showToasts, setShowToasts] = useState([]);
@@ -220,6 +221,9 @@ function Header() {
               <NavLink to="/course" className="nav-item nav-link">
                 Khóa học
               </NavLink>
+              <NavLink to="/product" className="nav-item nav-link">
+                Sản phẩm
+              </NavLink>
 
               <Dropdown align="start">
                 <Dropdown.Toggle
@@ -379,7 +383,7 @@ function Header() {
                 className="badge rounded-pill bg-danger position-absolute"
                 style={{ top: "-5px", left: "32px" }}
               >
-                {user ? listCartItems?.length : 0}
+                {user ? shoppingCartItems?.length : 0}
               </span>
             </NavLink>
             {!user ? (

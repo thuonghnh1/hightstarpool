@@ -1,96 +1,78 @@
 import { useState, useEffect, useContext } from "react";
-import { Modal, Button, Spinner } from "react-bootstrap"; // Sử dụng React Bootstrap cho modal
+import { Modal, Button, Spinner } from "react-bootstrap";
 import { Helmet } from "react-helmet-async";
 import { UserContext } from "../../../contexts/UserContext";
+import { CartContext } from "../../../contexts/CartContext";
 import { useNavigate } from "react-router-dom";
+import UserProfileService from "../../../admin/services/UserProfileService";
 
 const ShoppingCart = () => {
   const { user } = useContext(UserContext);
-  const navigate = useNavigate();
-  const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
-  // Khởi tạo dữ liệu giỏ hàng từ localStorage hoặc sử dụng dữ liệu mẫu
-  const initialCartItems = JSON.parse(
-    localStorage.getItem("shoppingCartItems")
-  ) || [
-    {
-      cartItemId: 1,
-      product: {
-        productId: 101,
-        name: "Áo Sơ Mi Xanh",
-        image: "https://via.placeholder.com/150",
-      },
-      quantity: 2,
-      unitPrice: 1799000,
-      color: "Xanh lá",
-      size: "M",
-    },
-    {
-      cartItemId: 2,
-      product: {
-        productId: 102,
-        name: "Quần Jeans Đen",
-        image: "https://via.placeholder.com/150",
-      },
-      quantity: 1,
-      unitPrice: 2599000,
-      color: "Đen",
-      size: "32",
-    },
-  ];
+  const { shoppingCartItems, removeFromCart, updateQuantity, clearCart } =
+    useContext(CartContext);
 
-  const [shoppingCartItems, setShoppingCartItems] = useState(initialCartItems);
-  const [totalPriceInCart, setTotalPriceInCart] = useState(0);
+  const navigate = useNavigate();
+  const [loadingPage, setLoadingPage] = useState(false);
   const [checkoutData, setCheckoutData] = useState({
-    fullName: "Nguyễn Văn A", // Giả lập dữ liệu người dùng
-    phoneNumber: "0123456789",
-    shippingAddress: "123 Đường ABC, Quận 1, TP. HCM",
+    fullName: "",
+    phoneNumber: "",
+    shippingAddress: "",
     totalAmount: 0,
   });
   const [showModal, setShowModal] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
 
-  // Tính tổng tiền trong giỏ hàng
+  // Lấy thông tin hồ sơ người dùng khi `user` thay đổi
   useEffect(() => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    setLoadingPage(true);
-    const total = shoppingCartItems.reduce(
-      (acc, item) => acc + item.unitPrice * item.quantity,
-      0
-    );
-    setTotalPriceInCart(total);
-    setCheckoutData((prevData) => ({ ...prevData, totalAmount: total }));
-
-    // Lưu trữ giỏ hàng vào localStorage
-    localStorage.setItem(
-      "shoppingCartItems",
-      JSON.stringify(shoppingCartItems)
-    );
-    setLoadingPage(false);
-  }, [shoppingCartItems, user, navigate]);
-
-  // Xử lý thay đổi số lượng sản phẩm
-  const handleQuantityChange = (itemId, newQuantity) => {
-    const updatedItems = shoppingCartItems.map((item) => {
-      if (item.cartItemId === itemId) {
-        return { ...item, quantity: newQuantity };
+    const fetchUserProfile = async () => {
+      if (!user) {
+        navigate("/login");
+        return;
       }
-      return item;
-    });
-    setShoppingCartItems(updatedItems);
-  };
 
-  // Xử lý xóa sản phẩm khỏi giỏ
-  const handleRemoveItem = (itemId) => {
-    const updatedItems = shoppingCartItems.filter(
-      (item) => item.cartItemId !== itemId
-    );
-    setShoppingCartItems(updatedItems);
-  };
+      setLoadingPage(true);
+      try {
+        const profile = await UserProfileService.getProfileByUserId(
+          user.userId
+        );
 
-  // Xử lý thay đổi input trong form checkout
+        if (profile) {
+          setCheckoutData((prevData) => ({
+            ...prevData,
+            fullName: profile.fullName || "",
+            phoneNumber: profile.phoneNumber || "",
+            shippingAddress: profile.shippingAddress || "",
+          }));
+        } else {
+          console.warn("Không tìm thấy hồ sơ người dùng.");
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy thông tin hồ sơ người dùng:", error);
+      } finally {
+        setLoadingPage(false);
+      }
+    };
+
+    if (user && user.userId) {
+      fetchUserProfile();
+    } else {
+      navigate("/login");
+    }
+  }, [user, navigate]);
+
+  // Tính tổng tiền trong giỏ hàng
+  const totalPriceInCart = shoppingCartItems.reduce(
+    (acc, item) => acc + (item.unitPrice || 0) * (item.quantity || 0),
+    0
+  );
+
+  useEffect(() => {
+    setCheckoutData((prevData) => ({
+      ...prevData,
+      totalAmount: totalPriceInCart,
+    }));
+  }, [totalPriceInCart]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCheckoutData((prevState) => ({
@@ -99,28 +81,30 @@ const ShoppingCart = () => {
     }));
   };
 
-  // Xử lý thanh toán
-  const handleCheckout = (e) => {
+  const handleCheckout = async (e) => {
     e.preventDefault();
-    // Giả lập gọi API và xử lý thanh toán
-    console.log("Checkout Data:", checkoutData);
-    // Sau khi thanh toán thành công, làm trống giỏ hàng
-    setShoppingCartItems([]);
-    setCheckoutSuccess(true);
-    setShowModal(false);
+    setLoadingPage(true);
+    try {
+      clearCart(); // Làm trống giỏ hàng sau khi thanh toán
+      setCheckoutSuccess(true);
+      setShowModal(false);
+    } catch (error) {
+      console.error("Lỗi khi xử lý thanh toán:", error);
+    } finally {
+      setLoadingPage(false);
+    }
   };
 
-  // Đóng thông báo thanh toán thành công
   const handleCloseSuccess = () => setCheckoutSuccess(false);
 
   return (
     <>
       <Helmet>
-        <title>Trang chủ - Hight Star</title>
+        <title>Giỏ Hàng - Hight Star</title>
       </Helmet>
       {loadingPage ? (
         <div className="w-100 h-100 d-flex justify-content-center align-items-center">
-          <Spinner animation="border" variant="primary" className=""></Spinner>
+          <Spinner animation="border" variant="primary" />
         </div>
       ) : (
         <section className="container h-100 px-4 py-3 mt-3 bg-white shopping-container">
@@ -129,7 +113,6 @@ const ShoppingCart = () => {
               <div className="col-md-8">
                 <div className="card mb-4">
                   <div className="card-header py-3">
-                    {/* Hiển thị số lượng sản phẩm trong giỏ hàng */}
                     <h5 className="mb-0">
                       Có{" "}
                       <span className="text-danger">
@@ -144,7 +127,6 @@ const ShoppingCart = () => {
                         <div key={item.cartItemId}>
                           <div className="row">
                             <div className="col-lg-3 col-md-12 mb-4 mb-lg-0">
-                              {/* Hiển thị hình ảnh sản phẩm */}
                               <div
                                 className="bg-image hover-overlay hover-zoom ripple rounded"
                                 data-mdb-ripple-color="light"
@@ -172,7 +154,6 @@ const ShoppingCart = () => {
                             </div>
 
                             <div className="col-lg-5 col-md-6 mb-4 mb-lg-0">
-                              {/* Hiển thị tên sản phẩm */}
                               <p className="mb-2">
                                 <strong className="fs-5 text-truncate">
                                   {item.product.name}
@@ -180,32 +161,20 @@ const ShoppingCart = () => {
                               </p>
                               <p
                                 style={{ fontSize: "14px" }}
-                                className="mb-2 text-muted"
-                              >
-                                <span className="fw-bold me-2">Màu sắc:</span>
-                                <span>{item.color || "Xanh lá"}</span>
-                              </p>
-                              <p
-                                style={{ fontSize: "14px" }}
                                 className="mb-3 text-muted"
                               >
-                                <span className="fw-bold me-2">
-                                  Kích thước:
-                                </span>
+                                <span className="fw-bold me-2">Size:</span>
                                 <span>{item.size || "M"}</span>
                               </p>
-                              {/* Hiển thị số lượng và nút tăng/giảm */}
                               <div
                                 className="d-flex mb-4"
                                 style={{ maxWidth: "300px" }}
                               >
                                 <button
                                   className="btn btn-sm rounded-0 text-light"
-                                  style={{
-                                    backgroundColor: "blue",
-                                  }}
+                                  style={{ backgroundColor: "blue" }}
                                   onClick={() =>
-                                    handleQuantityChange(
+                                    updateQuantity(
                                       item.cartItemId,
                                       Math.max(item.quantity - 1, 1)
                                     )
@@ -224,20 +193,15 @@ const ShoppingCart = () => {
                                   onChange={(e) => {
                                     const value = parseInt(e.target.value);
                                     if (value >= 1) {
-                                      handleQuantityChange(
-                                        item.cartItemId,
-                                        value
-                                      );
+                                      updateQuantity(item.cartItemId, value);
                                     }
                                   }}
                                 />
                                 <button
                                   className="btn btn-sm rounded-0 text-light"
-                                  style={{
-                                    backgroundColor: "blue",
-                                  }}
+                                  style={{ backgroundColor: "blue" }}
                                   onClick={() =>
-                                    handleQuantityChange(
+                                    updateQuantity(
                                       item.cartItemId,
                                       item.quantity + 1
                                     )
@@ -246,16 +210,10 @@ const ShoppingCart = () => {
                                 >
                                   <i className="fas fa-plus"></i>
                                 </button>
-                                <input
-                                  type="hidden"
-                                  name="cartItemId"
-                                  value={item.cartItemId}
-                                />
                               </div>
                             </div>
 
                             <div className="col-lg-4 col-md-6 mb-4 mb-lg-0 d-flex align-items-center justify-content-end">
-                              {/* Hiển thị đơn giá sản phẩm */}
                               <div className="me-5">
                                 <strong>
                                   {new Intl.NumberFormat("vi-VN", {
@@ -264,13 +222,10 @@ const ShoppingCart = () => {
                                   }).format(item.unitPrice)}
                                 </strong>
                               </div>
-                              {/* Nút xóa sản phẩm khỏi giỏ */}
                               <button
                                 type="button"
                                 className="btn text-light btn-danger"
-                                onClick={() =>
-                                  handleRemoveItem(item.cartItemId)
-                                }
+                                onClick={() => removeFromCart(item.cartItemId)}
                                 title="Remove item"
                               >
                                 <i className="fas fa-trash"></i>
@@ -285,6 +240,7 @@ const ShoppingCart = () => {
                     )}
                   </div>
                 </div>
+
                 <div className="card mb-4 mb-lg-0">
                   <div className="card-body">
                     <p className="mb-3">
@@ -311,6 +267,7 @@ const ShoppingCart = () => {
                   </div>
                 </div>
               </div>
+
               <div className="col-md-4">
                 <div className="card mb-4">
                   <div className="card-header py-3">
@@ -355,11 +312,20 @@ const ShoppingCart = () => {
                     >
                       Mua Hàng
                     </button>
+                    <button
+                      type="button"
+                      className="btn btn-block rounded-0 px-5 py-2 text-white"
+                      style={{ backgroundColor: "red" }}
+                      onClick={clearCart}
+                    >
+                      Xóa tất cả
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
           {/* Modal Checkout */}
           <Modal show={showModal} onHide={() => setShowModal(false)} centered>
             <form id="checkoutForm" onSubmit={handleCheckout}>

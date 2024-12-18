@@ -24,13 +24,13 @@ import lombok.RequiredArgsConstructor;
 public class CategoryController {
     private final CategoryService categoryService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER', 'USER')")
     @GetMapping
     public List<CategoryDTO> getAllCategorys() {
         return categoryService.getAllCategorys();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER', 'USER')")
     @GetMapping("/{id}")
     public CategoryDTO getCategoryById(@PathVariable Long id) {
         return categoryService.getCategoryById(id);
