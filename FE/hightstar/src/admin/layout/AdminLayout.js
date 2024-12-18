@@ -20,6 +20,8 @@ import {
   ProductManagement,
   ClassManagement,
   EnrollmentManagement,
+  TransactionHistory,
+  VietQRGenerator,
 } from "../views/index";
 import "../css/style.css";
 import TicketCheck from "../views/tickets/TicketCheck";
@@ -93,7 +95,10 @@ const AdminLayout = () => {
                 element={<StudentManagement />}
               />
               <Route path="class-management" element={<ClassManagement />} />
-              <Route path="enrollment-management" element={<EnrollmentManagement />} />
+              <Route
+                path="enrollment-management"
+                element={<EnrollmentManagement />}
+              />
               <Route path="review-management" element={<ReviewManagement />} />
               <Route
                 path="ticket/ticket-management"
@@ -116,6 +121,15 @@ const AdminLayout = () => {
               <Route
                 path="products-management"
                 element={<ProductManagement />}
+              />
+              <Route
+                path="transactionhistory-management"
+                element={<TransactionHistory />}
+              />
+
+              <Route
+                path="vietqrgenerator-management"
+                element={<VietQRGenerator />}
               />
               <Route path="*" element={<Navigate to={"/admin"} />} />
             </Routes>

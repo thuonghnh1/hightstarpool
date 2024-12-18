@@ -140,6 +140,28 @@ const AppSidebar = ({ isSidebarOpen }) => {
         </li>
         <li>
           <NavLink
+            to="/admin/vietqrgenerator-management"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            <i class="me-2 bi bi-credit-card"></i> Tạo Qr Thanh Toán
+          </NavLink>
+        </li>
+
+        <li>
+          <NavLink
+            to="/admin/transactionhistory-management"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            <i class="me-2 bi bi-cash-coin"></i> Lịch sử chuyển khoản
+          </NavLink>
+        </li>
+        
+        <li>
+          <NavLink
             to="/admin/user-management"
             className={({ isActive }) =>
               isActive ? "active-link" : "inactive-link"

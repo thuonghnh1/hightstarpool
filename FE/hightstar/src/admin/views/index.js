@@ -16,6 +16,8 @@ import CategoryManagement from "./category/CategoryManagement";
 import ProductManagement from "./product/ProductManagement";
 import ClassManagement from "./class/ClassManagement";
 import EnrollmentManagement from "./enrollments/EnrollmentManagement";
+import TransactionHistory from "./payments/TransactionHistory";
+import VietQRGenerator from "./payments/VietQRGenerator";
 
 export {
   Dashboard,
@@ -36,4 +38,6 @@ export {
   ProductManagement,
   ClassManagement,
   EnrollmentManagement,
+  TransactionHistory,
+  VietQRGenerator,
 };

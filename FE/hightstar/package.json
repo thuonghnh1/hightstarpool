@@ -9,6 +9,7 @@
     "axios": "^1.7.7",
     "bootstrap": "^5.3.0",
     "bootstrap-icons": "^1.11.3",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "font-awesome": "^4.7.0",
     "hightstar": "file:",
