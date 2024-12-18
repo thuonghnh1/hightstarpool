@@ -196,10 +196,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO createUser(UserDTO userDto) {
         if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
-            throw new AppException("Email đã tồn tại!", ErrorCode.EMAIL_ALREADY_EXISTS);
+            throw new AppException("Email này đã tồn tại!", ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         if (userRepository.findByUsername(userDto.getPhoneNumber()).isPresent()) {
-            throw new AppException("Số điện thoại đã tồn tại!", ErrorCode.PHONE_NUMBER_ALREADY_EXISTS);
+            throw new AppException("Số điện thoại này đã tồn tại!", ErrorCode.PHONE_NUMBER_ALREADY_EXISTS);
         }
 
         User user = new User();

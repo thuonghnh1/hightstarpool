@@ -27,8 +27,8 @@ public class Ticket {
     private TicketType ticketType; // OneTime_ticket, Weekly_ticket ,Monthly_ticket.
     private Double ticketPrice;
     @ManyToOne
-    @JoinColumn(name = "studentId", referencedColumnName = "studentId")
-    private Student student;
+    @JoinColumn(name = "class_student_enrollment_id", nullable = true)
+    private ClassStudentEnrollment classStudentEnrollment;
     @Column(length = 4096)
     private String qrCodeBase64; // Lưu mã QR dưới dạng Base64 string
 

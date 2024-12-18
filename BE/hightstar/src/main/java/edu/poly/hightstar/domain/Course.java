@@ -34,5 +34,5 @@ public class Course {
 
     // Mối quan hệ One-to-Many với Review
     @OneToMany(mappedBy = "course")
-    private List<Review> reviews;  // Trường này sẽ lưu trữ danh sách các đánh giá liên quan tới sản phẩm
+    private List<Review> reviews; // Trường này sẽ lưu trữ danh sách các đánh giá liên quan tới sản phẩm
 }

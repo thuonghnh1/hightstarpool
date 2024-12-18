@@ -12,14 +12,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.poly.hightstar.domain.Attendance;
-import edu.poly.hightstar.domain.Student;
 import edu.poly.hightstar.domain.Ticket;
 import edu.poly.hightstar.enums.TicketType;
 import edu.poly.hightstar.model.AttendanceDTO;
 import edu.poly.hightstar.model.QRCodeValidationResponse;
 import edu.poly.hightstar.model.TicketDTO;
 import edu.poly.hightstar.repository.AttendanceRepository;
-import edu.poly.hightstar.repository.StudentRepository;
 import edu.poly.hightstar.repository.TicketRepository;
 import edu.poly.hightstar.service.AttendanceService;
 import edu.poly.hightstar.service.QRCodeValidationService;
@@ -32,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 public class AttendanceServiceImpl implements AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final TicketRepository ticketRepository;
-    private final StudentRepository studentRepository;
     private final QRCodeValidationService qrCodeValidationService;
 
     @Override
@@ -41,13 +38,20 @@ public class AttendanceServiceImpl implements AttendanceService {
         return attendanceRepository.findAll().stream().map(attendance -> {
             AttendanceDTO dto = new AttendanceDTO();
 
-            if (attendance.getStudent() != null) {
-                dto.setStudentId(attendance.getStudent().getStudentId());
+            if (attendance.getTicket() != null && attendance.getTicket().getClassStudentEnrollment() != null) {
+                dto.setClassStudentEnrollmentId(
+                        attendance.getTicket().getClassStudentEnrollment().getClassStudentEnrollmentId());
+            } else {
+                dto.setClassStudentEnrollmentId(null);
             }
+
+            // Set ticketId
             if (attendance.getTicket() != null) {
                 dto.setTicketId(attendance.getTicket().getTicketId());
             }
-            BeanUtils.copyProperties(attendance, dto);
+
+            // Copy các thuộc tính khác
+            BeanUtils.copyProperties(attendance, dto, "ticket");
             return dto;
         }).collect(Collectors.toList());
     }
@@ -58,13 +62,20 @@ public class AttendanceServiceImpl implements AttendanceService {
         return attendanceRepository.findByCheckOutTimeIsNull().stream().map(attendance -> {
             AttendanceDTO dto = new AttendanceDTO();
 
-            if (attendance.getStudent() != null) {
-                dto.setStudentId(attendance.getStudent().getStudentId());
+            if (attendance.getTicket() != null && attendance.getTicket().getClassStudentEnrollment() != null) {
+                dto.setClassStudentEnrollmentId(
+                        attendance.getTicket().getClassStudentEnrollment().getClassStudentEnrollmentId());
+            } else {
+                dto.setClassStudentEnrollmentId(null);
             }
+
             if (attendance.getTicket() != null) {
                 dto.setTicketId(attendance.getTicket().getTicketId());
             }
-            BeanUtils.copyProperties(attendance, dto);
+
+            // Copy các thuộc tính khác
+            BeanUtils.copyProperties(attendance, dto, "ticket");
+
             return dto;
         }).collect(Collectors.toList());
     }
@@ -76,7 +87,19 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .orElseThrow(() -> new AppException("Điểm danh này không tồn tại!", ErrorCode.ATTENDANCE_NOT_FOUND));
 
         AttendanceDTO attendanceDTO = new AttendanceDTO();
-        BeanUtils.copyProperties(attendance, attendanceDTO);
+        BeanUtils.copyProperties(attendance, attendanceDTO, "ticket");
+
+        if (attendance.getTicket() != null && attendance.getTicket().getClassStudentEnrollment() != null) {
+            attendanceDTO.setClassStudentEnrollmentId(
+                    attendance.getTicket().getClassStudentEnrollment().getClassStudentEnrollmentId());
+        } else {
+            attendanceDTO.setClassStudentEnrollmentId(null);
+        }
+
+        if (attendance.getTicket() != null) {
+            attendanceDTO.setTicketId(attendance.getTicket().getTicketId());
+        }
+
         return attendanceDTO;
     }
 
@@ -96,7 +119,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         Date today = getCurrentDateWithoutTime();
 
         Attendance attendance = new Attendance();
-        BeanUtils.copyProperties(attendanceDTO, attendance, "student", "ticket");
+        BeanUtils.copyProperties(attendanceDTO, attendance, "ticket");
 
         if (attendanceDTO.getTicketId() == null) {
             throw new AppException("Vé bơi không được phép để trống!", ErrorCode.INVALID_INPUT);
@@ -110,13 +133,15 @@ public class AttendanceServiceImpl implements AttendanceService {
 
             // Kiểm tra trùng lặp bản ghi
             Optional<Attendance> existingAttendance;
-            if (ticket.getStudent() != null) {
-                existingAttendance = attendanceRepository.findByStudentStudentIdAndTicketTicketIdAndAttendanceDate(
-                        ticket.getStudent().getStudentId(), attendanceDTO.getTicketId(),
+            if (ticket.getClassStudentEnrollment() != null) {
+                existingAttendance = attendanceRepository.findByClassStudentEnrollmentIdAndTicketIdAndAttendanceDate(
+                        ticket.getClassStudentEnrollment().getClassStudentEnrollmentId(),
+                        attendanceDTO.getTicketId(),
                         today);
             } else {
-                existingAttendance = attendanceRepository.findByStudentIsNullAndTicketTicketIdAndAttendanceDate(
-                        attendanceDTO.getTicketId(), today);
+                existingAttendance = attendanceRepository
+                        .findByClassStudentEnrollmentIsNullAndTicketIdAndAttendanceDate(
+                                attendanceDTO.getTicketId(), today);
             }
 
             if (existingAttendance.isPresent()) {
@@ -126,10 +151,11 @@ public class AttendanceServiceImpl implements AttendanceService {
             }
 
             if (ticket.getTicketType() == TicketType.STUDENT_TICKET) {
-                if (ticket.getStudent() != null) {
-                    attendance.setStudent(ticket.getStudent());
+                if (ticket.getClassStudentEnrollment() != null) {
+                    // Không cần thiết lập trực tiếp Student trong Attendance
+                    // Mối quan hệ thông qua Ticket và ClassStudentEnrollment
                 } else {
-                    throw new AppException("Không tìm thấy học viên của vé bơi này! " + attendanceDTO.getStudentId(),
+                    throw new AppException("Không tìm thấy enrollment cho vé bơi này!",
                             ErrorCode.USER_NOT_FOUND);
                 }
             }
@@ -138,7 +164,8 @@ public class AttendanceServiceImpl implements AttendanceService {
         }
 
         // Log các giá trị quan trọng
-        System.out.println("Creating attendance with Student ID: " + attendanceDTO.getStudentId());
+        System.out.println(
+                "Creating attendance with ClassStudentEnrollment ID: " + attendanceDTO.getClassStudentEnrollmentId());
         System.out.println("Creating attendance with Ticket ID: " + attendanceDTO.getTicketId());
         System.out.println("Creating attendance with Attendance Date: " + attendanceDTO.getAttendanceDate());
 
@@ -146,9 +173,15 @@ public class AttendanceServiceImpl implements AttendanceService {
         Attendance createdAttendance = attendanceRepository.save(attendance);
 
         AttendanceDTO createdAttendanceDTO = new AttendanceDTO();
-        BeanUtils.copyProperties(createdAttendance, createdAttendanceDTO);
-        createdAttendanceDTO.setStudentId(
-                createdAttendance.getStudent() != null ? createdAttendance.getStudent().getStudentId() : null);
+        BeanUtils.copyProperties(createdAttendance, createdAttendanceDTO, "ticket");
+
+        if (createdAttendance.getTicket() != null
+                && createdAttendance.getTicket().getClassStudentEnrollment() != null) {
+            createdAttendanceDTO.setClassStudentEnrollmentId(
+                    createdAttendance.getTicket().getClassStudentEnrollment().getClassStudentEnrollmentId());
+        } else {
+            createdAttendanceDTO.setClassStudentEnrollmentId(null);
+        }
         createdAttendanceDTO.setTicketId(
                 createdAttendance.getTicket() != null ? createdAttendance.getTicket().getTicketId() : null);
 
@@ -163,7 +196,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         Ticket oldTicket = attendance.getTicket();
 
-        BeanUtils.copyProperties(attendanceDTO, attendance, "student", "ticket");
+        BeanUtils.copyProperties(attendanceDTO, attendance, "ticket");
 
         // Nếu ticketId là null thì ném ngoại lệ, vì vé không được phép là null
         if (attendanceDTO.getTicketId() == null) {
@@ -175,18 +208,22 @@ public class AttendanceServiceImpl implements AttendanceService {
                         ErrorCode.TICKET_NOT_FOUND));
 
         // Kiểm tra nếu ticket bị thay đổi hoặc attendanceDate bị thay đổi
-        boolean ticketChanged = (oldTicket == null || !oldTicket.getTicketId().equals(newTicket.getTicketId()));
+        boolean ticketChanged = (oldTicket == null || !oldTicket.getTicketId().equals(newTicket.getTicketId()))
+                || !attendance.getAttendanceDate().equals(attendanceDTO.getAttendanceDate());
 
         if (ticketChanged) {
             // Kiểm tra trùng lặp
             Optional<Attendance> existingAttendance;
-            if (newTicket.getStudent() != null) {
-                existingAttendance = attendanceRepository.findByStudentStudentIdAndTicketTicketIdAndAttendanceDate(
-                        newTicket.getStudent().getStudentId(), attendanceDTO.getTicketId(),
+            if (newTicket.getClassStudentEnrollment() != null) {
+                existingAttendance = attendanceRepository.findByClassStudentEnrollmentIdAndTicketIdAndAttendanceDate(
+                        newTicket.getClassStudentEnrollment().getClassStudentEnrollmentId(),
+                        attendanceDTO.getTicketId(),
                         attendanceDTO.getAttendanceDate());
             } else {
-                existingAttendance = attendanceRepository.findByStudentIsNullAndTicketTicketIdAndAttendanceDate(
-                        attendanceDTO.getTicketId(), attendanceDTO.getAttendanceDate());
+                existingAttendance = attendanceRepository
+                        .findByClassStudentEnrollmentIsNullAndTicketIdAndAttendanceDate(
+                                attendanceDTO.getTicketId(),
+                                attendanceDTO.getAttendanceDate());
             }
 
             if (existingAttendance.isPresent() && !existingAttendance.get().getAttendanceId().equals(id)) {
@@ -195,17 +232,12 @@ public class AttendanceServiceImpl implements AttendanceService {
                         ErrorCode.DUPLICATE_ENTRY);
             }
 
-            if (newTicket.getTicketType() == TicketType.ONETIME_TICKET
-                    && hasCheckedOutWithTicket(newTicket.getTicketId())) {
-                throw new AppException("Vé bơi này đã được điểm danh trước đó!", ErrorCode.DUPLICATE_ENTRY);
-            }
-
             if (newTicket.getTicketType() == TicketType.STUDENT_TICKET) {
-                if (newTicket.getStudent() != null) {
-                    attendance.setStudent(newTicket.getStudent());
+                if (newTicket.getClassStudentEnrollment() != null) {
+                    // Không cần thiết lập trực tiếp Student trong Attendance
+                    // Mối quan hệ thông qua Ticket và ClassStudentEnrollment
                 } else {
-                    throw new AppException(
-                            "Không tìm thấy học viên của vé bơi này! " + attendanceDTO.getStudentId(),
+                    throw new AppException("Không tìm thấy enrollment cho vé bơi này!",
                             ErrorCode.USER_NOT_FOUND);
                 }
             }
@@ -216,9 +248,15 @@ public class AttendanceServiceImpl implements AttendanceService {
         Attendance updatedAttendance = attendanceRepository.save(attendance);
 
         AttendanceDTO updatedAttendanceDTO = new AttendanceDTO();
-        BeanUtils.copyProperties(updatedAttendance, updatedAttendanceDTO);
-        updatedAttendanceDTO.setStudentId(
-                updatedAttendance.getStudent() != null ? updatedAttendance.getStudent().getStudentId() : null);
+        BeanUtils.copyProperties(updatedAttendance, updatedAttendanceDTO, "ticket");
+
+        if (updatedAttendance.getTicket() != null
+                && updatedAttendance.getTicket().getClassStudentEnrollment() != null) {
+            updatedAttendanceDTO.setClassStudentEnrollmentId(
+                    updatedAttendance.getTicket().getClassStudentEnrollment().getClassStudentEnrollmentId());
+        } else {
+            updatedAttendanceDTO.setClassStudentEnrollmentId(null);
+        }
         updatedAttendanceDTO.setTicketId(
                 updatedAttendance.getTicket() != null ? updatedAttendance.getTicket().getTicketId() : null);
 
@@ -244,16 +282,17 @@ public class AttendanceServiceImpl implements AttendanceService {
         }
 
         TicketDTO ticketDTO = validationResponse.getTicketDto();
-        Long studentId = ticketDTO.getStudentId();
+        Long classStudentEnrollmentId = ticketDTO.getClassStudentEnrollmentId();
         Long ticketId = ticketDTO.getTicketId();
         Date today = getCurrentDateWithoutTime();
 
         // Bước 2: Tìm bản ghi điểm danh cho học viên hoặc khách bơi hôm nay
         Attendance attendance;
-        if (studentId != null) {
+        if (classStudentEnrollmentId != null) {
             // Trường hợp học viên
             Optional<Attendance> optionalAttendance = attendanceRepository
-                    .findByStudentStudentIdAndTicketTicketIdAndAttendanceDate(studentId, ticketId, today);
+                    .findByClassStudentEnrollmentIdAndTicketIdAndAttendanceDate(classStudentEnrollmentId, ticketId,
+                            today);
 
             if (optionalAttendance.isPresent()) {
                 // Nếu đã có bản ghi điểm danh hôm nay
@@ -262,31 +301,27 @@ public class AttendanceServiceImpl implements AttendanceService {
                     throw new AppException("Vé đã được quét ra.", ErrorCode.INVALID_OPERATION);
                 }
                 // Thực hiện check-out
-                attendance.setCheckOutTime(LocalTime.now());
+                attendance.setCheckOutTime(LocalTime.now()); // Sử dụng timestamp hiện tại
                 // Tính toán penaltyAmount nếu cần thiết (ví dụ: nếu check-out trễ)
                 // attendance.setPenaltyAmount(calculatePenalty(attendance));
             } else {
                 // Nếu chưa có bản ghi điểm danh hôm nay, thực hiện check-in
                 attendance = new Attendance();
                 attendance.setAttendanceDate(today);
-                attendance.setCheckInTime(LocalTime.now());
+                attendance.setCheckInTime(LocalTime.now()); // Sử dụng timestamp hiện tại
 
-                // Lấy đối tượng Student và Ticket từ repository
-                Student student = studentRepository.findById(studentId)
-                        .orElseThrow(() -> new AppException("Không tìm thấy học viên với ID: " + studentId,
-                                ErrorCode.USER_NOT_FOUND));
+                // Lấy đối tượng Ticket từ repository
                 Ticket ticket = ticketRepository.findById(ticketId)
                         .orElseThrow(() -> new AppException("Không tìm thấy vé với ID: " + ticketId,
                                 ErrorCode.TICKET_NOT_FOUND));
 
-                attendance.setStudent(student);
                 attendance.setTicket(ticket);
                 attendance.setPenaltyAmount(0.0); // Khởi tạo penalty
             }
         } else {
-            // Trường hợp người bơi bình thường (studentId null)
+            // Trường hợp người bơi bình thường (classStudentEnrollmentId null)
             Optional<Attendance> optionalAttendance = attendanceRepository
-                    .findByStudentIsNullAndTicketTicketIdAndAttendanceDate(ticketId, today);
+                    .findByClassStudentEnrollmentIsNullAndTicketIdAndAttendanceDate(ticketId, today);
 
             if (optionalAttendance.isPresent()) {
                 // Nếu đã có bản ghi điểm danh hôm nay
@@ -320,9 +355,16 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         // Bước 4: Chuyển đổi thành DTO để trả về
         AttendanceDTO attendanceDTO = new AttendanceDTO();
-        BeanUtils.copyProperties(updatedAttendance, attendanceDTO);
-        attendanceDTO.setStudentId(
-                updatedAttendance.getStudent() != null ? updatedAttendance.getStudent().getStudentId() : null);
+        BeanUtils.copyProperties(updatedAttendance, attendanceDTO, "ticket");
+
+        if (updatedAttendance.getTicket() != null
+                && updatedAttendance.getTicket().getClassStudentEnrollment() != null) {
+            attendanceDTO.setClassStudentEnrollmentId(
+                    updatedAttendance.getTicket().getClassStudentEnrollment().getClassStudentEnrollmentId());
+        } else {
+            attendanceDTO.setClassStudentEnrollmentId(null);
+        }
+
         attendanceDTO.setTicketId(
                 updatedAttendance.getTicket() != null ? updatedAttendance.getTicket().getTicketId() : null);
 

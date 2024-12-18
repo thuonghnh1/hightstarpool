@@ -82,7 +82,7 @@ const TableManagement = ({
             statusText = "Đang giao hàng";
             break;
           case "COMPLETED":
-            statusClass = "text-bg-primary";
+            statusClass = "text-bg-success";
             statusText = "Hoàn thành";
             break;
           case "CANCELED":
@@ -96,6 +96,18 @@ const TableManagement = ({
           case "USED":
             statusClass = "text-bg-info";
             statusText = "Đã sử dụng";
+            break;
+          case "NOT_STARTED":
+            statusClass = "text-bg-secondary";
+            statusText = "Chưa bắt đầu";
+            break;
+          case "IN_PROGRESS":
+            statusClass = "text-bg-primary";
+            statusText = "Đang diễn ra";
+            break;
+          case "WITHDRAWN":
+            statusClass = "text-bg-warning";
+            statusText = "Đã nghỉ học";
             break;
           case true:
             statusClass = "text-bg-info";
@@ -415,6 +427,51 @@ const TableManagement = ({
             }}
           />
         );
+      case "progress":
+        return (
+          <div
+            className="progress"
+            style={{ height: "15px", width: "100px" }}
+            role="progressbar"
+            aria-label="Tiến trình lớp học"
+            aria-valuenow={item[column.key]}
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <div
+              class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+              style={{
+                width: item[column.key],
+                fontSize: "10px",
+                fontWeight: "bolder",
+              }}
+            >
+              {item[column.key]}%
+            </div>
+          </div>
+        );
+
+      case "timeSlots":
+        const dayOfWeekLabels = {
+          MONDAY: "Thứ Hai",
+          TUESDAY: "Thứ Ba",
+          WEDNESDAY: "Thứ Tư",
+          THURSDAY: "Thứ Năm",
+          FRIDAY: "Thứ Sáu",
+          SATURDAY: "Thứ Bảy",
+          SUNDAY: "Chủ Nhật",
+        };
+        return (
+          <span className={`rounded-3 px-2 py-1`}>
+            {item[column.key].map((timeSlot, index) => (
+              <span key={index} className="badge bg-light text-dark me-1">
+                {dayOfWeekLabels[timeSlot.dayOfWeek]} ({timeSlot.startTime} -{" "}
+                {timeSlot.endTime})
+              </span>
+            ))}
+          </span>
+        );
+
       default:
         return item[column.key] || "Không có"; // Trả về giá trị mặc định nếu không cần custom
     }

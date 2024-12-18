@@ -9,19 +9,27 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import edu.poly.hightstar.domain.Attendance;
+import edu.poly.hightstar.domain.ClassSession;
 
 @Repository
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
-    // Lấy các bản điểm danh chưa có checkOut
-    List<Attendance> findByCheckOutTimeIsNull();
+        // Lấy các bản điểm danh chưa có checkOut
+        List<Attendance> findByCheckOutTimeIsNull();
 
-    @Query("SELECT a FROM Attendance a WHERE a.ticket.ticketId = :ticketId")
-    Optional<Attendance> findByTicketId(Long ticketId);
+        @Query("SELECT a FROM Attendance a WHERE a.ticket.ticketId = :ticketId")
+        Optional<Attendance> findByTicketId(Long ticketId);
 
-    // Tìm Attendance cho học viên
-    Optional<Attendance> findByStudentStudentIdAndTicketTicketIdAndAttendanceDate(Long studentId, Long ticketId,
-            Date attendanceDate);
+        // Tìm Attendance cho học viên dựa trên classStudentEnrollmentId, ticketId và
+        // ngày điểm danh
+        @Query("SELECT a FROM Attendance a WHERE a.ticket.classStudentEnrollment.classStudentEnrollmentId = :classStudentEnrollmentId AND a.ticket.ticketId = :ticketId AND a.attendanceDate = :attendanceDate")
+        Optional<Attendance> findByClassStudentEnrollmentIdAndTicketIdAndAttendanceDate(Long classStudentEnrollmentId,
+                        Long ticketId, Date attendanceDate);
 
-    // Tìm Attendance cho người bơi bình thường (studentId null)
-    Optional<Attendance> findByStudentIsNullAndTicketTicketIdAndAttendanceDate(Long ticketId, Date attendanceDate);
+        // Tìm Attendance cho người bơi bình thường (classStudentEnrollmentId null) dựa
+        // trên ticketId và ngày điểm danh
+        @Query("SELECT a FROM Attendance a WHERE a.ticket.classStudentEnrollment IS NULL AND a.ticket.ticketId = :ticketId AND a.attendanceDate = :attendanceDate")
+        Optional<Attendance> findByClassStudentEnrollmentIsNullAndTicketIdAndAttendanceDate(Long ticketId,
+                        Date attendanceDate);
+
+        void deleteAllByClassSessionIn(List<ClassSession> classSessions);
 }

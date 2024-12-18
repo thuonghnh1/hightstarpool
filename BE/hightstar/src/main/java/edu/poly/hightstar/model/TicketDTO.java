@@ -21,6 +21,6 @@ public class TicketDTO {
     @JsonProperty("price")
     private Double ticketPrice;
     private boolean ticketIsUsed;
-    private Long studentId;
+    private Long classStudentEnrollmentId;
     private String qrCodeBase64; // Trường này để gửi mã QR dưới dạng Base64
 }

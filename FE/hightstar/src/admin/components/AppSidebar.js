@@ -36,6 +36,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
             className="object-fit-contain"
             width="200" // Thu nhỏ ảnh lại
             height="100%"
+            alt="logo"
           />
         </NavLink>
       </div>
@@ -107,7 +108,6 @@ const AppSidebar = ({ isSidebarOpen }) => {
             </ul>
           </Collapse>
         </li>
-
         <li>
           <NavLink
             to="/admin/attendance-management"
@@ -118,7 +118,26 @@ const AppSidebar = ({ isSidebarOpen }) => {
             <i className="me-2 bi bi-card-checklist"></i> Điểm danh
           </NavLink>
         </li>
-
+        <li>
+          <NavLink
+            to="/admin/class-management"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            <i className="me-2 fa fa-university"></i> Lớp học
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/admin/enrollment-management"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            <i class="me-2 bi bi-backpack2"></i> Đăng ký lớp học
+          </NavLink>
+        </li>
         <li>
           <NavLink
             to="/admin/user-management"
@@ -141,6 +160,16 @@ const AppSidebar = ({ isSidebarOpen }) => {
         </li>
         <li>
           <NavLink
+            to="/admin/trainer-management"
+            className={({ isActive }) =>
+              isActive ? "active-link" : "inactive-link"
+            }
+          >
+            <i className="me-2 fa-solid fa-building-user"></i> Huấn Luyện Viên
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
             to="/admin/course-management"
             className={({ isActive }) =>
               isActive ? "active-link" : "inactive-link"
@@ -151,26 +180,14 @@ const AppSidebar = ({ isSidebarOpen }) => {
         </li>
         <li>
           <NavLink
-            to="/admin/trainer-management"
+            to="/admin/timeSlot-management"
             className={({ isActive }) =>
               isActive ? "active-link" : "inactive-link"
             }
           >
-            <i className="me-2 fa-solid fa-building-user"></i> Huấn Luyện Viên
+            <i className="me-2 bi bi-palette-fill"></i> Suất học
           </NavLink>
         </li>
-
-        <li>
-          <NavLink
-            to="/admin/class-management"
-            className={({ isActive }) =>
-              isActive ? "active-link" : "inactive-link"
-            }
-          >
-            <i className="me-2 fa fa-university"></i> Lớp học
-          </NavLink>
-        </li>
-
         <li>
           <NavLink
             to="/admin/discount-management"
@@ -203,18 +220,6 @@ const AppSidebar = ({ isSidebarOpen }) => {
             <i className="me-2 fa-solid fa-receipt"></i> Đơn hàng
           </NavLink>
         </li>
-
-        <li>
-          <NavLink
-            to="/admin/timeSlot-management"
-            className={({ isActive }) =>
-              isActive ? "active-link" : "inactive-link"
-            }
-          >
-            <i className="me-2 bi bi-palette-fill"></i> Suất học
-          </NavLink>
-        </li>
-
         <li>
           <NavLink
             to="/admin/review-management"

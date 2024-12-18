@@ -18,6 +18,8 @@ import {
   ReviewManagement,
   CategoryManagement,
   ProductManagement,
+  ClassManagement,
+  EnrollmentManagement,
 } from "../views/index";
 import "../css/style.css";
 import TicketCheck from "../views/tickets/TicketCheck";
@@ -54,81 +56,76 @@ const AdminLayout = () => {
   }, []);
 
   return (
-    
-      <div className="container__admin overflow-hidden">
-        <AppSidebar className="" isSidebarOpen={isSidebarOpen} />
-        <div
-          className={`right__box d-flex flex-column ${
-            isSidebarOpen ? "with-sidebar" : ""
-          }`}
-        >
-          <AppHeader
-            toggleSidebar={toggleSidebar}
-            isSidebarOpen={isSidebarOpen}
-          />
-          <div className="main p-0">
-            <div className="container-fluid m-0 p-0 p-md-4 d-flex flex-column">
-              <Routes>
-                <Route index element={<Navigate to="/admin/dashboard" />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="sales-management" element={<SalesManagement />} />
-                <Route path="user-management" element={<UserManagement />} />
-                <Route path="my-profile" element={<MyProfile />} />
-                <Route
-                  path="course-management"
-                  element={<CourseManagement />}
-                />
-                <Route
-                  path="notificaton-management"
-                  element={<NotificationManagement />}
-                />
-                <Route
-                  path="trainer-management"
-                  element={<TrainerManagement />}
-                />
-                <Route
-                  path="discount-management"
-                  element={<DiscountManagement />}
-                />
-                <Route
-                  path="student-management"
-                  element={<StudentManagement />}
-                />
-                <Route
-                  path="review-management"
-                  element={<ReviewManagement />}
-                />
-                <Route
-                  path="ticket/ticket-management"
-                  element={<TicketManagement />}
-                />
-                <Route path="ticket/ticket-check" element={<TicketCheck />} />
-                <Route path="order-management" element={<OrderManagement />} />
-                <Route
-                  path="timeSlot-management"
-                  element={<TimeSlotManagement />}
-                />
-                <Route
-                  path="attendance-management"
-                  element={<AttendanceManagement />}
-                />
-                <Route
-                  path="category-management"
-                  element={<CategoryManagement />}
-                />
-                <Route
-                  path="products-management"
-                  element={<ProductManagement />}
-                />
-                <Route path="*" element={<Navigate to={"/admin"} />} />
-              </Routes>
-              <Outlet /> {/* Để hiển thị các component con */}
-            </div>
+    <div className="container__admin overflow-hidden">
+      <AppSidebar className="" isSidebarOpen={isSidebarOpen} />
+      <div
+        className={`right__box d-flex flex-column ${
+          isSidebarOpen ? "with-sidebar" : ""
+        }`}
+      >
+        <AppHeader
+          toggleSidebar={toggleSidebar}
+          isSidebarOpen={isSidebarOpen}
+        />
+        <div className="main p-0">
+          <div className="container-fluid m-0 p-0 p-md-4 d-flex flex-column">
+            <Routes>
+              <Route index element={<Navigate to="/admin/dashboard" />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="sales-management" element={<SalesManagement />} />
+              <Route path="user-management" element={<UserManagement />} />
+              <Route path="my-profile" element={<MyProfile />} />
+              <Route path="course-management" element={<CourseManagement />} />
+              <Route
+                path="notificaton-management"
+                element={<NotificationManagement />}
+              />
+              <Route
+                path="trainer-management"
+                element={<TrainerManagement />}
+              />
+              <Route
+                path="discount-management"
+                element={<DiscountManagement />}
+              />
+              <Route
+                path="student-management"
+                element={<StudentManagement />}
+              />
+              <Route path="class-management" element={<ClassManagement />} />
+              <Route path="enrollment-management" element={<EnrollmentManagement />} />
+              <Route path="review-management" element={<ReviewManagement />} />
+              <Route
+                path="ticket/ticket-management"
+                element={<TicketManagement />}
+              />
+              <Route path="ticket/ticket-check" element={<TicketCheck />} />
+              <Route path="order-management" element={<OrderManagement />} />
+              <Route
+                path="timeSlot-management"
+                element={<TimeSlotManagement />}
+              />
+              <Route
+                path="attendance-management"
+                element={<AttendanceManagement />}
+              />
+              <Route
+                path="category-management"
+                element={<CategoryManagement />}
+              />
+              <Route
+                path="products-management"
+                element={<ProductManagement />}
+              />
+              <Route path="*" element={<Navigate to={"/admin"} />} />
+            </Routes>
+            <Outlet /> {/* Để hiển thị các component con */}
           </div>
-          <AppFooter />
         </div>
-        <BackToTop />
+        <AppFooter />
       </div>
+      <BackToTop />
+    </div>
   );
 };
 

@@ -28,8 +28,11 @@ public enum ErrorCode {
     NOTIFICATION_NOT_FOUND("NOTIFICATION_NOT_FOUND"), // không tìm thấy thông báo
     REVIEW_NOT_FOUND("REVIEW_NOT_FOUND"), // không tìm thấy đánh giá
     TICKET_PRICE_NOT_FOUND("TICKET_PRICE_NOT_FOUND"), // không tìm thấy giá vé
+    CLASS_NOT_FOUND("CLASS_NOT_FOUND"),
+    ENROLLMENT_NOT_FOUND("ENROLLMENT_NOT_FOUND"),
 
     TICKET_EXPIRED("TICKET_EXPIRED"), // Vé đã hết hạn
+    SLOT_FULL("SLOT_FULL"), // đầy chỗ
 
     // Lỗi do dữ liệu xung đột (Conflict Errors)
     CONFLICT_ERROR("CONFLICT_ERROR"), // Xung đột dữ liệu tổng quát

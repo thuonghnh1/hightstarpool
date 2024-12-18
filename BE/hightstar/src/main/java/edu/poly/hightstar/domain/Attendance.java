@@ -46,7 +46,10 @@ public class Attendance {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "ticket_id", nullable = false)
     private Ticket ticket;
-    
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "session_id", nullable = true)
+    private ClassSession classSession;
 
     @Column(name = "penalty_amount")
     private Double penaltyAmount;

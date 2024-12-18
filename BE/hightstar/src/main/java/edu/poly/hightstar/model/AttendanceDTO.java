@@ -18,7 +18,7 @@ public class AttendanceDTO {
     private Date attendanceDate;
     private LocalTime checkInTime;
     private LocalTime checkOutTime;
-    private Long studentId;
+    private Long classStudentEnrollmentId;
     private Long ticketId;
     private Double penaltyAmount;
 }
