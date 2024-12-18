@@ -26,11 +26,11 @@ const BackToTop = () => {
   };
 
   return (
-    <div>
+    <div className="">
       {isVisible && (
         <button
           onClick={scrollToTop}
-          className="back-to-top rounded-circle btn"
+          className="back-to-top rounded-circle btn me-sm-3 mb-sm-3"
         >
           <i className="bi bi-caret-up-fill"></i>
         </button>

@@ -14,6 +14,7 @@ import { MyProfile } from "../../admin/views";
 import PrivateRoute from "../../common/PrivateRoute";
 import ShoppingCart from "../views/shopping-carts/ShoppingCart";
 import { CartProvider } from "../../contexts/CartContext";
+import BoxContact from "../components/BoxContact";
 
 const SiteLayout = () => {
   return (
@@ -67,29 +68,7 @@ const SiteLayout = () => {
         <Footer />
       </CartProvider>
       <BackToTop />
-      <div className="position-fixed " style={{ bottom: "10%", left: "30px" }}>
-        <Link to={"https://zalo.me/0366675206"} className="mb-2 d-block">
-          <img
-            src="/assets/img/icon-zalo.png"
-            className="object-fit-contain"
-            width={"50px"}
-            height={"50px"}
-            alt=""
-          />
-        </Link>
-        <Link
-          to={"https://www.facebook.com/profile.php?id=61570918401577"}
-          className="mb-2 d-block"
-        >
-          <img
-            src="/assets/img/icon-facebook.png"
-            className="object-fit-contain"
-            width={"50px"}
-            height={"50px"}
-            alt=""
-          />
-        </Link>
-      </div>
+      <BoxContact />
     </div>
   );
 };

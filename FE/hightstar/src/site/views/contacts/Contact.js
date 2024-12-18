@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 function Contact() {
   return (
     <div className="mb-5">
-      <div className="container-fluid bg-primary py-5 mb-5 hero-header">
+      <div className="container-fluid bg-primary mb-sm-5 hero-header">
         <div className="container py-5">
           <div className="row justify-content-center py-5">
             <div className="col-lg-10 pt-lg-5 mt-lg-5 text-center">
@@ -29,7 +29,7 @@ function Contact() {
         </div>
       </div>
       {/* Contact Start */}
-      <div className="container-xxl py-5">
+      <div className="container-xxl py-4 mt-1 py-sm-5">
         <div className="container">
           <div className="text-center">
             <h6 className="section-title bg-white text-center text-primary px-3">

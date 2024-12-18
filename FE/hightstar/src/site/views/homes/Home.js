@@ -177,7 +177,7 @@ export default function Home() {
         </div>
       ) : (
         <div>
-          <div className="container-fluid bg-primary py-5 mb-5 hero-header">
+          <div className="container-fluid bg-primary py-5 mb-5 hero-header vh-100">
             <div className="container py-5">
               <div className="row justify-content-center py-5">
                 <div className="col-lg-10 pt-lg-5 mt-lg-5 text-center">
@@ -186,11 +186,11 @@ export default function Home() {
                     <br />
                     Đánh dấu sứ mệnh hoàn thành.
                   </h1>
-                  <p className="fs-4 text-white mb-4 animated slideInDown">
+                  <p className="fs-4 text-white mb-4 animated slideInDown d-none d-sm-block">
                     Kỹ năng bơi lội không chỉ là môn thể thao, mà là sự bảo vệ
                     cho bản thân, gia đình và mọi người.
                   </p>
-                  <div className="position-relative w-75 mx-auto animated slideInDown">
+                  <div className="position-relative w-75 mx-auto animated slideInDown d-none d-sm-block">
                     <input
                       className="form-control border-0 rounded-pill w-100 py-3 ps-4 pe-5"
                       type="text"
@@ -199,6 +199,20 @@ export default function Home() {
                     <button
                       type="button"
                       className="btn btn-primary rounded-pill py-2 px-4 position-absolute top-0 end-0 me-2"
+                      style={{ marginTop: 7 }}
+                    >
+                      Tìm Kiếm
+                    </button>
+                  </div>
+                  <div className="w-75 mx-auto animated slideInDown d-sm-none mt-5">
+                    <input
+                      className="form-control border-0 rounded-pill w-100 py-3 ps-4 pe-5"
+                      type="text"
+                      placeholder="Tìm Khóa học, huấn luyện viên..."
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-primary rounded-pill py-2 px-4 mt-3"
                       style={{ marginTop: 7 }}
                     >
                       Tìm Kiếm

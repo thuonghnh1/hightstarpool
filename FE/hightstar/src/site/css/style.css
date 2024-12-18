@@ -47,8 +47,8 @@ h6,
   display: flex;
   justify-content: center;
   align-items: center;
-  right: 45px;
-  bottom: 45px;
+  right: 20px;
+  bottom: 4%;
   z-index: 9999;
 }
 
@@ -222,6 +222,8 @@ h6,
   background-repeat: no-repeat;
   background-size: cover;
 }
+
+
 
 .breadcrumb-item + .breadcrumb-item::before {
   color: rgba(255, 255, 255, 0.5);
@@ -612,3 +614,53 @@ input[type="number"]::-webkit-outer-spin-button {
 .footer .position-relative button:hover {
   background-color: #0056b3;
 }
+
+/* zalo , fb icon */
+@keyframes rotate-shake {
+  0% {
+    transform: rotate(0deg);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  25% {
+    transform: rotate(-15deg);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  }
+  50% {
+    transform: rotate(15deg);
+    transform: scale(1.08);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
+  }
+  75% {
+    transform: rotate(-15deg);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  100% {
+    transform: rotate(0deg);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.icon-container {
+  position: fixed;
+  bottom: 4%;
+  left: 20px;
+  z-index: 999;
+}
+
+.icon-container .icon {
+  display: block;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: white;
+  border: 2px solid #ddd;
+  animation: rotate-shake 1.5s ease-in-out infinite;
+}
+
+.icon-container .icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+

@@ -31,13 +31,13 @@ public class ProductController {
     private final ProductService productService;
     private final CloudinaryService cloudinaryService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')")
     @GetMapping
     public List<ProductDTO> getAllProducts() {
         return productService.getAllProducts();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')")
     @GetMapping("/{id}")
     public ProductDTO getProductById(@PathVariable Long id) {
         return productService.getProductById(id);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useContext } from "react";
 import { NavLink } from "react-router-dom";
 import { Spinner } from "react-bootstrap";
-import ProductService from "../../../admin/services/ProductService";
+import ProductService from "../../../site/services/ProductService";
 import { ToastContainer, toast } from "react-toastify";
 import { CartContext } from "../../../contexts/CartContext";
 import "react-toastify/dist/ReactToastify.css";
@@ -53,8 +53,8 @@ const ClothingCard = ({
 
   return (
     <div className="col">
-      <div className="card h-100">
-        <img src={image} className="card-img-top" alt={title} />
+      <div className="card h-100 shadow-sm">
+        <img src={image} className="card-img-top object-fit-contain" height={"300px"} alt={title} />
         <div className="card-body d-flex flex-column">
           <h5 className="card-title">{title}</h5>
           <p className="card-text text-truncate mb-3">{description}</p>
@@ -255,7 +255,7 @@ const Product = () => {
       ) : (
         <div>
           {/* Hero Header */}
-          <div className="container-fluid bg-primary py-5 mb-5 hero-header">
+          <div className="container-fluid bg-primary mb-sm-5 hero-header">
             <div className="container py-5">
               <div className="row justify-content-center py-5">
                 <div className="col-lg-10 pt-lg-5 mt-lg-5 text-center">
@@ -283,7 +283,7 @@ const Product = () => {
           </div>
 
           {/* Product Listing */}
-          <div className="container-xxl py-5">
+          <div className="container-xxl py-4 mt-1 py-sm-5">
             <div className="container">
               {/* Tiêu đề */}
               <h2 className="mb-4 text-center">Tất cả sản phẩm</h2>
@@ -308,7 +308,7 @@ const Product = () => {
                     </button>
                   </div>
                 </div>
-                <div className="col-md-6 d-flex justify-content-end">
+                <div className="col-md-6 d-flex justify-content-end mt-3 mt-sm-0">
                   {/* Dropdown sắp xếp */}
                   <select
                     className="form-select w-auto"
