@@ -52,6 +52,7 @@ public enum ErrorCode {
     INVALID_OTP("INVALID_OTP"), // lỗi otp không hợp lệ hoặc đã hết hạn.
     INVALID_QR_CODE("INVALID_QR_CODE"), // Mã qr không hợp lệ
     INVALID_OPERATION("INVALID_OPERATION"), // Vé đã được quét ra (đã quét ra khỏi hồ rồi)
+    INVALID_TICKET_TYPE("INVALID_TICKET_TYPE"), // loại vé khôgn h lệ
 
     // Lỗi hệ thống và máy chủ (System and Server Errors)
     INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR"), // Lỗi máy chủ nội bộ

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback, useContext } from "react";
 import { NavLink } from "react-router-dom";
-import { Spinner } from "react-bootstrap";
 import ProductService from "../../../site/services/ProductService";
 import { ToastContainer, toast } from "react-toastify";
 import { CartContext } from "../../../contexts/CartContext";
@@ -54,7 +53,12 @@ const ClothingCard = ({
   return (
     <div className="col">
       <div className="card h-100 shadow-sm">
-        <img src={image} className="card-img-top object-fit-contain" height={"300px"} alt={title} />
+        <img
+          src={image}
+          className="card-img-top object-fit-contain"
+          height={"300px"}
+          alt={title}
+        />
         <div className="card-body d-flex flex-column">
           <h5 className="card-title">{title}</h5>
           <p className="card-text text-truncate mb-3">{description}</p>
@@ -137,14 +141,13 @@ const ClothingCard = ({
 
 const Product = () => {
   const { addToCart } = useContext(CartContext);
-  const [loadingPage, setLoadingPage] = useState(false);
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("");
 
   // Hàm lấy sản phẩm từ API
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const fetchedProducts = await ProductService.getProducts();
 
@@ -192,7 +195,7 @@ const Product = () => {
       console.error("Lỗi khi lấy sản phẩm:", error);
       setError("Đã xảy ra lỗi khi tải sản phẩm.");
     }
-  };
+  }, [searchTerm, sortOption]);
 
   // Hàm xử lý tìm kiếm
   const handleSearch = (e) => {
@@ -226,29 +229,22 @@ const Product = () => {
     ));
   };
 
-  // Sử dụng useCallback và debounce để tối ưu hóa tìm kiếm khi người dùng gõ
-  const debouncedFetchProducts = useCallback(
-    debounce(() => {
-      fetchProducts();
-    }, 500), // 500ms debounce
-    [searchTerm, sortOption]
-  );
-
   useEffect(() => {
-    debouncedFetchProducts();
+    const debouncedFetch = debounce(() => {
+      fetchProducts();
+    }, 500);
 
-    // Cleanup function để hủy debounce khi component unmount
-    return debouncedFetchProducts.cancel;
-  }, [searchTerm, sortOption, debouncedFetchProducts]);
+    debouncedFetch();
+
+    return () => {
+      debouncedFetch.cancel();
+    };
+  }, [searchTerm, sortOption, fetchProducts]);
 
   return (
     <>
       <ToastContainer />
-      {loadingPage ? (
-        <div className="w-100 h-100 d-flex justify-content-center align-items-center">
-          <Spinner animation="border" variant="primary" />
-        </div>
-      ) : error ? (
+      {error ? (
         <div className="alert alert-danger" role="alert">
           {error}
         </div>
@@ -290,7 +286,7 @@ const Product = () => {
 
               {/* Thanh tìm kiếm và sắp xếp */}
               <div className="row mb-4">
-                <div className="col-md-6">
+                <div className="col-md-4">
                   <div className="input-group">
                     <input
                       type="text"
@@ -299,16 +295,10 @@ const Product = () => {
                       value={searchTerm}
                       onChange={handleSearch}
                     />
-                    <button
-                      className="btn btn-outline-secondary"
-                      type="button"
-                      onClick={fetchProducts}
-                    >
-                      Tìm kiếm
-                    </button>
+                   
                   </div>
                 </div>
-                <div className="col-md-6 d-flex justify-content-end mt-3 mt-sm-0">
+                <div className="col-md-8 d-flex justify-content-end mt-3 mt-sm-0">
                   {/* Dropdown sắp xếp */}
                   <select
                     className="form-select w-auto"

@@ -5,6 +5,7 @@ import { UserContext } from "../../../contexts/UserContext";
 import { CartContext } from "../../../contexts/CartContext";
 import { useNavigate } from "react-router-dom";
 import UserProfileService from "../../../admin/services/UserProfileService";
+import { toast } from "react-toastify";
 
 const ShoppingCart = () => {
   const { user } = useContext(UserContext);
@@ -17,6 +18,8 @@ const ShoppingCart = () => {
     fullName: "",
     phoneNumber: "",
     shippingAddress: "",
+    phoneNumber: "",
+    notes: "",
     totalAmount: 0,
   });
   const [showModal, setShowModal] = useState(false);
@@ -81,10 +84,50 @@ const ShoppingCart = () => {
     }));
   };
 
+  const prepareOrderData = (cartItems) => {
+    // Dữ liệu cho Order
+    const orderData = {
+      total: checkoutData.totalAmount,
+      paymentMethod: "BANK_TRANSFER", // Mặc định là chưa xác định
+      notes: checkoutData.notes,
+      shippingAddress: checkoutData.shippingAddress,
+      discountId: null,
+      userId: user.userId,
+    };
+    console.log(cartItems);
+    // Tạo OrderDetails
+    const orderDetails = cartItems.map((item) => {
+      const detail = {
+        quantity: item.quantity,
+        unitPrice: item.unitPrice * item.quantity,
+        productId: item.product.productId,
+      };
+
+      return detail; // Trả về trực tiếp nếu không phải vé bơi
+    });
+
+    // Kết hợp dữ liệu Order và OrderDetails
+    const invoiceObj = {
+      order: orderData,
+      orderDetails: orderDetails,
+    };
+
+    return invoiceObj;
+  };
+
   const handleCheckout = async (e) => {
     e.preventDefault();
+    if (!shoppingCartItems || shoppingCartItems.length === 0) {
+      toast.error(
+        "Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi thanh toán."
+      );
+      return;
+    }
     setLoadingPage(true);
     try {
+      // Xử lý thanh toán
+      console.log(prepareOrderData(shoppingCartItems)); // thông tin để lưu vào csdl
+
       clearCart(); // Làm trống giỏ hàng sau khi thanh toán
       setCheckoutSuccess(true);
       setShowModal(false);
@@ -303,23 +346,24 @@ const ShoppingCart = () => {
                         </span>
                       </li>
                     </ul>
-
-                    <button
-                      type="button"
-                      className="btn btn-block rounded-0 px-5 py-2 text-white"
-                      style={{ backgroundColor: "blue" }}
-                      onClick={() => setShowModal(true)}
-                    >
-                      Mua Hàng
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-block rounded-0 px-5 py-2 text-white"
-                      style={{ backgroundColor: "red" }}
-                      onClick={clearCart}
-                    >
-                      Xóa tất cả
-                    </button>
+                    <div className="d-flex">
+                      <button
+                        type="button"
+                        className="me-auto btn btn-block rounded-0 px-4 py-2 text-white text-nowrap"
+                        style={{ backgroundColor: "red" }}
+                        onClick={clearCart}
+                      >
+                        Xóa tất cả
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-block rounded-0 px-5 py-2 text-white text-nowrap"
+                        style={{ backgroundColor: "blue" }}
+                        onClick={() => setShowModal(true)}
+                      >
+                        Mua Hàng
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -373,6 +417,21 @@ const ShoppingCart = () => {
                     value={checkoutData.shippingAddress}
                     onChange={handleInputChange}
                     placeholder="Số nhà, tên đường..."
+                    required
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="shippingAddress" className="form-label">
+                    Ghi chú
+                  </label>
+                  <textarea
+                    rows={4}
+                    className="form-control"
+                    id="notes"
+                    name="notes"
+                    value={checkoutData.notes}
+                    onChange={handleInputChange}
+                    placeholder="Ghi chú..."
                     required
                   />
                 </div>

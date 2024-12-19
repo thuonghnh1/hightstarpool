@@ -28,6 +28,7 @@ import edu.poly.hightstar.utils.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import com.google.zxing.WriterException;
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import edu.poly.hightstar.utils.qr.QRCodeGenerator;
 
@@ -119,6 +120,33 @@ public class TicketServiceImpl implements TicketService {
         if (price != null) {
             ticket.setTicketPrice(price.getPrice());
         }
+
+        // Đặt ngày bắt đầu và ngày hết hạn
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime issueDate = ticketDTO.getIssueDate() != null ? ticketDTO.getIssueDate() : now;
+        LocalDateTime expiryDate = ticketDTO.getExpiryDate();
+
+        if (expiryDate == null) {
+            switch (ticketDTO.getTicketType()) {
+                case ONETIME_TICKET:
+                    expiryDate = issueDate.plusDays(1);
+                    break;
+                case WEEKLY_TICKET:
+                    expiryDate = issueDate.plusDays(7);
+                    break;
+                case MONTHLY_TICKET:
+                    expiryDate = issueDate.plusDays(30);
+                    break;
+                default:
+                    throw new AppException("Loại vé không hợp lệ", ErrorCode.INVALID_TICKET_TYPE);
+            }
+        }
+
+        ticket.setIssueDate(issueDate);
+        ticket.setExpiryDate(expiryDate);
+
+        ticketDTO.setIssueDate(issueDate);
+        ticketDTO.setExpiryDate(expiryDate);
 
         // Lưu vé để lấy ticketId
         Ticket createdTicket = ticketRepository.save(ticket);

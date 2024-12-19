@@ -20,8 +20,8 @@ const ReviewManagement = () => {
   const [loadingPage, setLoadingPage] = useState(false); // này để load cho toàn bộ trang dữ liệu
   const [errorServer, setErrorServer] = useState(null);
   const button = {
-    btnAdd: true,
-    btnEdit: true,
+    btnAdd: false,
+    btnEdit: false,
     btnDelete: true,
     btnDetail: false,
     btnSetting: false,

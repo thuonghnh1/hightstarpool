@@ -1,0 +1,93 @@
+/* CSS for SwimmingTicket */
+.ticket-container {
+  display: flex;
+  width: 800px;
+  height: 270px;
+  border: 1px solid #ddd;
+  font-family: Arial, sans-serif;
+  background-color: #fff;
+  overflow: hidden;
+}
+
+.ticket-left {
+  flex: 2;
+  padding: 20px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ticket-header img {
+  height: 50px;
+}
+
+.ticket-header h6 {
+  text-transform: uppercase;
+  font-weight: 400;
+  margin: 0;
+}
+
+.ticket-header span {
+  font-size: 12px;
+  text-align: right;
+}
+
+.ticket-title {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.ticket-title h3 {
+  margin: 0;
+  font-weight: bold;
+}
+
+.ticket-title p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.ticket-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.ticket-info p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.ticket-right {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ticket-right img {
+  height: 200px;
+}
+
+.ticket-right .ticket-id {
+  font-weight: bold;
+  font-size: 13px;
+  color: #333;
+  margin: 10px 0;
+}
+
+.ticket-right .ticket-footer {
+  font-size: 9px;
+  font-style: italic;
+  color: red;
+  text-align: center;
+}

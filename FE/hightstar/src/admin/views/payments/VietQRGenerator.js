@@ -129,6 +129,7 @@ const VietQRGenerator = () => {
 
       if (verifyResponse === true) {
         setMessage("Xác thực OTP thành công! Giao dịch đã được xác nhận.");
+        
         // Xóa transactionId và otp khỏi localStorage sau khi xác thực thành công
         localStorage.removeItem("transactionId");
         localStorage.removeItem("otp");

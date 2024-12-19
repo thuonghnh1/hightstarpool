@@ -1,11 +1,28 @@
-// services/apiService.js
 import CourseService from "./CourseService";
 import DiscountService from "./DiscountService";
-import TicketService from "./TicketService";
 import ProductService from "./ProductService";
 import axiosInstance from "../../services/axiosInstance";
+import TicketPriceService from "./TicketPriceService";
 
 const API_URL = "/employee/sales";
+
+const formatTicketData = (data) => {
+  return data
+    .filter((item) => item.ticketType !== "STUDENT_TICKET") // Lọc bỏ vé học viên
+    .map((item) => ({
+      id: `VB${item.id}`,
+      type: item.ticketType,
+      name:
+        item.ticketType === "ONETIME_TICKET"
+          ? "Vé dùng 1 lần"
+          : item.ticketType === "WEEKLY_TICKET"
+          ? "Vé tuần"
+          : item.ticketType === "MONTHLY_TICKET"
+          ? "Vé tháng"
+          : "",
+      price: item.price,
+    }));
+};
 
 // Các hàm chuyển đổi dữ liệu
 const formatProductData = (data) => {
@@ -13,22 +30,8 @@ const formatProductData = (data) => {
     id: `SP${item.id}`, //thêm tiền tố SP (sanpham) cho id để nhận diện trong quá trình xử lý
     image: item.image,
     name: item.productName,
-    type: item.categoryId, // Thay đổi nếu cần
+    type: item.categoryName, // Thay đổi nếu cần
     price: item.price,
-  }));
-};
-
-const formatTicketData = (data) => {
-  return data.map((item) => ({
-    id: `VB${item.id}`,
-    code: item.ticketCode,
-    name:
-      item.ticketType === "ONETIME_TICKET"
-        ? "Vé dùng 1 lần"
-        : item.ticketType === "WEEKLY_TICKET"
-        ? "Vé tuần"
-        : "Vé tháng",
-    price: item.ticketPrice,
   }));
 };
 
@@ -37,7 +40,7 @@ const formatCourseData = (data) => {
     id: `KH${item.id}`,
     image: item.image,
     name: item.courseName,
-    type: `1 kèm ${item.maxStudents}`,
+    type: "",
     price: item.price,
   }));
 };
@@ -61,9 +64,9 @@ const fetchProducts = async () => {
   }
 };
 
-const fetchTickets = async () => {
+const fetchTicketPrices = async () => {
   try {
-    const data = await TicketService.getTickets();
+    const data = await TicketPriceService.getTicketPrices();
     return formatTicketData(data);
   } catch (error) {
     console.error("Error fetching tickets:", error);
@@ -101,7 +104,6 @@ const fetchActiveDiscounts = async () => {
   }
 };
 
-
 const createInvoice = async (invoiceData) => {
   try {
     const response = await axiosInstance.post(
@@ -128,7 +130,7 @@ const createInvoiceHaveCourse = async (payload) => {
 
 const SalesService = {
   fetchProducts,
-  fetchTickets,
+  fetchTicketPrices,
   fetchCourses,
   fetchDiscounts,
   fetchActiveDiscounts,

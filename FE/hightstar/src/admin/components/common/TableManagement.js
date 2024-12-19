@@ -271,11 +271,11 @@ const TableManagement = ({
 
         switch (item.ticketType) {
           case "ONETIME_TICKET":
-            ticketTypeClass = "text-bg-info"; // Vé cơ bản
+            ticketTypeClass = "text-bg-primary"; // Vé cơ bản
             ticketTypeText = "Vé một lần";
             break;
           case "WEEKLY_TICKET":
-            ticketTypeClass = "text-bg-primary"; // Vé tuần
+            ticketTypeClass = "text-bg-success"; // Vé tuần
             ticketTypeText = "Vé tuần";
             break;
           case "MONTHLY_TICKET":

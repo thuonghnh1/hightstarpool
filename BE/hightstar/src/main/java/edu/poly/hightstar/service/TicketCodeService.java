@@ -47,14 +47,13 @@ public class TicketCodeService {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime expiryDate = ticketDTO.getExpiryDate(); // Ngày hết hạn của vé
 
-        Date issueDate = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
-        Date expiryDateConverted = Date.from(expiryDate.atZone(ZoneId.systemDefault()).toInstant());
+        Date issueDate = Date.from(now.atZone(ZoneId.systemDefault()).toInstant()); // Chuyển đổi LocalDateTime (thời gian hiện tại) thành Date
+        Date expiryDateConverted = Date.from(expiryDate.atZone(ZoneId.systemDefault()).toInstant()); // Chuyển đổi LocalDate (ngày hết hạn) thành Date
 
         return Jwts.builder()
                 .setSubject(String.valueOf(ticketDTO.getTicketId()))
                 .claim("ticketId", ticketDTO.getTicketId())
                 .claim("ticketType", ticketDTO.getTicketType().name())
-                // Dùng classStudentEnrollmentId thay vì studentId
                 .claim("classStudentEnrollmentId",
                         ticketDTO.getClassStudentEnrollmentId() != null ? ticketDTO.getClassStudentEnrollmentId() : "")
                 .claim("issueDate", issueDate.getTime())

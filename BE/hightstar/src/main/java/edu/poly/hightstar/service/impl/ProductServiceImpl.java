@@ -28,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
             ProductDTO dto = new ProductDTO();
             BeanUtils.copyProperties(product, dto);
             dto.setCategoryId(product.getCategory().getCategoryId());
+            dto.setCategoryName(product.getCategory().getCategoryName());
             return dto;
         }).collect(Collectors.toList());
     }
@@ -38,6 +39,8 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new AppException("Không tìm thấy sản phẩm này", ErrorCode.PRODUCT_NOT_FOUND));
         ProductDTO productDTO = new ProductDTO();
         BeanUtils.copyProperties(product, productDTO);
+        productDTO.setCategoryId(product.getCategory().getCategoryId());
+        productDTO.setCategoryName(product.getCategory().getCategoryName());
         return productDTO;
     }
 

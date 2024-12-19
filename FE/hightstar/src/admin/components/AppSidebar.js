@@ -135,7 +135,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
               isActive ? "active-link" : "inactive-link"
             }
           >
-            <i class="me-2 bi bi-backpack2"></i> Đăng ký lớp học
+            <i className="me-2 bi bi-backpack2"></i> Đăng ký lớp học
           </NavLink>
         </li>
         <li>
@@ -145,7 +145,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
               isActive ? "active-link" : "inactive-link"
             }
           >
-            <i class="me-2 bi bi-credit-card"></i> Tạo Qr Thanh Toán
+            <i className="me-2 bi bi-credit-card"></i> Tạo Qr Thanh Toán
           </NavLink>
         </li>
 
@@ -156,7 +156,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
               isActive ? "active-link" : "inactive-link"
             }
           >
-            <i class="me-2 bi bi-cash-coin"></i> Lịch sử chuyển khoản
+            <i className="me-2 bi bi-cash-coin"></i> Lịch sử chuyển khoản
           </NavLink>
         </li>
         

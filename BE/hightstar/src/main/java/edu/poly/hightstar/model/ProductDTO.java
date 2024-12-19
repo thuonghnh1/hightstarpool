@@ -36,4 +36,5 @@ public class ProductDTO {
 
     private Long categoryId; // Chỉ cần categoryId thay vì đối tượng category
 
+    private String categoryName;
 }

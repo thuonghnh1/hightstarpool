@@ -20,52 +20,19 @@ import UserService from "../../services/UserService";
 import ModalConfirmInfo from "./ModalConfirmInfo";
 import Invoice from "./Invoice";
 import PrintComponent from "../../components/common/PrintComponent";
+import TicketService from "../../services/TicketService";
+import SwimmingTicket from "./SwimmingTicket";
 
 const SalesManagement = () => {
   const [activeTab, setActiveTab] = useState("tickets");
   const [cartItems, setCartItems] = useState([]);
   const [showInvoice, setShowInvoice] = useState(false);
-  const [selectedDiscount, setSelectedDiscount] = useState(null); // State cho mã giảm giá
-  const [tickets, setTickets] = useState([
-    { id: "VB1", name: "Vé dùng 1 lần", price: 60000 },
-    { id: "VB2", name: "Vé tuần", price: 400000 },
-    { id: "VB3", name: "Vé tháng", price: 1500000 },
-  ]);
-  const [courses, setCourses] = useState([]);
-  const [products, setProducts] = useState([
-    {
-      id: "SP01",
-      image:
-        "https://boidat.com/wp-content/uploads/2024/04/z4610703450640_e29a9e4149977230a446f105682e6d71-2048x1536.jpg",
-      name: "Nước uống",
-      type: "Đồ ăn",
-      price: 15000,
-    },
-    {
-      id: "SP02",
-      image:
-        "https://boidat.com/wp-content/uploads/2024/04/z4610703450640_e29a9e4149977230a446f105682e6d71-2048x1536.jpg",
-      name: "Snack",
-      type: "Áo quần",
-      price: 10000,
-    },
-    {
-      id: "SP03",
-      image:
-        "https://boidat.com/wp-content/uploads/2024/04/z4610703450640_e29a9e4149977230a446f105682e6d71-2048x1536.jpg",
-      name: "Mì tôm trứng",
-      type: "Đồ ăn",
-      price: 15000,
-    },
-  ]);
   const [listDiscountOption, setListDiscountOption] = useState([]);
+  const [selectedDiscount, setSelectedDiscount] = useState(null); // State cho mã giảm giá
+  const [tickets, setTickets] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState(""); // State cho tìm kiếm
-  // State dùng để quản lý trạng thái hiển thị của các modal
-  const [modals, setModals] = useState({
-    modalEnterPhone: false,
-    modalConfirmInfo: false,
-    modal3: false,
-  });
   const [formData, setFormData] = useState({ phoneNumber: "" });
   const [buyer, setBuyer] = useState({});
   const [invoiceData, setInvoiceData] = useState(null); // lưu thông tin hóa đơn
@@ -73,19 +40,25 @@ const SalesManagement = () => {
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const printRef = useRef();
+  // State dùng để quản lý trạng thái hiển thị của các modal
+  const [modals, setModals] = useState({
+    modalEnterPhone: false,
+    modalConfirmInfo: false,
+    modal3: false,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         if (activeTab === "tickets") {
-          // const data = await SalesService.fetchTickets();
-          // setTickets(data);
+          const data = await SalesService.fetchTicketPrices();
+          setTickets(data);
         } else if (activeTab === "courses") {
           const data = await SalesService.fetchCourses();
           setCourses(data);
         } else if (activeTab === "products") {
-          // const data = await SalesService.fetchProducts();
-          // setProducts(data);
+          const data = await SalesService.fetchProducts();
+          setProducts(data);
         }
         const data = await SalesService.fetchActiveDiscounts();
         setListDiscountOption(data);
@@ -114,28 +87,51 @@ const SalesManagement = () => {
   const handleAddToCart = (item) => {
     setCartItems((prevItems) => {
       const isCourse = item.id.includes("KH");
-      const existingItem = prevItems.find(
-        (cartItem) => cartItem.id === item.id
+      const hasCourseInCart = prevItems.some((cartItem) =>
+        cartItem.id.includes("KH")
       );
 
-      if (isCourse && existingItem) {
-        setTimeout(() => {
-          toast.error("Khóa học này đã có trong giỏ hàng!", {
+      // Nếu là khóa học
+      if (isCourse) {
+        // Kiểm tra giỏ hàng không được chứa bất kỳ sản phẩm nào khác
+        if (prevItems.length > 0) {
+          toast.error("Khóa học chỉ được phép mua riêng lẻ!", {
             toastId: item.id,
           });
-        }, 0);
-        return prevItems;
+          return prevItems; // Không thêm khóa học mới
+        }
+
+        // Thêm khóa học mới vào giỏ
+        return [...prevItems, { ...item, quantity: 1 }];
       }
 
-      if (existingItem) {
-        return prevItems.map((cartItem) =>
-          cartItem.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
+      // Nếu không phải là khóa học
+      if (!isCourse) {
+        // Kiểm tra nếu đã có khóa học trong giỏ hàng
+        if (hasCourseInCart) {
+          toast.error("Bạn không thể mua sản phẩm khác khi đã chọn khóa học!", {
+            toastId: item.id,
+          });
+          return prevItems; // Không thêm sản phẩm khác
+        }
+
+        // Nếu sản phẩm đã tồn tại, tăng số lượng
+        const existingItem = prevItems.find(
+          (cartItem) => cartItem.id === item.id
         );
+        if (existingItem) {
+          return prevItems.map((cartItem) =>
+            cartItem.id === item.id
+              ? { ...cartItem, quantity: cartItem.quantity + 1 }
+              : cartItem
+          );
+        }
+
+        // Thêm sản phẩm mới vào giỏ
+        return [...prevItems, { ...item, quantity: 1 }];
       }
 
-      return [...prevItems, { ...item, quantity: 1 }];
+      return prevItems;
     });
   };
 
@@ -157,10 +153,8 @@ const SalesManagement = () => {
   };
 
   // Lọc kết quả theo từ khóa tìm kiếm
-  const filteredItems = items.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      String(item.id).toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredItems = items.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Xử lý cập nhật giá trị tìm kiếm
@@ -202,7 +196,6 @@ const SalesManagement = () => {
   const handleCheckBuyer = async (modalName) => {
     if (validateForm()) {
       try {
-        // Gọi API để kiểm tra người dùng theo số điện thoại
         const data = await UserService.getUserByUsername(formData.phoneNumber);
         if (data) {
           setBuyer(data);
@@ -215,33 +208,41 @@ const SalesManagement = () => {
     }
   };
 
-  const prepareOrderData = (cartItems, buyer, discountId, paymentMethod) => {
+  const prepareOrderData = (cartItems, buyer, discountId) => {
     // Dữ liệu cho Order
     const orderData = {
       total: calculateTotalPrice(),
-      paymentMethod, // Phương thức thanh toán (VD: "CASH", "MOMO")
+      paymentMethod: "UNKNOWN", // Mặc định là chưa xác định
       notes,
-      shippingAddress: null, // Địa chỉ giao hàng
+      shippingAddress: "Tại quầy",
       discountId,
-      userId: buyer.id || null, // null nếu là khách
+      userId: buyer.id || null, // Nếu không có buyer, để null
     };
 
-    // Dữ liệu cho OrderDetails
-    const orderDetails = cartItems.map((item) => {
+    // Tạo OrderDetails
+    const orderDetails = cartItems.flatMap((item) => {
+      if (item.id.includes("VB")) {
+        return Array.from({ length: item.quantity }, () => ({
+          // Đảm bảo các vé cùng loại sẽ được tách ra vì id sẽ là riêng biệt khi tạo hóa đơna
+          ticketType: item.type,
+          ticketId: null,
+          unitPrice: item.price,
+          quantity: 1,
+        }));
+      }
+
       const detail = {
         quantity: item.quantity,
         unitPrice: item.price * item.quantity,
       };
 
       if (item.id.includes("SP")) {
-        detail.productId = item.id.substring(2); // Lấy phần còn lại sau tiền tố
+        detail.productId = item.id.substring(2); // Bỏ tiền tố để lấy ID
       } else if (item.id.includes("KH")) {
-        detail.courseId = item.id.substring(2);
-      } else if (item.id.includes("VB")) {
-        detail.ticketId = item.id.substring(2);
+        detail.courseId = item.id.substring(2); // Bỏ tiền tố để lấy ID
       }
 
-      return detail;
+      return detail; // Trả về trực tiếp nếu không phải vé bơi
     });
 
     // Kết hợp dữ liệu Order và OrderDetails
@@ -249,52 +250,188 @@ const SalesManagement = () => {
       order: orderData,
       orderDetails: orderDetails,
     };
-    setInvoiceData(invoiceObj); // lưu vào state
+
+    // Lưu vào state nếu cần sử dụng
+    setInvoiceData(invoiceObj);
 
     return invoiceObj;
   };
 
-  const handleConfirmPayment = async () => {
-    // Kiểm tra nếu giỏ hàng chứa khóa học
-    const hasCourse = cartItems.some((item) => item.id.includes("KH"));
-    if (hasCourse) {
-      // Hiển thị modal
-      handleShowModal("modalConfirmInfo"); // hiển thị modal xác nhận trước khi thanh toán.
-      return;
+  // cập nhật lại ticketId cho đơn hàng
+  const updateOrderDetailsWithTickets = (orderDetails, createdTickets) => {
+    // Copy danh sách orderDetails để tránh thay đổi trực tiếp
+    const updatedOrderDetails = [...orderDetails];
+
+    // Tách createdTickets theo loại vé
+    const ticketsByType = createdTickets.reduce((acc, ticket) => {
+      if (!acc[ticket.ticketType]) {
+        acc[ticket.ticketType] = [];
+      }
+      acc[ticket.ticketType].push(ticket);
+      return acc;
+    }, {});
+    console.log(ticketsByType);
+
+    // Duyệt qua từng loại vé
+    Object.entries(ticketsByType).forEach(([ticketType, tickets]) => {
+      // Lấy danh sách orderDetails cho loại vé tương ứng
+      let matchingDetails = updatedOrderDetails.filter(
+        (detail) => detail.ticketId === null && detail.ticketType === ticketType
+      );
+
+      // Gán ticketId vào từng mục orderDetail theo thứ tự
+      tickets.forEach((ticket, index) => {
+        if (index < matchingDetails.length) {
+          matchingDetails[index].ticketId = ticket.id; // Gán ticketId
+        }
+      });
+    });
+
+    return updatedOrderDetails; // Trả về danh sách orderDetails đã được cập nhật
+  };
+
+  const clearPage = () => {
+    setCartItems([]);
+    setBuyer({});
+    setInvoiceData(null);
+    setNotes("");
+    setSelectedDiscount(null);
+    setSearchTerm("");
+    setShowInvoice(false);
+  };
+
+  const handleTicketsLogic = async (tickets) => {
+    try {
+      const createdTickets = [];
+      for (const ticket of tickets) {
+        // Gọi API tạo vé
+        const createdTicket = await TicketService.createTicket({
+          ticketType: ticket.type,
+        });
+
+        if (createdTicket) {
+          createdTickets.push(createdTicket);
+
+          // Render vé bơi
+          const ticketComponent = (
+            <SwimmingTicket
+              ticketData={createdTicket}
+              buyerName={buyer?.fullName}
+            />
+          );
+
+          // In vé bơi
+          await printRef.current.printTicket(ticketComponent);
+        }
+      }
+
+      return createdTickets;
+    } catch (error) {
+      console.error("Lỗi khi tạo vé:", error);
+      throw error;
     }
+  };
 
-    const invoice = prepareOrderData(
-      cartItems,
-      buyer,
-      selectedDiscount ? selectedDiscount.value : null,
-      "CASH"
-    );
+  const handleCoursesLogic = async (courses) => {
+    try {
+      const createdTickets = [];
+      for (const ticket of tickets) {
+        // Gọi API tạo vé
+        const createdTicket = await TicketService.createTicket({
+          ticketType: ticket.type,
+        });
 
-    // Gọi API để tạo hóa đơn
+        if (createdTicket) {
+          createdTickets.push(createdTicket);
+
+          // Render vé bơi
+          const ticketComponent = (
+            <SwimmingTicket
+              ticketData={createdTicket}
+              buyerName={buyer?.fullName}
+            />
+          );
+
+          // In vé bơi
+          await printRef.current.printTicket(ticketComponent);
+        }
+      }
+
+      return createdTickets;
+    } catch (error) {
+      console.error("Lỗi khi tạo vé:", error);
+      throw error;
+    }
+  };
+
+  const handleConfirmPayment = async () => {
+    const courses = cartItems.filter((item) => item.id.includes("KH"));
+    const tickets = cartItems.filter((item) => item.id.includes("VB"));
+    const products = cartItems.filter((item) => item.id.includes("SP"));
+
     try {
       setIsLoading(true);
+      // Chuẩn bị dữ liệu hóa đơn
+      const invoice = prepareOrderData(
+        cartItems,
+        buyer,
+        selectedDiscount ? selectedDiscount.value : null
+      );
+
+      // Xử lý vé bơi
+      if (tickets.length > 0) {
+        // Tạo vé bơi và lấy danh sách vé đã tạo
+        const createdTickets = await handleTicketsLogic(tickets);
+
+        // Cập nhật danh sách ticketId vào orderDetails
+        const updatedOrderDetails = updateOrderDetailsWithTickets(
+          invoice.orderDetails,
+          createdTickets
+        );
+
+        // Gán lại orderDetails đã cập nhật vào invoice
+        invoice.orderDetails = updatedOrderDetails;
+      }
+
+      // Xử lý khóa học
+      if (courses.length > 0) {
+        handleShowModal("modalConfirmInfo");
+        return;
+      }
+
+      // Gọi API tạo hóa đơn
       const orderResponse = await SalesService.createInvoice(invoice);
       if (orderResponse && orderResponse.id) {
         const updatedInvoice = {
           ...invoice,
           order: {
-            ...invoice.order, // Giữ nguyên dữ liệu của `order`
-            orderCode: orderResponse.id, // Thêm mã hóa đơn từ API
+            ...invoice.order,
+            orderCode: orderResponse.id,
           },
         };
 
-        // Lưu lại invoiceObj với mã hóa đơn
         setInvoiceData(updatedInvoice);
 
-        toast.success("Thanh toán thành công!");
-        // Gọi in hóa đơn
-        if (printRef.current) {
-          printRef.current.print();
-        }
+        // Render hóa đơn
+        const invoiceComponent = (
+          <Invoice
+            buyer={buyer}
+            cartItems={cartItems}
+            totalPrice={updatedInvoice.order.total}
+            discount={selectedDiscount}
+            date={new Date().toLocaleString()}
+            invoiceCode={updatedInvoice.order.orderCode}
+          />
+        );
+
+        // In hóa đơn
+        await printRef.current.printInvoice(invoiceComponent);
+
+        clearPage();
       }
     } catch (error) {
-      // đã xử lý ở service
-      return;
+      console.error("Lỗi khi xử lý thanh toán:", error);
+      toast.error("Có lỗi xảy ra khi thanh toán!");
     } finally {
       setIsLoading(false);
     }
@@ -314,9 +451,6 @@ const SalesManagement = () => {
               value={searchTerm} // Liên kết giá trị tìm kiếm
               onChange={handleSearchChange} // Cập nhật khi gõ tìm kiếm
             />
-            {/* <Button variant="outline-primary" className="mx-2">
-              Hóa đơn 1
-            </Button> */}
             <Button variant="success">
               <i className="bi bi-funnel-fill"></i> Lọc
             </Button>
@@ -405,7 +539,8 @@ const SalesManagement = () => {
               </tbody>
             </Table>
           </div>
-          {/* Order Note and Total */}
+
+          {/* Ghi chú và tổng tiền */}
           <div className="d-flex justify-content-between align-items-center mt-3">
             <InputGroup className="w-50">
               <InputGroup.Text>
@@ -487,11 +622,11 @@ const SalesManagement = () => {
                         className="rounded-start object-fit-cover"
                         style={{ width: "70px", height: "100%" }}
                       />
-                      <div className="card-body px-2 py-2 text-truncate">
+                      <div className="card-body px-2 py-2 overflow-hidden d-flex flex-column justify-content-between">
                         <h6 className="card-title m-0 small text-truncate">
                           {item.name}
                         </h6>
-                        <span className="card-subtitle text-muted small">
+                        <span className="card-subtitle text-muted text-truncate small">
                           {item.type}
                         </span>
                         <p className="card-text text-danger text fw-bold small">
@@ -631,6 +766,7 @@ const SalesManagement = () => {
                   Giảm giá: <br />({selectedDiscount.label})
                 </Col>
                 <Col xs={4} className="text-end fw-bold text-success">
+                  -{" "}
                   {(
                     cartItems.reduce(
                       (total, item) => total + item.price * item.quantity,
@@ -725,19 +861,7 @@ const SalesManagement = () => {
         invoiceData={invoiceData}
       ></ModalConfirmInfo>
 
-      {/* Component in */}
-      {invoiceData && (
-        <PrintComponent ref={printRef} documentTitle="Hóa Đơn Bán Hàng">
-          <Invoice
-            buyer={buyer}
-            cartItems={cartItems}
-            totalPrice={invoiceData.order.total}
-            discount={selectedDiscount}
-            date={new Date().toLocaleString()}
-            invoiceCode={invoiceData.order.orderCode}
-          />
-        </PrintComponent>
-      )}
+      <PrintComponent ref={printRef} />
     </section>
   );
 };
