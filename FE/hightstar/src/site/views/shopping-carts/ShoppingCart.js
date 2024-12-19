@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { Modal, Button, Spinner } from "react-bootstrap";
+import { toast } from 'react-toastify';
 import { Helmet } from "react-helmet-async";
 import { UserContext } from "../../../contexts/UserContext";
 import { CartContext } from "../../../contexts/CartContext";
@@ -83,6 +84,12 @@ const ShoppingCart = () => {
 
   const handleCheckout = async (e) => {
     e.preventDefault();
+    if (!shoppingCartItems || shoppingCartItems.length === 0) {
+      toast.error(
+        "Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi thanh toán."
+      );
+      return;
+    }
     setLoadingPage(true);
     try {
       clearCart(); // Làm trống giỏ hàng sau khi thanh toán
