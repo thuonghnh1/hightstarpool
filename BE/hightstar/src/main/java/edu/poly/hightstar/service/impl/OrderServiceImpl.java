@@ -159,8 +159,10 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order();
         OrderDTO orderDTO = request.getOrder();
         BeanUtils.copyProperties(orderDTO, order);
-        System.out.println(order.getPaymentMethod());
-        order.setStatus(OrderStatus.COMPLETED); // Trạng thái mặc định
+        if (orderDTO.getStatus() == null) {
+            order.setStatus(OrderStatus.COMPLETED); // Trạng thái mặc định
+        }
+        order.setStatus(orderDTO.getStatus());
 
         if (orderDTO.getDiscountId() != null) {
             Discount discount = discountRepository.findById(orderDTO.getDiscountId())

@@ -142,7 +142,7 @@ const EnrollmentManagement = () => {
     setFormData({
       studentId: "",
       classId: "",
-      status: "",
+      status: "NOT_STARTED",
     });
     handleResetStatus();
     setErrorFields({});

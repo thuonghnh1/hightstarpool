@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
+import { getTransactionHistory } from "../../services/TransactionService";
 import {
   Container,
   Row,
@@ -24,15 +24,8 @@ const TransactionHistory = () => {
   // Hàm lấy dữ liệu giao dịch
   const fetchTransactions = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8080/api/public/transactions"
-      );
-      if (!response.data.error) {
-        setTransactions(response.data.transactionHistoryList);
-        setError(null);
-      } else {
-        setError(response.data.message);
-      }
+      const data = await getTransactionHistory();
+      setTransactions(data.transactionHistoryList);
     } catch (error) {
       setError("Không thể tải lịch sử giao dịch.");
       console.error("Lỗi khi lấy dữ liệu:", error);
@@ -54,8 +47,7 @@ const TransactionHistory = () => {
       case "ACSM":
         return (
           <span className="text-success d-flex align-items-center justify-content-center">
-            <i className="bi bi-check-circle-fill me-1"></i> Thành
-            công
+            <i className="bi bi-check-circle-fill me-1"></i> Thành công
           </span>
         );
       case "PENDING":
@@ -144,9 +136,7 @@ const TransactionHistory = () => {
                   <Table hover responsive variant="light">
                     <thead className="table-light">
                       <tr>
-                        <th className="text-center text-capitalize">
-                          Ngày
-                        </th>
+                        <th className="text-center text-capitalize">Ngày</th>
                         <th className="text-center text-capitalize">
                           Số Tài Khoản
                         </th>

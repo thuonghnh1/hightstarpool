@@ -332,42 +332,10 @@ const SalesManagement = () => {
     }
   };
 
-  const handleCoursesLogic = async (courses) => {
-    try {
-      const createdTickets = [];
-      for (const ticket of tickets) {
-        // Gọi API tạo vé
-        const createdTicket = await TicketService.createTicket({
-          ticketType: ticket.type,
-        });
-
-        if (createdTicket) {
-          createdTickets.push(createdTicket);
-
-          // Render vé bơi
-          const ticketComponent = (
-            <SwimmingTicket
-              ticketData={createdTicket}
-              buyerName={buyer?.fullName}
-            />
-          );
-
-          // In vé bơi
-          await printRef.current.printTicket(ticketComponent);
-        }
-      }
-
-      return createdTickets;
-    } catch (error) {
-      console.error("Lỗi khi tạo vé:", error);
-      throw error;
-    }
-  };
-
   const handleConfirmPayment = async () => {
     const courses = cartItems.filter((item) => item.id.includes("KH"));
     const tickets = cartItems.filter((item) => item.id.includes("VB"));
-    const products = cartItems.filter((item) => item.id.includes("SP"));
+    // const products = cartItems.filter((item) => item.id.includes("SP"));
 
     try {
       setIsLoading(true);
@@ -426,7 +394,7 @@ const SalesManagement = () => {
 
         // In hóa đơn
         await printRef.current.printInvoice(invoiceComponent);
-
+        toast.success("Thanh toán thành công!");
         clearPage();
       }
     } catch (error) {
@@ -859,6 +827,11 @@ const SalesManagement = () => {
         show={modals.modalConfirmInfo}
         onHide={() => handleCloseModal("modalConfirmInfo")}
         invoiceData={invoiceData}
+        cartItems={cartItems}
+        handleClearPage={clearPage}
+        printRef={printRef}
+        selectedDiscount={selectedDiscount}
+        buyer={buyer}
       ></ModalConfirmInfo>
 
       <PrintComponent ref={printRef} />

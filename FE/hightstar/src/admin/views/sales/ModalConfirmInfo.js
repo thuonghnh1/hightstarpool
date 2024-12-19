@@ -1,12 +1,22 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import SalesService from "../../services/SalesService";
 import { toast } from "react-toastify";
-import Select from "react-select";
-import TimeSlotService from "../../services/TimeSlotService";
-import TrainerService from "../../services/TrainerService";
+import Invoice from "./Invoice";
+import UserService from "../../services/UserService";
+import StudentService from "../../services/StudentService";
 
-const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
+const ModalConfirmInfo = ({
+  show,
+  onHide,
+  invoiceData,
+  cartItems,
+  handleClearPage,
+  printRef,
+  selectedDiscount,
+  buyer,
+}) => {
+  const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     buyerFullName: "",
@@ -18,88 +28,20 @@ const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
     nickname: "",
     age: 0,
     note: "",
-    timeSlots: [], // Mảng lưu các suất học được chọn
-    trainerId: null,
   });
   const [errorFields, setErrorFields] = useState({});
-  const [listTimeSlotOption, setListTimeSlotOption] = useState([]);
-  const [listTrainerOption, setListTrainerOption] = useState([]);
-  const [numSessionsPerWeek, setNumSessionsPerWeek] = useState(3); // Mặc định là 3 buổi học trong 1 tuần
 
-  const handelChangeDayOfWeek = (dayOfWeek) => {
-    const dayLabels = {
-      MONDAY: "Thứ Hai",
-      TUESDAY: "Thứ Ba",
-      WEDNESDAY: "Thứ Tư",
-      THURSDAY: "Thứ Năm",
-      FRIDAY: "Thứ Sáu",
-      SATURDAY: "Thứ Bảy",
-      SUNDAY: "Chủ Nhật",
-    };
-    return dayLabels[dayOfWeek];
-  };
-
-  // Gọi API khi component mount
   useEffect(() => {
-    const fetchTimeSlotData = async () => {
-      try {
-        let timeSlots = await TimeSlotService.getTimeSlots();
-
-        // Chuyển đổi danh sách thành định dạng phù hợp cho Select
-        const timeSlotOptions = timeSlots.map((timeSlot) => ({
-          value: timeSlot.id,
-          label: `#${timeSlot.id}: ${handelChangeDayOfWeek(
-            timeSlot.dayOfWeek
-          )} (${timeSlot.startTime} - ${timeSlot.endTime})`, // label có định dạng vd: #1: Thứ Hai (6:00 - 7:00)
-        }));
-        // Cập nhật trạng thái danh sách tùy chọn cho Select
-        setListTimeSlotOption(timeSlotOptions);
-      } catch (error) {
-        toast.error("Lỗi khi lấy danh sách người dùng");
-      }
-    };
-    fetchTimeSlotData();
-  }, []);
-
-  // Hàm kiểm tra tất cả timeSlotId đã được chọn
-  const areAllTimeSlotsSelected = useCallback(() => {
-    return (
-      formData.timeSlots.length === numSessionsPerWeek &&
-      formData.timeSlots.every((slotId) => { // Nếu bất kỳ phần tử nào không thỏa mãn, nó trả về false
-        const slotStr = String(slotId); // Chuyển số thành chuỗi
-        return slotStr.trim() !== ""; // Kiểm tra chuỗi không rỗng
-      })
-    );
-  }, [formData.timeSlots, numSessionsPerWeek]);
-
-  // Hàm gọi API lấy danh sách HLV dựa trên các suất học
-  const fetchAvailableTrainers = useCallback(async () => {
-    if (!areAllTimeSlotsSelected()) return; // Chỉ gọi API nếu đủ số suất học
-    try {
-      // Call API
-      const trainers = await TrainerService.getAvailableTrainers(
-        formData.timeSlots
-      );
-
-      // Chuyển đổi danh sách thành định dạng phù hợp cho Select
-      const trainerOptions = trainers.map((trainer) => ({
-        value: trainer.id,
-        label: `#${trainer.id} - ${trainer.fullName}`, // label có định dạng: #1 - Nguyễn Văn A
+    if (buyer && Object.keys(buyer).length !== 0) {
+      setFormData((prev) => ({
+        ...prev,
+        buyerFullName: buyer.fullName,
+        phoneNumber: buyer.phoneNumber,
+        email: buyer.email,
       }));
-
-      // Cập nhật trạng thái danh sách tùy chọn cho Select
-      setListTrainerOption(trainerOptions);
-    } catch (error) {
-      toast.error("Lỗi khi lấy danh sách HLV!");
+      setCurrentStep(2);
     }
-  }, [formData.timeSlots, areAllTimeSlotsSelected]);
-
-  // Gọi fetchAvailableTrainers mỗi khi timeSlots thay đổi
-  useEffect(() => {
-    if (areAllTimeSlotsSelected()) {
-      fetchAvailableTrainers();
-    }
-  }, [formData.timeSlots, areAllTimeSlotsSelected, fetchAvailableTrainers]);
+  }, [buyer]);
 
   // Hàm kiểm tra từng trường hợp lỗi
   const validateField = (key, value) => {
@@ -158,7 +100,7 @@ const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
   const validateStep = () => {
     const newErrors = {};
 
-    if (currentStep === 1) {
+    if (currentStep === 1 && Object.keys(buyer).length === 0) {
       // Step 1: Kiểm tra các trường thông tin người mua
       if (!formData.buyerFullName || formData.buyerFullName.trim() === "") {
         newErrors.buyerFullName = "Tên người mua không được để trống.";
@@ -197,12 +139,6 @@ const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
 
     if (currentStep === 3) {
       // Step 3: Kiểm tra thông tin
-      for (let i = 1; i <= numSessionsPerWeek; i++) {
-        const key = `timeSlotId${i}`;
-        if (!formData[key]) {
-          newErrors[key] = `Vui lòng chọn suất học!`;
-        }
-      }
     }
 
     setErrorFields(newErrors);
@@ -229,6 +165,70 @@ const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
     return null;
   };
 
+  const clearForm = () => {
+    setFormData({
+      buyerFullName: "",
+      phoneNumber: "",
+      email: "",
+      buyerGender: true,
+      studentFullName: "",
+      studentGender: true,
+      nickname: "",
+      age: 0,
+      note: "",
+    });
+  };
+
+  const processInvoice = async (buyerData) => {
+    try {
+      // Gọi API tạo hóa đơn
+      const orderResponse = await SalesService.createInvoice({
+        ...invoiceData,
+        order: {
+          ...invoiceData.order,
+          status: "PENDING",
+          userId: Object.keys(buyer).length !== 0 ? buyer.id : buyerData.id,
+        },
+      });
+
+      if (orderResponse && orderResponse.id) {
+        const updatedInvoice = {
+          ...invoiceData,
+          order: {
+            ...invoiceData.order,
+            orderCode: orderResponse.id,
+            userId: Object.keys(buyer).length !== 0 ? buyer.id : buyerData.id,
+          },
+        };
+
+        // Render hóa đơn
+        const invoiceComponent = (
+          <Invoice
+            buyer={buyerData}
+            cartItems={cartItems}
+            totalPrice={updatedInvoice.order.total}
+            discount={selectedDiscount}
+            date={new Date().toLocaleString()}
+            invoiceCode={updatedInvoice.order.orderCode}
+          />
+        );
+
+        // In hóa đơn
+        if (printRef?.current) {
+          await printRef.current.printInvoice(invoiceComponent);
+        }
+
+        toast.success("Thanh toán thành công!");
+        handleClearPage(); // Xóa giỏ hàng
+      } else {
+        throw new Error("Không thể tạo hóa đơn!");
+      }
+    } catch (error) {
+      console.error("Lỗi khi xử lý hóa đơn:", error);
+      toast.error("Có lỗi xảy ra khi xử lý hóa đơn!");
+    }
+  };
+
   // Xử lý khi click bước tiếp theo
   const handleContinue = async () => {
     if (validateStep()) {
@@ -241,84 +241,53 @@ const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
               fullName: formData.buyerFullName,
               phoneNumber: formData.phoneNumber,
               email: formData.email,
-              gender: formData.buyerGender ? "Nam" : "Nữ",
+              gender: formData.buyerGender,
+              role: "USER",
+              status: "ACTIVE",
             },
             studentInfo: {
               fullName: formData.studentFullName,
               nickname: formData.nickname || null,
               age: formData.age,
-              gender: formData.studentGender ? "Nam" : "Nữ",
-              note: formData.note || null,
+              gender: formData.studentGender,
+              note:
+                `${formData.studentFullName} (${formData.age} Tuổi): ${formData.note}` ||
+                `${formData.studentFullName} (${formData.age} Tuổi)`,
+              userId: null || buyer.id,
             },
-            listTimeSlotId: formData.timeSlots, // Sử dụng mảng timeSlots đã chọn
             invoice: invoiceData, // Hóa đơn từ component cha
           };
 
-          console.log("Payload gửi lên server: ", payload);
-
           // Gọi API
-          const response = await SalesService.createInvoiceHaveCourse(payload);
-          console.log("Đăng ký thành công: ", response);
+          setLoading(true);
+          let createdUser = buyer;
+          if (Object.keys(buyer).length === 0) {
+            createdUser = await UserService.createUser(payload.buyerInfo);
+            // tạo học viên
+            if (createdUser) {
+              await StudentService.createStudent({
+                ...payload.studentInfo,
+                userId: createdUser.id,
+              });
+            }
+          } else {
+            await StudentService.createStudent(payload.studentInfo);
+          }
 
-          toast.success("Đăng ký thành công!");
+          toast.success("Đăng ký thông tin thành công!");
+          processInvoice(createdUser); // in hóa đơn
+          clearForm();
           onHide();
         } catch (error) {
           console.error("Lỗi khi đăng ký: ", error);
           toast.error("Đăng ký thất bại. Vui lòng thử lại!");
+        } finally {
+          setLoading(false);
         }
       } else {
         setCurrentStep(currentStep + 1);
       }
     }
-  };
-
-  // Hàm xử lý thay đổi số buổi học
-  const handleNumSessionsChange = (e) => {
-    const value = parseInt(e.target.value, 10);
-    setNumSessionsPerWeek(value);
-  };
-
-  const renderTimeSlotInputs = () => {
-    // Tính toán lớp cột dựa trên số buổi học trong tuần
-    const columnClass =
-      numSessionsPerWeek === 1
-        ? "col-12"
-        : numSessionsPerWeek % 2 === 0
-        ? "col-md-6"
-        : "col-md-4";
-
-    return Array.from({ length: numSessionsPerWeek }, (_, index) => (
-      <div className={`${columnClass} mb-3`} key={index}>
-        <Form.Group controlId={`formTimeSlot${index}`}>
-          <Form.Label>
-            Suất học {index + 1} <span className="text-danger">(*)</span>
-          </Form.Label>
-          <Select
-            options={listTimeSlotOption}
-            value={listTimeSlotOption.find(
-              (option) => option.value === formData.timeSlots[index]
-            )}
-            onChange={(selectedOption) => {
-              // Thay đổi trực tiếp trong mảng `timeSlots`
-              const updatedTimeSlots = [...formData.timeSlots];
-              updatedTimeSlots[index] = selectedOption
-                ? selectedOption.value
-                : "";
-              handleInputChange("timeSlots", updatedTimeSlots);
-            }}
-            placeholder={`Chọn suất học ${index + 1}.`}
-            isInvalid={!!errorFields.timeSlots}
-            isClearable
-            isSearchable
-          />
-          {errorFields.timeSlots && (
-            <div className="invalid-feedback d-block">
-              {errorFields.timeSlots}
-            </div>
-          )}
-        </Form.Group>
-      </div>
-    ));
   };
 
   const formBuyerInfo = (
@@ -337,6 +306,7 @@ const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
             isInvalid={!!errorFields.buyerFullName}
             placeholder="VD: Nguyen Van A"
             required
+            disabled={Object.keys(buyer).length !== 0}
           />
           <Form.Control.Feedback type="invalid">
             {errorFields.buyerFullName}
@@ -357,6 +327,7 @@ const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
             isInvalid={!!errorFields.phoneNumber}
             placeholder="Nhập số điện thoại"
             required
+            disabled={Object.keys(buyer).length !== 0}
           />
           <Form.Control.Feedback type="invalid">
             {errorFields.phoneNumber}
@@ -376,6 +347,7 @@ const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
             isInvalid={!!errorFields.email}
             placeholder="Nhập địa chỉ email"
             required
+            disabled={Object.keys(buyer).length !== 0}
           />
           <Form.Control.Feedback type="invalid">
             {errorFields.email}
@@ -383,40 +355,42 @@ const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
         </Form.Group>
       </div>
       {/* Giới Tính */}
-      <div className="col-md-6 mb-3">
-        <Form.Group controlId="formBuyerGender">
-          <Form.Label>
-            Giới tính <span className="text-danger">(*)</span>
-          </Form.Label>
-          <div>
-            <Form.Check
-              type="radio"
-              label="Nam"
-              name="buyerGender"
-              value="true"
-              checked={formData.buyerGender === true}
-              onChange={() => handleInputChange("buyerGender", true)}
-              inline
-              isInvalid={!!errorFields.buyerGender}
-            />
-            <Form.Check
-              type="radio"
-              label="Nữ"
-              name="buyerGender"
-              value="false"
-              checked={formData.buyerGender === false}
-              onChange={() => handleInputChange("buyerGender", false)}
-              inline
-              isInvalid={!!errorFields.buyerGender}
-            />
-          </div>
-          {errorFields.buyerGender && (
-            <div className="invalid-feedback d-block">
-              {errorFields.buyerGender}
+      {Object.keys(buyer).length === 0 && (
+        <div className="col-md-6 mb-3">
+          <Form.Group controlId="formBuyerGender">
+            <Form.Label>
+              Giới tính <span className="text-danger">(*)</span>
+            </Form.Label>
+            <div>
+              <Form.Check
+                type="radio"
+                label="Nam"
+                name="buyerGender"
+                value="true"
+                checked={formData.buyerGender === true}
+                onChange={() => handleInputChange("buyerGender", true)}
+                inline
+                isInvalid={!!errorFields.buyerGender}
+              />
+              <Form.Check
+                type="radio"
+                label="Nữ"
+                name="buyerGender"
+                value="false"
+                checked={formData.buyerGender === false}
+                onChange={() => handleInputChange("buyerGender", false)}
+                inline
+                isInvalid={!!errorFields.buyerGender}
+              />
             </div>
-          )}
-        </Form.Group>
-      </div>
+            {errorFields.buyerGender && (
+              <div className="invalid-feedback d-block">
+                {errorFields.buyerGender}
+              </div>
+            )}
+          </Form.Group>
+        </div>
+      )}
     </>
   );
 
@@ -546,60 +520,7 @@ const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
     </>
   );
 
-  const confirmSignUp = (
-    <>
-      {/* Ô chọn số lượng buổi học */}
-      <div className="col-12 mb-3">
-        <Form.Group controlId="formNumSessions">
-          <Form.Label>
-            Số buổi học / tuần <span className="text-danger">(*)</span>
-          </Form.Label>
-          <Form.Select
-            value={numSessionsPerWeek}
-            onChange={handleNumSessionsChange}
-          >
-            {Array.from({ length: 7 }, (_, i) => (
-              <option key={i + 1} value={i + 1}>
-                {i + 1} buổi
-              </option>
-            ))}
-          </Form.Select>
-        </Form.Group>
-      </div>
-      {/* Render các ô chọn suất học */}
-      {renderTimeSlotInputs()}
-
-      {/* Ô chọn HLV */}
-      <div className="col-12 mb-3">
-        <Form.Group controlId="formTrainer">
-          <Form.Label>
-            Huấn luyện viên <span className="text-danger">(*)</span>
-          </Form.Label>
-          <Select
-            options={listTrainerOption}
-            value={listTrainerOption.find(
-              (option) => option.value === formData.TrainerId
-            )}
-            onChange={(selectedOption) =>
-              handleInputChange(
-                "TrainerId",
-                selectedOption ? selectedOption.value : ""
-              )
-            }
-            placeholder="Vui lòng chọn HLV"
-            isInvalid={!!errorFields.TrainerId}
-            isClearable
-            isSearchable
-          />
-          {errorFields.TrainerId && (
-            <div className="invalid-feedback d-block">
-              {errorFields.TrainerId}
-            </div>
-          )}
-        </Form.Group>
-      </div>
-    </>
-  );
+  const confirmSignUp = <></>;
 
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
@@ -607,17 +528,23 @@ const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
         <Modal.Title className="d-flex align-items-center w-100 text-uppercase fw-bold fs-5">
           <div
             className="me-auto"
-            onClick={() => setCurrentStep(currentStep > 1 && currentStep - 1)}
+            onClick={() =>
+              setCurrentStep(currentStep > 1 ? currentStep - 1 : currentStep)
+            }
             style={{ left: "35px" }}
           >
-            <i className="bi bi-arrow-left fs-3 text-muted"></i>
+            <i
+              className={`bi bi-arrow-left fs-3 text-muted ${
+                currentStep === 1 && "opacity-50"
+              }`}
+            ></i>
           </div>
           <div className="modal__title me-auto">
             {currentStep === 1
               ? "Điền thông tin người mua"
               : currentStep === 2
               ? "Điền thông tin học viên"
-              : "Xác nhận đăng ký"}
+              : "Xác nhận thanh toán"}
           </div>
         </Modal.Title>
       </Modal.Header>
@@ -629,7 +556,11 @@ const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
             className="mx-auto w-50 my-3 px-5 py-1 mx-2 fw-bold text-uppercase text-nowrap"
             onClick={handleContinue}
           >
-            {currentStep === 3 ? "Xác Nhận" : "Tiếp theo"}
+            {loading
+              ? "Đang xử lý..."
+              : currentStep === 3
+              ? "Xác Nhận"
+              : "Tiếp theo"}
           </Button>
         </div>
       </Modal.Body>
@@ -763,7 +694,7 @@ const ModalConfirmInfo = ({ show, onHide, invoiceData }) => {
                   currentStep >= 3 ? "text-success" : "text-muted"
                 } fw-bold`}
               >
-                XÁC NHẬN ĐĂNG KÝ
+                XÁC NHẬN THANH TOÁN
               </small>
             </div>
           </div>
