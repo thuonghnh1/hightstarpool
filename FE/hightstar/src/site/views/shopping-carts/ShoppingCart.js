@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { Modal, Button, Spinner } from "react-bootstrap";
+import { toast } from 'react-toastify';
 import { Helmet } from "react-helmet-async";
 import { UserContext } from "../../../contexts/UserContext";
 import { CartContext } from "../../../contexts/CartContext";
