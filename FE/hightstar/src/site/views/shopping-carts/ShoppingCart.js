@@ -6,7 +6,6 @@ import { UserContext } from "../../../contexts/UserContext";
 import { CartContext } from "../../../contexts/CartContext";
 import { useNavigate } from "react-router-dom";
 import UserProfileService from "../../../admin/services/UserProfileService";
-import { toast } from "react-toastify";
 
 const ShoppingCart = () => {
   const { user } = useContext(UserContext);
@@ -19,7 +18,6 @@ const ShoppingCart = () => {
     fullName: "",
     phoneNumber: "",
     shippingAddress: "",
-    phoneNumber: "",
     notes: "",
     totalAmount: 0,
   });
