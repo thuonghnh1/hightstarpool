@@ -66,4 +66,7 @@ public class User {
     // Liên kết Trainer, sẽ tự động xóa khi User bị xóa
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Trainer trainer;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Cart cart;
 }

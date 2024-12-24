@@ -17,7 +17,6 @@ import edu.poly.hightstar.model.LoginDTO;
 import edu.poly.hightstar.model.LoginResponse;
 import edu.poly.hightstar.model.RegisterDTO;
 import edu.poly.hightstar.model.UserDTO;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public LoginResponse loginUser(LoginDTO loginDTO, HttpServletResponse response) {
         Optional<User> userOptional = userRepository.findByUsername(loginDTO.getUsername());
-        if (!userOptional.isPresent()
+        if (userOptional.isEmpty()
                 || !passwordEncoder.matches(loginDTO.getPassword(), userOptional.get().getPassword())) {
             System.out.println(loginDTO.getPassword() + "--" + userOptional.get().getPassword());
             throw new AppException("Thông tin đăng nhập không chính xác!", ErrorCode.INVALID_LOGIN);
@@ -109,7 +109,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOptional = userRepository.findByUsername(phoneNumber);
 
         // Kiểm tra người dùng có tồn tại không
-        if (!userOptional.isPresent()) {
+        if (userOptional.isEmpty()) {
             return false;
         }
         User user = new User();
@@ -149,7 +149,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public boolean verifyPassword(Long userId, String password) {
         Optional<User> userOptional = userRepository.findById(userId);
-        if (!userOptional.isPresent()) {
+        if (userOptional.isEmpty()) {
             throw new AppException("Người dùng này không tồn tại trong hệ thống!", ErrorCode.USER_NOT_FOUND);
         }
         if (!passwordEncoder.matches(password, userOptional.get().getPassword())) {
@@ -162,7 +162,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public boolean changePassword(Long userId, String password, String newPassword) {
         Optional<User> userOptional = userRepository.findById(userId);
-        if (!userOptional.isPresent()) {
+        if (userOptional.isEmpty()) {
             throw new AppException("Người dùng này không tồn tại trong hệ thống!", ErrorCode.USER_NOT_FOUND);
         }
         if (!passwordEncoder.matches(password, userOptional.get().getPassword())) {
@@ -205,7 +205,8 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         BeanUtils.copyProperties(userDto, user);
         // Tạo mật khẩu ngẫu nhiên có 6 chữ số
-        String defaultPassword = RandomStringUtils.randomAlphanumeric(6);
+        // Tạo mật khẩu ngẫu nhiên có 6 ký tự
+        String defaultPassword = UUID.randomUUID().toString().replace("-", "").substring(0, 6);
         user.setPassword(passwordEncoder.encode(defaultPassword)); // Mã hóa mật khẩu
         user.setUsername(userDto.getPhoneNumber()); // mặc định username là sđt
         User createdUser = userRepository.save(user);

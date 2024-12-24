@@ -21,7 +21,7 @@ public class TransactionController {
      * @return Mã OTP đã được sinh ra
      */
     @PostMapping("/generate-otp")
-    public ResponseEntity<String> generateOtp(@RequestParam("transactionId") String transactionId) {
+    public ResponseEntity<String> generateOtp(@RequestParam String transactionId) {
         String otp = transactionService.generateOTP(transactionId);
         return ResponseEntity.ok(otp);
     }
@@ -35,8 +35,8 @@ public class TransactionController {
      */
     @PostMapping("/verify-otp")
     public ResponseEntity<Boolean> verifyOtp(
-            @RequestParam("transactionId") String transactionId,
-            @RequestParam("otp") String otp) {
+            @RequestParam String transactionId,
+            @RequestParam String otp) {
         boolean isValid = transactionService.verifyOTP(transactionId, otp);
         return ResponseEntity.ok(isValid);
     }

@@ -214,6 +214,7 @@ const SalesManagement = () => {
       total: calculateTotalPrice(),
       paymentMethod: "UNKNOWN", // Mặc định là chưa xác định
       notes,
+      status: "COMPLETED",
       shippingAddress: "Tại quầy",
       discountId,
       userId: buyer.id || null, // Nếu không có buyer, để null

@@ -3,7 +3,9 @@ package edu.poly.hightstar.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.poly.hightstar.enums.UserStatus;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor

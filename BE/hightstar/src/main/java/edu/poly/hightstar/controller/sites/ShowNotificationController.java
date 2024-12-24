@@ -37,7 +37,7 @@ public class ShowNotificationController {
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER', 'USER')")
     @GetMapping("/by-recipient-type/{recipientType}")
     public List<NotificationDTO> getNotificationsByRecipientType(
-            @PathVariable("recipientType") RecipientType recipientType) {
+            @PathVariable RecipientType recipientType) {
         return notificationService.getNotificationsByRecipientType(recipientType);
 
     }

@@ -19,7 +19,7 @@ public class OtpService {
 
     // Tạo OTP ngẫu nhiên
     public String sendOtp(String phoneNumber, String email) {
-        String otp = String.format("%06d", new Random().nextInt(999999));// tạo OTP 6 chữ số
+        String otp = "%06d".formatted(new Random().nextInt(999999));// tạo OTP 6 chữ số
         otpStorage.put(phoneNumber, new OtpData(otp, LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES)));
         sendOtpEmail(email, otp); // gửi email
         return otp;

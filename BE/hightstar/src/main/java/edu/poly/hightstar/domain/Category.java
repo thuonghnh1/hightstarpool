@@ -3,7 +3,9 @@ package edu.poly.hightstar.domain;
 import java.util.List;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity

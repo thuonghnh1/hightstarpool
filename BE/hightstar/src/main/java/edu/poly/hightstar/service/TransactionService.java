@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -27,7 +28,7 @@ public class TransactionService {
 
     public String generateOTP(String transactionId) {
         // Tạo mã OTP ngẫu nhiên
-        String otp = String.format("%06d", (int) (Math.random() * 900000) + 100000);
+        String otp = "%06d".formatted((int) (ThreadLocalRandom.current().nextDouble() * 900000) + 100000);
 
         // Lưu OTP vào Map
         otpMap.put(transactionId, otp);
@@ -79,8 +80,7 @@ public class TransactionService {
         // Nếu OTP là hợp lệ, kiểm tra trong danh sách giao dịch từ external API
         if (isValid) {
             Object historyResponse = transactionHistoryService.getTransactionHistory();
-            if (historyResponse instanceof String) {
-                String responseStr = (String) historyResponse;
+            if (historyResponse instanceof String responseStr) {
                 System.out.println("Transaction history response: " + responseStr); // In ra phản hồi từ API
                 ObjectMapper objectMapper = new ObjectMapper();
                 try {

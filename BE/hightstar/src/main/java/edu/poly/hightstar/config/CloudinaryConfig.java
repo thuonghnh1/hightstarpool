@@ -11,7 +11,7 @@ public class CloudinaryConfig {
     private final Dotenv dotenv = Dotenv.load();
 
     @Bean
-    public Cloudinary cloudinary() {
+    Cloudinary cloudinary() {
         return new Cloudinary(dotenv.get("CLOUDINARY_URL"));
     }
 }

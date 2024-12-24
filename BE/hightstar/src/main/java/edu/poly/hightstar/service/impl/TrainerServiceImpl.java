@@ -1,9 +1,9 @@
 package edu.poly.hightstar.service.impl;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -54,7 +54,8 @@ public class TrainerServiceImpl implements TrainerService {
         User newUser = new User();
         newUser.setUsername(trainerDTO.getPhoneNumber()); // Sử dụng sđt làm username
         // Tạo mật khẩu ngẫu nhiên có 6 chữ số
-        String defaultPassword = RandomStringUtils.randomAlphanumeric(6);
+        // Tạo mật khẩu ngẫu nhiên có 6 ký tự
+        String defaultPassword = UUID.randomUUID().toString().replace("-", "").substring(0, 6);
         newUser.setPassword(passwordEncoder.encode(defaultPassword)); // Mã hóa mật khẩu
         newUser.setEmail(trainerDTO.getEmail());
         newUser.setRole(Role.TRAINER); // Gán vai trò là huấn luyện viên
