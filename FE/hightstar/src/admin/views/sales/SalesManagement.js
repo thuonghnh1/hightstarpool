@@ -60,15 +60,16 @@ const SalesManagement = () => {
           const data = await SalesService.fetchProducts();
           setProducts(data);
         }
-        const data = await SalesService.fetchActiveDiscounts();
-        setListDiscountOption(data);
+
+        const discountData = await SalesService.fetchActiveDiscounts();
+        setListDiscountOption(discountData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
     fetchData();
-  }, [activeTab]);
+  }, [activeTab, cartItems]);
 
   // Cập nhật items dựa trên activeTab
   const items =
@@ -85,6 +86,23 @@ const SalesManagement = () => {
   const handleCloseOffcanvas = () => setShowInvoice(false);
 
   const handleAddToCart = (item) => {
+    const isProduct = item.id.includes("SP");
+
+    if (isProduct) {
+      // Lấy sản phẩm từ danh sách products
+      const productInStock = products.find((product) => product.id === item.id);
+
+      if (productInStock) {
+        // Kiểm tra nếu sản phẩm đã đạt số lượng tối đa
+        const cartItem = cartItems.find((cartItem) => cartItem.id === item.id);
+        const cartQuantity = cartItem ? cartItem.quantity : 0;
+
+        if (cartQuantity >= productInStock.stock) {
+          toast.error("Số lượng sản phẩm trong kho đã đạt tối đa!");
+          return;
+        }
+      }
+    }
     setCartItems((prevItems) => {
       const isCourse = item.id.includes("KH");
       const hasCourseInCart = prevItems.some((cartItem) =>
@@ -336,7 +354,7 @@ const SalesManagement = () => {
   const handleConfirmPayment = async () => {
     const courses = cartItems.filter((item) => item.id.includes("KH"));
     const tickets = cartItems.filter((item) => item.id.includes("VB"));
-    // const products = cartItems.filter((item) => item.id.includes("SP"));
+    const products = cartItems.filter((item) => item.id.includes("SP"));
 
     try {
       setIsLoading(true);
@@ -397,6 +415,10 @@ const SalesManagement = () => {
         await printRef.current.printInvoice(invoiceComponent);
         toast.success("Thanh toán thành công!");
         clearPage();
+        if (products.length > 0) {
+          const data = await SalesService.fetchProducts(); // load lại sản phẩm để lấy số lượng mới
+          setProducts(data);
+        }
       }
     } catch (error) {
       console.error("Lỗi khi xử lý thanh toán:", error);
@@ -449,7 +471,7 @@ const SalesManagement = () => {
                     <td className="align-middle text-nowrap">
                       <button
                         className="btn btn-light btn-sm me-1"
-                        onClick={() =>
+                        onClick={() => {
                           setCartItems(
                             cartItems.map((cartItem) =>
                               cartItem.id === item.id && cartItem.quantity > 1
@@ -459,15 +481,25 @@ const SalesManagement = () => {
                                   }
                                 : cartItem
                             )
-                          )
-                        }
+                          );
+
+                          // Tăng lại số lượng trong `products`
+                          setProducts((prevProducts) =>
+                            prevProducts.map((product) =>
+                              product.id === item.id
+                                ? { ...product, stock: product.stock + 1 }
+                                : product
+                            )
+                          );
+                        }}
+                        disabled={item.quantity <= 1} // Làm mờ nếu số lượng <= 1
                       >
                         <i className="bi bi-dash"></i>
                       </button>
                       <span className="mx-2">{item.quantity}</span>
                       <button
                         className="btn btn-light btn-sm ms-1"
-                        onClick={() =>
+                        onClick={() => {
                           setCartItems(
                             cartItems.map((cartItem) =>
                               cartItem.id === item.id
@@ -477,8 +509,21 @@ const SalesManagement = () => {
                                   }
                                 : cartItem
                             )
-                          )
-                        }
+                          );
+
+                          // Giảm số lượng tồn kho trong `products`
+                          setProducts((prevProducts) =>
+                            prevProducts.map((product) =>
+                              product.id === item.id
+                                ? { ...product, stock: product.stock - 1 }
+                                : product
+                            )
+                          );
+                        }}
+                        disabled={
+                          cartItems.find((cartItem) => cartItem.id === item.id)
+                            ?.quantity >= item.stock
+                        } // Làm mờ nút nếu số lượng đạt tối đa
                       >
                         <i className="bi bi-plus"></i>
                       </button>
@@ -492,13 +537,25 @@ const SalesManagement = () => {
                     <td className="align-middle">
                       <button
                         className="btn text-danger btn-sm"
-                        onClick={() =>
+                        onClick={() => {
                           setCartItems(
                             cartItems.filter(
                               (cartItem) => cartItem.id !== item.id
                             )
-                          )
-                        }
+                          );
+
+                          // Tăng lại số lượng tồn kho khi xóa sản phẩm
+                          setProducts((prevProducts) =>
+                            prevProducts.map((product) =>
+                              product.id === item.id
+                                ? {
+                                    ...product,
+                                    stock: product.stock + item.quantity,
+                                  }
+                                : product
+                            )
+                          );
+                        }}
                       >
                         <i className="bi bi-trash-fill"></i>
                       </button>
@@ -580,28 +637,59 @@ const SalesManagement = () => {
                     </div>
                   ) : (
                     <div
-                      className="card__sales card d-flex flex-row bg-body-tertiary"
-                      onClick={() => handleAddToCart(item)}
-                      style={{ height: "80px", cursor: "pointer" }}
+                      className="card__sales card d-flex flex-row bg-body-tertiary position-relative"
+                      onClick={() => {
+                        if (item.stock === 0) {
+                          return;
+                        }
+                        handleAddToCart(item);
+                      }}
+                      style={{
+                        height: "80px",
+                        cursor: item.stock === 0 ? "not-allowed" : "pointer",
+                      }}
                       title={item.name} // Thêm tooltip
                     >
                       <img
                         src={item.image}
                         alt={item.name}
                         className="rounded-start object-fit-cover"
-                        style={{ width: "70px", height: "100%" }}
+                        style={{
+                          width: "70px",
+                          height: "100%",
+                        }}
                       />
                       <div className="card-body px-2 py-2 overflow-hidden d-flex flex-column justify-content-between">
                         <h6 className="card-title m-0 small text-truncate">
                           {item.name}
                         </h6>
-                        <span className="card-subtitle text-muted text-truncate small">
+                        <span className="card-subtitle text-muted text-truncate small my-auto">
                           {item.type}
                         </span>
-                        <p className="card-text text-danger text fw-bold small">
-                          {item.price.toLocaleString()}đ
-                        </p>
+                        <div className="d-flex justify-content-between align-items-center text-truncate m-0">
+                          <p className="card-text text-danger fw-bold small">
+                            {item.price.toLocaleString()}đ
+                          </p>
+                          {item.stock !== undefined ? (
+                            <p className="card-text text-muted fw-bold small">
+                              Kho: {item.stock}
+                            </p>
+                          ) : null}
+                        </div>
                       </div>
+                      {item.stock === 0 && (
+                        <div
+                          className="text-nowrap fw-bold text-muted fs-5 position-absolute d-flex justify-content-center align-items-center"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            background: "rgba(255, 255, 255, 0.8)",
+                            borderRadius: "8px",
+                          }}
+                        >
+                          Hết hàng
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

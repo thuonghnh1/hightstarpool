@@ -49,10 +49,15 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
           ...notificationsForAll,
           ...commonNotifications,
         ];
-        setNotifications(allNotifications);
+
+        setNotifications(
+          allNotifications.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt) // sắp xếp theo thời gian tạo
+          )
+        );
 
         const individualNotifications =
-          await NotificationService.getNotificationsByUserId(user.userId);
+          await NotificationService.getNotificationsByUserId(user.userId); // Thông báo riêng cho từng người dùng
 
         const notificationsWithIcon = individualNotifications.map(
           (notification) => ({
@@ -61,7 +66,11 @@ const AppHeader = ({ toggleSidebar, isSidebarOpen }) => {
             createdAt: dayjs(notification.createdAt).fromNow(),
           })
         );
-        setRoleNotifications(notificationsWithIcon);
+        setRoleNotifications(
+          notificationsWithIcon.sort(
+            (a, b) => new Date(b.createdAt) -  new Date(a.createdAt)// sắp xếp theo thời gian tạo
+          )
+        );
       }
     } catch (error) {
       console.error("Lỗi khi lấy thông báo:", error);

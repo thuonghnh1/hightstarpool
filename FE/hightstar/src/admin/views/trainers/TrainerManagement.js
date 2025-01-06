@@ -177,6 +177,7 @@ const TrainerManagement = () => {
       schedule: "",
       status: "ACTIVE",
     });
+    setImageFile(null);
     handleResetStatus();
     setErrorFields({});
   };

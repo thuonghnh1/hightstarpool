@@ -80,7 +80,7 @@ const ClothingCard = ({
           </div>
 
           {/* Phần chọn size */}
-          <div className="mt-3">
+          {/* <div className="mt-3">
             <label htmlFor={`sizeSelect-${productId}`} className="form-label">
               Chọn Size:
             </label>
@@ -100,10 +100,10 @@ const ClothingCard = ({
                 <option value="">Không có kích cỡ</option>
               )}
             </select>
-          </div>
+          </div> */}
 
           {/* Phần điều khiển số lượng */}
-          <div className="d-flex align-items-center mt-3">
+          {/* <div className="d-flex align-items-center mt-3">
             <button
               className="btn btn-outline-secondary"
               onClick={() => setQuantity((prev) => (prev > 1 ? prev - 1 : 1))}
@@ -122,17 +122,17 @@ const ClothingCard = ({
               +
             </button>
             <span className="ms-3 text-muted">Còn lại: {stock}</span>{" "}
-            {/* Hiển thị stock */}
-          </div>
+
+          </div> */}
 
           {/* Nút thêm vào giỏ */}
-          <button
+          {/* <button
             className="btn btn-success w-100 mt-3"
             onClick={handleAddToCart}
             disabled={stock === 0}
           >
             {stock === 0 ? "Hết Hàng" : "Thêm vào giỏ"}
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
@@ -282,7 +282,7 @@ const Product = () => {
           <div className="container-xxl py-4 mt-1 py-sm-5">
             <div className="container">
               {/* Tiêu đề */}
-              <h2 className="mb-4 text-center">Tất cả sản phẩm</h2>
+              <h2 className="mb-4 text-center">Tất cả sản phẩm tại trung tâm</h2>
 
               {/* Thanh tìm kiếm và sắp xếp */}
               <div className="row mb-4">

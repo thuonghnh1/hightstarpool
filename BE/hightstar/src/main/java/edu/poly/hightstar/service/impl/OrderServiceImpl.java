@@ -119,8 +119,13 @@ public class OrderServiceImpl implements OrderService {
                 Product product = productRepository.findById(detailDTO.getProductId())
                         .orElseThrow(
                                 () -> new AppException("Không tìm thấy sản phẩm này!", ErrorCode.PRODUCT_NOT_FOUND));
+                if (product.getStock() < detailDTO.getQuantity()) {
+                    throw new AppException("Số lượng sản phẩm không đủ!", ErrorCode.INSUFFICIENT_PRODUCT_QUANTITY);
+                }
+                product.setStock(product.getStock() - detailDTO.getQuantity());
                 orderDetail.setProduct(product);
                 hasValidReference = true;
+                productRepository.save(product);
             }
             if (detailDTO.getCourseId() != null) {
                 Course course = courseRepository.findById(detailDTO.getCourseId())

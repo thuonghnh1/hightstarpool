@@ -84,7 +84,7 @@ function CourseList({ courses, coursesPerPage = 3 }) {
                       style={{ borderRadius: "0 30px 30px 0" }}
                       onClick={()=>handleNavigateDetails(course)}
                     >
-                      Đăng Ký Ngay
+                      Tư vấn ngay
                     </div>
                   </div>
                 </div>

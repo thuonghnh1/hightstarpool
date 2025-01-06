@@ -307,7 +307,7 @@ const ClassManagement = () => {
     );
   }, [formData.timeSlots, numSessionsPerWeek]);
 
-  // Hàm gọi API lấy danh sách HLV dựa trên các suất học
+  // Hàm gọi API lấy danh sách HLV dựa trên các suất học và ngày bắt đầu
   const fetchAvailableTrainers = useCallback(async () => {
     if (!areAllTimeSlotsSelected()) return; // Chỉ gọi API nếu đủ số suất học
 
@@ -318,7 +318,8 @@ const ClassManagement = () => {
       // Call API
       const trainers = await ClassService.getAvailableTrainers(
         formData.timeSlots,
-        classId
+        classId,
+        formData.startDate
       );
 
       // Chuyển đổi danh sách thành định dạng phù hợp cho Select
@@ -332,12 +333,22 @@ const ClassManagement = () => {
     } catch (error) {
       toast.error("Lỗi khi lấy danh sách HLV!");
     }
-  }, [formData.timeSlots, formData.id, areAllTimeSlotsSelected]);
+  }, [
+    formData.timeSlots,
+    formData.id,
+    formData.startDate,
+    areAllTimeSlotsSelected,
+  ]);
 
   // Gọi fetchAvailableTrainers mỗi khi timeSlots thay đổi
   useEffect(() => {
     fetchAvailableTrainers();
-  }, [formData.timeSlots, areAllTimeSlotsSelected, fetchAvailableTrainers]);
+  }, [
+    formData.timeSlots,
+    areAllTimeSlotsSelected,
+    fetchAvailableTrainers,
+    formData.startDate,
+  ]);
 
   // Hàm xử lý thay đổi số buổi học
   const handleNumSessionsChange = (e) => {

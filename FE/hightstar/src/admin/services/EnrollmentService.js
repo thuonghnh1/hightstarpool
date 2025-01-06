@@ -14,16 +14,19 @@ const getEnrollments = async () => {
   }
 };
 
-// Hàm lấy tất cả danh sách class có thể đăng ký được theo mã học viên
-const getAvailableClasses = async (enrollmentId) => {
+// Hàm lấy tất cả danh sách class có thể đăng ký được theo mã học viên và mã đăng ký
+const getAvailableClasses = async (studentId, enrollmentId) => {
   try {
     const response = await axiosInstance.get(`${API_URL}/available-classes`, {
-      params: { enrollmentId: enrollmentId || null },
+      params: {
+        studentId: studentId, // Mã học viên
+        enrollmentId: enrollmentId || null, // Mã đăng ký (có thể null)
+      },
     });
-    return response.data;
+    return response.data; // Trả về danh sách lớp khả dụng
   } catch (error) {
     console.error("Lỗi khi lấy danh sách đăng ký:", error);
-    throw error;
+    throw error; // Ném lỗi để hàm gọi xử lý
   }
 };
 

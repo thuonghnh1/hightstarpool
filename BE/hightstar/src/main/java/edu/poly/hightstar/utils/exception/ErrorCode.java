@@ -33,6 +33,7 @@ public enum ErrorCode {
 
     TICKET_EXPIRED("TICKET_EXPIRED"), // Vé đã hết hạn
     SLOT_FULL("SLOT_FULL"), // đầy chỗ
+    INSUFFICIENT_PRODUCT_QUANTITY("INSUFFICIENT_PRODUCT_QUANTITY"), // Số lượng sản phẩm không đủ
 
     // Lỗi do dữ liệu xung đột (Conflict Errors)
     CONFLICT_ERROR("CONFLICT_ERROR"), // Xung đột dữ liệu tổng quát
@@ -70,6 +71,8 @@ public enum ErrorCode {
     // Lỗi khi thiếu tham số (Missing Parameters Errors)
     MISSING_REQUIRED_PARAMETER("MISSING_REQUIRED_PARAMETER"), // Thiếu tham số bắt buộc trong yêu cầu
     PARAMETER_VALIDATION_FAILED("PARAMETER_VALIDATION_FAILED"), // Kiểm tra tham số không hợp lệ
+    SESSION_GENERATION_FAILED("SESSION_GENERATION_FAILED"), // Lỗi khi tạo phiên
+    CLASS_CREATION_FAILED("CLASS_CREATION_FAILED"), // Lỗi khi tạo lớp học
 
     // Lỗi khi không thể xử lý dữ liệu (Data Processing Errors)
     DATA_PROCESSING_ERROR("DATA_PROCESSING_ERROR"), // Lỗi trong quá trình xử lý dữ liệu

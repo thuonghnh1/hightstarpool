@@ -6,6 +6,7 @@ import Page500 from "../../../common/pages/Page500";
 import Select from "react-select";
 import { Helmet } from "react-helmet-async";
 import { Spinner, Form } from "react-bootstrap";
+import studentService from "../../services/StudentService";
 
 const EnrollmentManagement = () => {
   // State để lưu trữ danh sách đăng ký học viên từ API
@@ -62,7 +63,7 @@ const EnrollmentManagement = () => {
     }
 
     try {
-      const students = await EnrollmentService.getStudentsNotEnroll();
+      const students = await studentService.getStudents();
       // Chuyển đổi danh sách học viên đã lọc thành định dạng phù hợp cho Select
       if (students.length === 0) {
         return;
@@ -76,10 +77,20 @@ const EnrollmentManagement = () => {
     } catch (error) {
       console.log(error);
     }
+  };
 
+  useEffect(() => {
+    fetchEnrollmentData();
+  }, []);
+
+  const fetchClassAvailableData = async (studentId, enrollmentId) => {
     try {
-      const classes = await EnrollmentService.getAvailableClasses(null); // mặc định khi tạo mới sẽ lấy tất cả khóa học chưa bắt đầu
+      const classes = await EnrollmentService.getAvailableClasses(
+        studentId,
+        enrollmentId
+      );
       if (classes.length === 0) {
+        setListClassOption([]); // Nếu không có lớp học nào thì không cần thiết hiển thị
         return;
       }
       const classEntityOptions = classes.map((classEntity) => ({
@@ -92,10 +103,6 @@ const EnrollmentManagement = () => {
       console.log(error);
     }
   };
-
-  useEffect(() => {
-    fetchEnrollmentData();
-  }, []);
 
   const validateField = (key, value) => {
     let error = "";
@@ -125,6 +132,11 @@ const EnrollmentManagement = () => {
   const handleInputChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
     validateField(key, value);
+
+    if (key === "studentId") {
+      // Nếu thay đổi học viên thì load lại danh sách lớp học
+      fetchClassAvailableData(value, formData.id || null);
+    }
   };
 
   const updateStatus = (newStatus) => {
@@ -152,20 +164,7 @@ const EnrollmentManagement = () => {
     setFormData({ ...item });
     updateStatus({ isEditing: true });
     setErrorFields({});
-    try {
-      const classes = await EnrollmentService.getAvailableClasses(item.id); // lấy thêm class cho enroll hiện tại nếu nó ở trạng thái khác
-      if (classes.length === 0) {
-        return;
-      }
-      const classEntityOptions = classes.map((classEntity) => ({
-        value: classEntity.id,
-        label: `#${classEntity.id} - (${classEntity.trainerName}) - ${classEntity.courseName}`,
-      }));
-
-      setListClassOption(classEntityOptions);
-    } catch (error) {
-      console.log(error);
-    }
+    fetchClassAvailableData(item.studentId, item.id);
   };
 
   const handleSaveItem = async () => {
@@ -253,7 +252,7 @@ const EnrollmentManagement = () => {
         <div className="col-md-12 mb-3">
           <Form.Group controlId="formClassId">
             <Form.Label>
-              Mã lớp học <span className="text-danger">(*)</span>
+              Lớp học <span className="text-danger">(*)</span>
             </Form.Label>
             <Select
               options={listClassOption}

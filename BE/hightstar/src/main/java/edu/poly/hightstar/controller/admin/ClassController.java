@@ -10,6 +10,8 @@ import edu.poly.hightstar.model.ClassRequest;
 import edu.poly.hightstar.model.TrainerDTO;
 import edu.poly.hightstar.service.ClassService;
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -21,7 +23,10 @@ public class ClassController {
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @PostMapping
     public ResponseEntity<ClassDTO> createClass(@RequestBody ClassRequest request) {
+        System.out.println("clc ----------------" + request);
+
         ClassDTO createdClass = classService.createClass(request);
+        System.out.println("clc1 ----------------" + request);
 
         return new ResponseEntity<>(createdClass, HttpStatus.CREATED);
     }
@@ -43,6 +48,13 @@ public class ClassController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    @GetMapping("/available-classes/{courseId}")
+    public ResponseEntity<List<ClassDTO>> getAvailableClassesForCourse(@PathVariable Long courseId) {
+        List<ClassDTO> classes = classService.getAvailableClassesForCourse(courseId);
+        return new ResponseEntity<>(classes, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @GetMapping("/{classId}")
     public ResponseEntity<ClassDTO> getClassById(@PathVariable Long classId) {
         ClassDTO classDTO = classService.getClassById(classId);
@@ -53,15 +65,19 @@ public class ClassController {
     @PostMapping("/available-trainers")
     public ResponseEntity<List<TrainerDTO>> getAvailableTrainers(
             @RequestBody List<Long> selectedTimeSlotIds,
-            @RequestParam(required = false) String classId) {
+            @RequestParam(required = false) Long classId,
+            @RequestParam LocalDate startDate) {
         List<TrainerDTO> availableTrainers;
-        if (classId == null || classId.equals("")) {
-            // đối với thêm mới!
-            availableTrainers = classService.getAvailableTrainers(selectedTimeSlotIds);
+
+        if (classId == null) {
+            // Đối với thêm mới!
+            availableTrainers = classService.getAvailableTrainersForNew(selectedTimeSlotIds, startDate);
         } else {
-            availableTrainers = classService.getAvailableTrainers(selectedTimeSlotIds, Long.parseLong(classId));
+            // Đối với cập nhật!
+            availableTrainers = classService.getAvailableTrainersForUpdate(selectedTimeSlotIds, classId, startDate);
         }
-        return new ResponseEntity<>(availableTrainers, HttpStatus.OK);
+
+        return ResponseEntity.ok(availableTrainers);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")

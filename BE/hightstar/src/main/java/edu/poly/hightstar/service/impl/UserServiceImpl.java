@@ -162,6 +162,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public boolean changePassword(Long userId, String password, String newPassword) {
         Optional<User> userOptional = userRepository.findById(userId);
+        System.out.println(password + " --------- " + newPassword);
         if (userOptional.isEmpty()) {
             throw new AppException("Người dùng này không tồn tại trong hệ thống!", ErrorCode.USER_NOT_FOUND);
         }
@@ -169,7 +170,7 @@ public class UserServiceImpl implements UserService {
             throw new AppException("Mật khẩu cũ không chính xác!", ErrorCode.INVALID_LOGIN);
         }
         User user = userOptional.get();
-        user.setPassword(passwordEncoder.encode(password));
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         return true;
     }

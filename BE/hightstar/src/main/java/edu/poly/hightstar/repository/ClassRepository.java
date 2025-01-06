@@ -1,5 +1,7 @@
 package edu.poly.hightstar.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import edu.poly.hightstar.domain.ClassEntity;
@@ -11,4 +13,6 @@ public interface ClassRepository extends JpaRepository<ClassEntity, Long> {
 
     // Kiểm tra nếu HLV đã có lớp học vào khung giờ này
     boolean existsByTrainerTrainerIdAndClassTimeSlotsTimeSlot(Long trainerId, TimeSlot timeSlot);
+
+    List<ClassEntity> findByTrainerTrainerIdAndClassTimeSlotsTimeSlot(Long trainerId, TimeSlot timeSlot);
 }

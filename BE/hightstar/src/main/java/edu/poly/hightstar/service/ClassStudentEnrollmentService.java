@@ -17,7 +17,7 @@ public interface ClassStudentEnrollmentService {
 
     void deleteEnrollment(Long id);
 
-    List<ClassDTO> getAvailableClassesForStudent(Long enrollmentId);
+    List<ClassDTO> getAvailableClassesForStudent(Long studentId, Long enrollmentId);
 
     List<StudentDTO> getStudentsNotEnrolledInAnyClass();
 }

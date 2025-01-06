@@ -74,7 +74,7 @@ const TicketManagement = () => {
     { key: "ticketType", label: "Loại Vé" },
     { key: "issueDate", label: "Ngày Phát Hành" },
     { key: "expiryDate", label: "Ngày Hết Hạn" },
-    { key: "studentId", label: "Mã Học Viên" },
+    { key: "classStudentEnrollmentId", label: "Mã Đăng Ký Vào Lớp" },
     { key: "status", label: "Trạng thái" },
     { key: "price", label: "Giá Vé" },
   ];

@@ -1,5 +1,6 @@
 package edu.poly.hightstar.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import edu.poly.hightstar.model.ClassDTO;
 import edu.poly.hightstar.model.ClassRequest;
@@ -14,9 +15,12 @@ public interface ClassService {
 
     ClassDTO getClassById(Long classId);
 
-    List<TrainerDTO> getAvailableTrainers(List<Long> selectedTimeSlotIds);
+    List<ClassDTO> getAvailableClassesForCourse(Long courseId);
 
-    List<TrainerDTO> getAvailableTrainers(List<Long> selectedTimeSlotIds, Long classId);
+    List<TrainerDTO> getAvailableTrainersForNew(List<Long> selectedTimeSlotIds, LocalDate startDate);
+
+    List<TrainerDTO> getAvailableTrainersForUpdate(List<Long> selectedTimeSlotIds, Long classId,
+            LocalDate startDate);
 
     ClassDTO createClass(ClassRequest request);
 

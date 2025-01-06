@@ -17,6 +17,8 @@ import edu.poly.hightstar.domain.Course;
 import edu.poly.hightstar.domain.Ticket;
 import edu.poly.hightstar.domain.TimeSlot;
 import edu.poly.hightstar.domain.Trainer;
+import edu.poly.hightstar.domain.User;
+import edu.poly.hightstar.domain.UserProfile;
 import edu.poly.hightstar.enums.DayOfWeek;
 import edu.poly.hightstar.model.ClassDTO;
 import edu.poly.hightstar.model.ClassRequest;
@@ -95,7 +97,7 @@ public class ClassServiceImpl implements ClassService {
 
     @Override
     @Transactional
-    public List<TrainerDTO> getAvailableTrainers(List<Long> selectedTimeSlotIds) {
+    public List<TrainerDTO> getAvailableTrainersForNew(List<Long> selectedTimeSlotIds, LocalDate startDate) {
         // Lấy tất cả các HLV
         List<TrainerDTO> trainers = trainerService.getAllTrainers();
         // Lấy tất cả TimeSlot theo ID
@@ -111,6 +113,25 @@ public class ClassServiceImpl implements ClassService {
                 // Kiểm tra nếu khung giờ này đã được chọn trong lớp học của HLV
                 boolean hasConflict = classRepository
                         .existsByTrainerTrainerIdAndClassTimeSlotsTimeSlot(trainerDTO.getTrainerId(), timeSlot);
+
+                // Nếu có xung đột, kiểm tra thêm điều kiện về ngày bắt đầu và ngày kết thúc
+                if (hasConflict) {
+                    List<ClassEntity> conflictingClasses = classRepository
+                            .findByTrainerTrainerIdAndClassTimeSlotsTimeSlot(trainerDTO.getTrainerId(), timeSlot);
+
+                    for (ClassEntity conflictingClass : conflictingClasses) {
+                        LocalDate conflictingEndDate = conflictingClass.getEndDate();
+
+                        // Nếu ngày bắt đầu của lớp mới lớn hơn ngày kết thúc của lớp cũ, không coi là
+                        // xung đột
+                        if (startDate.isAfter(conflictingEndDate)) {
+                            hasConflict = false;
+                            break;
+                        }
+                    }
+                }
+
+                // Nếu vẫn còn xung đột, đánh dấu không khả dụng và thoát vòng lặp
                 if (hasConflict) {
                     isAvailable = false;
                     break;
@@ -127,7 +148,8 @@ public class ClassServiceImpl implements ClassService {
 
     @Override
     @Transactional
-    public List<TrainerDTO> getAvailableTrainers(List<Long> selectedTimeSlotIds, Long classId) {
+    public List<TrainerDTO> getAvailableTrainersForUpdate(List<Long> selectedTimeSlotIds, Long classId,
+            LocalDate startDate) {
         // Lấy tất cả các HLV
         List<TrainerDTO> trainers = trainerService.getAllTrainers();
         // Lấy tất cả TimeSlot theo ID
@@ -150,6 +172,24 @@ public class ClassServiceImpl implements ClassService {
                     hasConflict = false;
                 }
 
+                // Nếu có xung đột, kiểm tra thêm điều kiện về ngày bắt đầu và ngày kết thúc
+                if (hasConflict) {
+                    List<ClassEntity> conflictingClasses = classRepository
+                            .findByTrainerTrainerIdAndClassTimeSlotsTimeSlot(trainerDTO.getTrainerId(), timeSlot);
+
+                    for (ClassEntity conflictingClass : conflictingClasses) {
+                        LocalDate conflictingEndDate = conflictingClass.getEndDate();
+
+                        // Nếu ngày bắt đầu của lớp mới lớn hơn ngày kết thúc của lớp cũ, không coi là
+                        // xung đột
+                        if (startDate.isAfter(conflictingEndDate)) {
+                            hasConflict = false;
+                            break;
+                        }
+                    }
+                }
+
+                // Nếu vẫn còn xung đột, đánh dấu không khả dụng và thoát vòng lặp
                 if (hasConflict) {
                     isAvailable = false;
                     break;
@@ -166,34 +206,75 @@ public class ClassServiceImpl implements ClassService {
 
     @Override
     @Transactional
+    public List<ClassDTO> getAvailableClassesForCourse(Long courseId) {
+        // Lấy ngày hiện tại
+        LocalDate today = LocalDate.now();
+
+        // Lọc ra các lớp học thuộc khóa học được chỉ định và có ngày bắt đầu sau ngày
+        // hiện tại
+        List<ClassDTO> availableClasses = classRepository.findAll().stream()
+                .filter(cls -> cls.getCourse().getCourseId().equals(courseId)) // Lọc theo khóa học
+                .filter(cls -> cls.getStartDate().isAfter(today)) // Chỉ lấy lớp chưa bắt đầu
+                .map(this::mapToClassDTO)
+                .collect(Collectors.toList());
+        return availableClasses;
+    }
+
+    @Override
+    @Transactional
     public ClassDTO createClass(ClassRequest request) {
+        // Kiểm tra và lấy Course
         Course course = courseRepository.findById(request.getCourseId())
                 .orElseThrow(() -> new AppException("Không tìm thấy khóa học này!", ErrorCode.COURSE_NOT_FOUND));
+
+        // Kiểm tra và lấy Trainer
         Trainer trainer = trainerRepository.findById(request.getTrainerId())
                 .orElseThrow(() -> new AppException("Không tìm thấy HLV này!", ErrorCode.TRAINER_NOT_FOUND));
 
+        // fix lỗi vòng lặp vô hạn (do lỗi tuần tự khi lấy user trong trainer)
+        Trainer trainerCustom = new Trainer();
+        trainerCustom.setTrainerId(trainer.getTrainerId());
+        User user = new User();
+        UserProfile userProfile = new UserProfile();
+        userProfile.setFullName(trainer.getUser().getUserProfile().getFullName());
+        user.setUserProfile(userProfile);
+        trainerCustom.setUser(user);
+
+        // Tạo và lưu ClassEntity
         ClassEntity cl = new ClassEntity();
         cl.setCourse(course);
-        cl.setTrainer(trainer);
+        cl.setTrainer(trainerCustom);
         cl.setStartDate(request.getStartDate());
         cl.setEndDate(request.getEndDate());
         cl.setMaxStudents(request.getMaxStudents());
-
         classRepository.save(cl);
 
+        // Lấy và kiểm tra TimeSlots
         List<TimeSlot> slots = timeSlotRepository.findAllById(request.getTimeSlotIds());
-        for (TimeSlot slot : slots) {
-            ClassTimeSlot cts = new ClassTimeSlot();
-            cts.setClassEntity(cl);
-            cts.setTimeSlot(slot);
-            classTimeSlotRepository.save(cts);
-            cl.getClassTimeSlots().add(cts);
+        if (slots.size() != request.getTimeSlotIds().size()) {
+            throw new AppException("Một hoặc nhiều TimeSlot không tồn tại!", ErrorCode.TIMESLOT_NOT_FOUND);
         }
 
+        // Lưu ClassTimeSlots
+        List<ClassTimeSlot> classTimeSlots = slots.stream()
+                .map(slot -> {
+                    ClassTimeSlot cts = new ClassTimeSlot();
+                    cts.setClassEntity(cl);
+                    cts.setTimeSlot(slot);
+                    return cts;
+                })
+                .collect(Collectors.toList());
+        classTimeSlotRepository.saveAll(classTimeSlots);
+        cl.getClassTimeSlots().addAll(classTimeSlots);
+
+        // Tạo và lưu ClassSession
         List<ClassSession> sessions = generateSessions(cl, slots);
+        if (sessions.isEmpty()) {
+            throw new AppException("Không thể tạo phiên học cho lớp này!", ErrorCode.SESSION_GENERATION_FAILED);
+        }
         cl.setNumberOfSessions(sessions.size());
         classRepository.save(cl);
-
+        // Trả về DTO
         return mapToClassDTO(cl);
     }
 
@@ -268,6 +349,7 @@ public class ClassServiceImpl implements ClassService {
         classRepository.delete(classEntity);
     }
 
+    @Transactional
     private List<ClassSession> generateSessions(ClassEntity cls, List<TimeSlot> slots) {
         // Tập hợp dayOfWeek từ TimeSlot (từ enum tự định nghĩa sang
         // java.time.DayOfWeek)
@@ -331,6 +413,7 @@ public class ClassServiceImpl implements ClassService {
         return (int) ((completedSessions * 100) / classEntity.getNumberOfSessions());
     }
 
+    @Transactional
     private ClassDTO mapToClassDTO(ClassEntity classEntity) {
         ClassDTO classDTO = new ClassDTO();
         classDTO.setClassId(classEntity.getClassId());
@@ -347,6 +430,7 @@ public class ClassServiceImpl implements ClassService {
         List<TimeSlotDTO> timeSlotDTOs = new ArrayList<>();
         for (ClassTimeSlot classTimeSlot : classEntity.getClassTimeSlots()) {
             TimeSlot timeSlot = classTimeSlot.getTimeSlot();
+
             TimeSlotDTO timeSlotDTO = new TimeSlotDTO();
             timeSlotDTO.setSlotId(timeSlot.getSlotId());
             timeSlotDTO.setDayOfWeek(timeSlot.getDayOfWeek());

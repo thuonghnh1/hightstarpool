@@ -181,6 +181,7 @@ const handleReset = () => {
       price: "0",
       description: "", // Nếu vẫn cần trường mô tả
     });
+    setImageFile(null);
     handleResetStatus();
     setErrorFields({});
   };

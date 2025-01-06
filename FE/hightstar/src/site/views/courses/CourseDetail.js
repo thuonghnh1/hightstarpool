@@ -168,19 +168,19 @@ const CourseDetail = () => {
                     </Card.Body>
                   </Card>
                   <div className="px-3 py-3">
-                    <Button
+                    {/* <Button
                       variant="success"
                       className="rounded-1 me-3"
                       onClick={() => alert("Đăng ký khóa học!")}
                     >
                       <i className="bi bi-cart-plus me-2"></i>Thêm vào giỏ hàng
-                    </Button>
+                    </Button> */}
                     <Button
                       variant="primary"
                       className="rounded-1 px-5"
                       onClick={() => alert("Đăng ký khóa học!")}
                     >
-                      Đăng ký ngay
+                      Tư vấn ngay
                     </Button>
                   </div>
                 </Col>

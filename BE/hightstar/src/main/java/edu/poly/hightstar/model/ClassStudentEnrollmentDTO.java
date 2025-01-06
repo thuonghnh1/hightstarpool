@@ -21,4 +21,6 @@ public class ClassStudentEnrollmentDTO {
     private String studentName;
     private EnrollmentStatus status;
     private List<TimeSlotDTO> timeSlots;
+    private TicketDTO ticket; // Trường lưu vé bơi cho đăng ký này (Dùng để in vé bơi lúc tạo hóa đơn hoặc các
+                              // công việc cần)
 }

@@ -44,6 +44,25 @@ const getClassById = async (id) => {
   }
 };
 
+// Hàm lấy tất cả lớp học
+const getAvailableClassesForCourse = async (courseId) => {
+  try {
+    const response = await axiosInstance.get(
+      `${API_URL}/available-classes/${courseId}`
+    );
+    const classes = response.data;
+
+    // Chuyển đổi định dạng ngày giờ cho từng lớp học
+    return classes.map((classEntity) => ({
+      ...classEntity,
+      startDate: formatDateToDMY(classEntity.startDate),
+      endDate: formatDateToDMY(classEntity.endDate),
+    }));
+  } catch (error) {
+    handleError(error, "Lỗi khi lấy danh sách lớp học:");
+  }
+};
+
 // Hàm tạo mới lớp học
 const createClass = async (classRequest) => {
   try {
@@ -74,11 +93,21 @@ const deleteClass = async (id) => {
 };
 
 // Hàm lấy giảng viên có sẵn theo thời gian đã chọn
-const getAvailableTrainers = async (selectedTimeSlotIds, classId) => {
+const getAvailableTrainers = async (
+  selectedTimeSlotIds,
+  classId,
+  startDate
+) => {
   try {
     const response = await axiosInstance.post(
-      `${API_URL}/available-trainers?classId=${classId || ""}`,
-      selectedTimeSlotIds
+      `${API_URL}/available-trainers`,
+      selectedTimeSlotIds,
+      {
+        params: {
+          classId: classId || null, // Nếu không có classId, gửi null
+          startDate: startDate, // Gửi ngày bắt đầu lớp
+        },
+      }
     );
     return response.data;
   } catch (error) {
@@ -90,6 +119,7 @@ const getAvailableTrainers = async (selectedTimeSlotIds, classId) => {
 const ClassService = {
   getClasses,
   getClassById,
+  getAvailableClassesForCourse,
   createClass,
   updateClass,
   deleteClass,

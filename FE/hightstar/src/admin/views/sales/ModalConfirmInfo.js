@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import SalesService from "../../services/SalesService";
 import { toast } from "react-toastify";
 import Invoice from "./Invoice";
 import UserService from "../../services/UserService";
 import StudentService from "../../services/StudentService";
+import Select from "react-select";
+import ClassService from "../../services/ClassService";
+import EnrollmentService from "../../services/EnrollmentService";
 
 const ModalConfirmInfo = ({
   show,
@@ -28,8 +31,81 @@ const ModalConfirmInfo = ({
     nickname: "",
     age: 0,
     note: "",
+    classId: "",
   });
+  const [createdUser, setCreatedUser] = useState({});
+  const [createdStudent, setCreatedStudent] = useState({});
+  const [createdEnrollment, setCreatedEnrollment] = useState({});
   const [errorFields, setErrorFields] = useState({});
+  const [listClassOption, setListClassOption] = useState([]);
+
+  const fetchClassList = useCallback(async () => {
+    try {
+      const classes = await ClassService.getAvailableClassesForCourse(
+        cartItems[0].id.substring(2)
+      ); // Lấy danh sách lớp học theo khóa học
+      if (classes.length === 0) {
+        return;
+      }
+
+      const dayMapping = {
+        MONDAY: "T2",
+        TUESDAY: "T3",
+        WEDNESDAY: "T4",
+        THURSDAY: "T5",
+        FRIDAY: "T6",
+        SATURDAY: "T7",
+        SUNDAY: "CN",
+      };
+
+      const classEntityOptions = classes.map((classEntity) => {
+        // Định dạng lịch học
+        const schedule = classEntity.timeSlots.map((slot, index) => (
+          <div key={index} style={{ marginLeft: "15px" }}>
+            - {dayMapping[slot.dayOfWeek]}: {slot.startTime.slice(0, 5)} -{" "}
+            {slot.endTime.slice(0, 5)}
+          </div>
+        ));
+
+        // Tạo label hiển thị dễ nhìn
+        return {
+          value: classEntity.id,
+          label: (
+            <div
+              style={{
+                paddingBottom: "10px",
+                paddingLeft: "5px",
+                borderBottom: "1px solid #ddd",
+              }}
+            >
+              <div style={{ fontWeight: "bold", fontSize: "14px" }}>
+                #{classEntity.id}: ({classEntity.trainerName})
+              </div>
+              <div style={{ marginTop: "5px", fontSize: "14px" }}>
+                <strong>Lịch học:</strong>
+                {schedule}
+              </div>
+            </div>
+          ),
+          searchLabel: `#${classEntity.id} (${
+            classEntity.trainerName
+          }) - ${classEntity.timeSlots
+            .map(
+              (slot) =>
+                `${dayMapping[slot.dayOfWeek]}: ${slot.startTime.slice(
+                  0,
+                  5
+                )} - ${slot.endTime.slice(0, 5)}`
+            )
+            .join(", ")}`, // Văn bản dùng để tìm kiếm
+        };
+      });
+
+      setListClassOption(classEntityOptions);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách lớp theo khóa học:", error);
+    }
+  }, [cartItems]); // Thêm 'cartItems' vào dependency nếu cần
 
   useEffect(() => {
     if (buyer && Object.keys(buyer).length !== 0) {
@@ -41,7 +117,10 @@ const ModalConfirmInfo = ({
       }));
       setCurrentStep(2);
     }
-  }, [buyer]);
+    if (cartItems.length > 0) {
+      fetchClassList(); // Lấy danh sách lớp học
+    }
+  }, [buyer, fetchClassList, cartItems]);
 
   // Hàm kiểm tra từng trường hợp lỗi
   const validateField = (key, value) => {
@@ -138,7 +217,9 @@ const ModalConfirmInfo = ({
     }
 
     if (currentStep === 3) {
-      // Step 3: Kiểm tra thông tin
+      if (!formData.classId || formData.classId.trim() === "") {
+        newErrors.classId = "Vui lòng chọn lớp học muốn đăng ký.";
+      }
     }
 
     setErrorFields(newErrors);
@@ -176,6 +257,7 @@ const ModalConfirmInfo = ({
       nickname: "",
       age: 0,
       note: "",
+      classId: "",
     });
   };
 
@@ -232,61 +314,90 @@ const ModalConfirmInfo = ({
   // Xử lý khi click bước tiếp theo
   const handleContinue = async () => {
     if (validateStep()) {
-      console.log("Dữ liệu tại bước " + currentStep, formData);
+      // Dữ liệu gửi lên server
+      const payload = {
+        buyerInfo: {
+          fullName: formData.buyerFullName,
+          phoneNumber: formData.phoneNumber,
+          email: formData.email,
+          gender: formData.buyerGender,
+          role: "USER",
+          status: "ACTIVE",
+        },
+        studentInfo: {
+          fullName: formData.studentFullName,
+          nickname: formData.nickname || null,
+          age: formData.age,
+          gender: formData.studentGender,
+          note: formData.note,
+        },
+        classId: formData.classId,
+        invoice: invoiceData, // Hóa đơn từ component cha
+      };
+
+      console.log("Dữ liệu tại bước " + currentStep, payload);
+
+      if (currentStep === 1) {
+        if (Object.keys(buyer).length === 0) {
+          try {
+            setLoading(true);
+            const createdUser = await UserService.createUser(payload.buyerInfo);
+            setCreatedUser(createdUser);
+            toast.success("Tạo người dùng mới thành công!");
+            setLoading(false);
+          } catch (error) {
+            setLoading(false);
+            console.error("Lỗi khi tạo người mua: ", error);
+            return;
+          }
+        }
+      }
+
+      if (currentStep === 2) {
+        try {
+          setLoading(true);
+          if (Object.keys(buyer).length === 0) {
+            const createdStudent = await StudentService.createStudent({
+              ...payload.studentInfo,
+              userId: createdUser.id,
+            });
+            setCreatedStudent(createdStudent);
+          } else {
+            const createdStudent = await StudentService.createStudent({
+              ...payload.studentInfo,
+              userId: buyer.id,
+            });
+            setCreatedStudent(createdStudent);
+          }
+          toast.success("Tạo học viên mới thành công!");
+          setLoading(false);
+        } catch (error) {
+          setLoading(false);
+          console.error("Lỗi khi tạo học viên: ", error);
+          return;
+        }
+      }
 
       if (currentStep === 3) {
         try {
-          const payload = {
-            buyerInfo: {
-              fullName: formData.buyerFullName,
-              phoneNumber: formData.phoneNumber,
-              email: formData.email,
-              gender: formData.buyerGender,
-              role: "USER",
-              status: "ACTIVE",
-            },
-            studentInfo: {
-              fullName: formData.studentFullName,
-              nickname: formData.nickname || null,
-              age: formData.age,
-              gender: formData.studentGender,
-              note:
-                `${formData.studentFullName} (${formData.age} Tuổi): ${formData.note}` ||
-                `${formData.studentFullName} (${formData.age} Tuổi)`,
-              userId: null || buyer.id,
-            },
-            invoice: invoiceData, // Hóa đơn từ component cha
-          };
-
           // Gọi API
           setLoading(true);
-          let createdUser = buyer;
-          if (Object.keys(buyer).length === 0) {
-            createdUser = await UserService.createUser(payload.buyerInfo);
-            // tạo học viên
-            if (createdUser) {
-              await StudentService.createStudent({
-                ...payload.studentInfo,
-                userId: createdUser.id,
-              });
-            }
-          } else {
-            await StudentService.createStudent(payload.studentInfo);
-          }
-
-          toast.success("Đăng ký thông tin thành công!");
+          const createdEnrollment = await EnrollmentService.createEnrollment({
+            studentId: createdStudent.id,
+            classId: payload.classId,
+          }); // Thêm học viên vào lớp học tương ứng
+          setCreatedEnrollment(createdEnrollment);
           processInvoice(createdUser); // in hóa đơn
           clearForm();
           onHide();
         } catch (error) {
-          console.error("Lỗi khi đăng ký: ", error);
-          toast.error("Đăng ký thất bại. Vui lòng thử lại!");
+          console.error("Lỗi khi xác nhận đăng ký: ", error);
+          toast.error("Đã xảy ra lỗi xác nhận đăng ký!");
         } finally {
           setLoading(false);
         }
-      } else {
-        setCurrentStep(currentStep + 1);
       }
+      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -520,7 +631,70 @@ const ModalConfirmInfo = ({
     </>
   );
 
-  const confirmSignUp = <></>;
+  const confirmSignUp = (
+    <>
+      {/* Thông tin hiển thị */}
+      <div className="mb-3">
+        <div className="row">
+          <div className="col-md-6 mb-3">
+            <span className="fw-bold me-1">Tên người mua:</span>{" "}
+            {formData.buyerFullName}
+          </div>
+          <div className="col-md-6 mb-3">
+            <span className="fw-bold me-1">Tên học viên:</span>{" "}
+            {formData.studentFullName}
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-md-12">
+            <span className="fw-bold me-1">Khóa học đang chọn mua:</span>{" "}
+            {cartItems[0]?.name}
+          </div>
+        </div>
+      </div>
+
+      {/* Gạch ngang ngăn cách */}
+      <div>
+        <hr />
+      </div>
+
+      {/* Ô nhập liệu */}
+      <div className="row mt-3">
+        <div className="col-md-12 mb-3 z-2">
+          <Form.Group controlId="formClassId">
+            <Form.Label>
+              Lớp học <span className="text-danger">(*)</span>
+            </Form.Label>
+            <Select
+              options={listClassOption}
+              value={listClassOption.find(
+                (option) => option.value === formData.classId
+              )}
+              onChange={(selectedOption) =>
+                handleInputChange(
+                  "classId",
+                  selectedOption ? selectedOption.value : ""
+                )
+              }
+              placeholder="Chọn lớp học"
+              isClearable // Cho phép xóa chọn lựa
+              isSearchable // Bật tính năng tìm kiếm
+              filterOption={(option, searchInput) =>
+                option.data.searchLabel
+                  .toLowerCase()
+                  .includes(searchInput.toLowerCase())
+              }
+            />
+            {errorFields.classId && (
+              <div className="invalid-feedback d-block">
+                {errorFields.classId}
+              </div>
+            )}
+          </Form.Group>
+        </div>
+      </div>
+    </>
+  );
 
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
@@ -544,7 +718,7 @@ const ModalConfirmInfo = ({
               ? "Điền thông tin người mua"
               : currentStep === 2
               ? "Điền thông tin học viên"
-              : "Xác nhận thanh toán"}
+              : "Xác nhận đăng ký"}
           </div>
         </Modal.Title>
       </Modal.Header>
@@ -555,6 +729,7 @@ const ModalConfirmInfo = ({
             variant="success"
             className="mx-auto w-50 my-3 px-5 py-1 mx-2 fw-bold text-uppercase text-nowrap"
             onClick={handleContinue}
+            disabled={loading}
           >
             {loading
               ? "Đang xử lý..."
@@ -694,7 +869,7 @@ const ModalConfirmInfo = ({
                   currentStep >= 3 ? "text-success" : "text-muted"
                 } fw-bold`}
               >
-                XÁC NHẬN THANH TOÁN
+                XÁC NHẬN ĐĂNG KÝ
               </small>
             </div>
           </div>

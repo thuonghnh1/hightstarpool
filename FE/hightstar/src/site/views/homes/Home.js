@@ -190,7 +190,7 @@ export default function Home() {
                     Kỹ năng bơi lội không chỉ là môn thể thao, mà là sự bảo vệ
                     cho bản thân, gia đình và mọi người.
                   </p>
-                  <div className="position-relative w-75 mx-auto animated slideInDown d-none d-sm-block">
+                  {/* <div className="position-relative w-75 mx-auto animated slideInDown d-none d-sm-block">
                     <input
                       className="form-control border-0 rounded-pill w-100 py-3 ps-4 pe-5"
                       type="text"
@@ -203,7 +203,7 @@ export default function Home() {
                     >
                       Tìm Kiếm
                     </button>
-                  </div>
+                  </div> */}
                   <div className="w-75 mx-auto animated slideInDown d-sm-none mt-5">
                     <input
                       className="form-control border-0 rounded-pill w-100 py-3 ps-4 pe-5"

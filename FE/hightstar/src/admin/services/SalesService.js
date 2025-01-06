@@ -31,6 +31,7 @@ const formatProductData = (data) => {
     image: item.image,
     name: item.productName,
     type: item.categoryName, // Thay đổi nếu cần
+    stock: item.stock,
     price: item.price,
   }));
 };

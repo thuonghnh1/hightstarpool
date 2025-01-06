@@ -34,9 +34,10 @@ public class ClassStudentEnrollmentController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @GetMapping("/available-classes")
-    public ResponseEntity<List<ClassDTO>> getAvailableClassesForStudent(
+    public ResponseEntity<List<ClassDTO>> getAvailableClasses(
+            @RequestParam Long studentId,
             @RequestParam(required = false) Long enrollmentId) {
-        List<ClassDTO> availableClasses = enrollmentService.getAvailableClassesForStudent(enrollmentId);
+        List<ClassDTO> availableClasses = enrollmentService.getAvailableClassesForStudent(studentId, enrollmentId);
         return ResponseEntity.ok(availableClasses);
     }
 

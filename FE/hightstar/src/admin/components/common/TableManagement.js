@@ -162,7 +162,7 @@ const TableManagement = ({
                   key={index}
                   src={image.trim() || defaultImage} // Xóa khoảng trắng dư thừa
                   alt={`Ảnh ${index + 1}`}
-                  className="rounded-circle"
+                  className="rounded-circle object-fit-cover"
                   style={{
                     width: "40px",
                     height: "40px",
@@ -439,7 +439,7 @@ const TableManagement = ({
             aria-valuemax="100"
           >
             <div
-              class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+              className="progress-bar progress-bar-striped progress-bar-animated bg-success"
               style={{
                 width: item[column.key],
                 fontSize: "10px",
@@ -473,7 +473,7 @@ const TableManagement = ({
         );
 
       default:
-        return item[column.key] || "Không có"; // Trả về giá trị mặc định nếu không cần custom
+        return item[column.key] || (item[column.key] === 0 ? 0 : "Không có"); // Trả về giá trị mặc định nếu không cần custom
     }
   };
 
