@@ -6,6 +6,8 @@ import { UserContext } from "../../../contexts/UserContext";
 import { CartContext } from "../../../contexts/CartContext";
 import { useNavigate } from "react-router-dom";
 import UserProfileService from "../../../admin/services/UserProfileService";
+import LocationSelector from "../../services/LocationSelector";
+import SalesService from "../../../admin/services/SalesService";
 
 const ShoppingCart = () => {
   const { user } = useContext(UserContext);
@@ -18,6 +20,7 @@ const ShoppingCart = () => {
     fullName: "",
     phoneNumber: "",
     shippingAddress: "",
+    specificAddress: "",
     notes: "",
     totalAmount: 0,
   });
@@ -81,15 +84,17 @@ const ShoppingCart = () => {
       ...prevState,
       [name]: value,
     }));
+    console.log(checkoutData);
   };
 
-  const prepareOrderData = (cartItems) => {
+  const prepareOrderData = (cartItems, fullAddress) => {
     // Dữ liệu cho Order
     const orderData = {
       total: checkoutData.totalAmount,
       paymentMethod: "BANK_TRANSFER", // Mặc định là chưa xác định
       notes: checkoutData.notes,
-      shippingAddress: checkoutData.shippingAddress,
+      status: "PENDING",
+      shippingAddress: fullAddress,
       discountId: null,
       userId: user.userId,
     };
@@ -122,15 +127,31 @@ const ShoppingCart = () => {
       );
       return;
     }
+    // Kết hợp địa chỉ
+    const fullAddress = `${checkoutData.specificAddress}, ${checkoutData.shippingAddress}`;
+    setCheckoutData((prevData) => ({
+      ...prevData,
+      shippingAddress: fullAddress,
+    }));
+
     setLoadingPage(true);
     try {
+
+      //    // Chuẩn bị dữ liệu cho đơn hàng
+      // const orderData = prepareOrderData(shoppingCartItems);
+      // // Lưu đơn hàng vào cơ sở dữ liệu
+      // // Giả sử bạn có API `OrderService` để lưu đơn hàng
+      // await OrderService.createOrder(orderData);
+
       // Xử lý thanh toán
-      console.log(prepareOrderData(shoppingCartItems)); // thông tin để lưu vào csdl
+      console.log(prepareOrderData(shoppingCartItems, fullAddress)); // thông tin để lưu vào csdl
+      await SalesService.createInvoice(prepareOrderData(shoppingCartItems, fullAddress));
 
       clearCart(); // Làm trống giỏ hàng sau khi thanh toán
       setCheckoutSuccess(true);
       setShowModal(false);
     } catch (error) {
+      setCheckoutSuccess(false);
       console.error("Lỗi khi xử lý thanh toán:", error);
     } finally {
       setLoadingPage(false);
@@ -404,7 +425,7 @@ const ShoppingCart = () => {
                     required
                   />
                 </div>
-                <div className="mb-3">
+                {/* <div className="mb-3">
                   <label htmlFor="shippingAddress" className="form-label">
                     Địa chỉ giao hàng
                   </label>
@@ -418,7 +439,41 @@ const ShoppingCart = () => {
                     placeholder="Số nhà, tên đường..."
                     required
                   />
+                </div> */}
+                <div className="mb-3">
+                  <label htmlFor="shippingAddress" className="form-label">
+                    Địa chỉ giao hàng
+                  </label>
+                  <LocationSelector
+                    value={checkoutData.shippingAddress}
+                    onChange={(newAddress) => {
+                      setCheckoutData((prevData) => ({
+                        ...prevData,
+                        shippingAddress: newAddress,
+                      }));
+                    }}
+                  />
+
                 </div>
+                <div className="mb-3">
+                  <label htmlFor="specificAddress" className="form-label">
+                    Địa chỉ cụ thể (số nhà, đường)
+                  </label>
+                  <input
+                    type="text"
+                    id="specificAddress"
+                    className="form-control"
+                    value={checkoutData.specificAddress}
+                    onChange={(e) => {
+                      setCheckoutData((prevData) => ({
+                        ...prevData,
+                        specificAddress: e.target.value,
+                      }));
+                    }}
+                    placeholder="Nhập số nhà, tên đường, thôn, xóm,..."
+                  />
+                </div>
+
                 <div className="mb-3">
                   <label htmlFor="shippingAddress" className="form-label">
                     Ghi chú
