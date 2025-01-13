@@ -45,10 +45,16 @@ const getClassById = async (id) => {
 };
 
 // Hàm lấy tất cả lớp học
-const getAvailableClassesForCourse = async (courseId) => {
+const getAvailableClassesForCourse = async (courseId, studentId) => {
   try {
     const response = await axiosInstance.get(
-      `${API_URL}/available-classes/${courseId}`
+      `${API_URL}/available-classes-for-course`,
+      {
+        params: {
+          courseId: courseId,
+          studentId: studentId && studentId !== "" ? studentId : null, // Nếu không có studentId, gửi null
+        },
+      }
     );
     const classes = response.data;
 

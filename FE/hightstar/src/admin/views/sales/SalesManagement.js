@@ -442,9 +442,9 @@ const SalesManagement = () => {
               value={searchTerm} // Liên kết giá trị tìm kiếm
               onChange={handleSearchChange} // Cập nhật khi gõ tìm kiếm
             />
-            <Button variant="success">
+            {/* <Button variant="success">
               <i className="bi bi-funnel-fill"></i> Lọc
-            </Button>
+            </Button> */}
           </div>
 
           {/* Cart Table */}
@@ -921,6 +921,8 @@ const SalesManagement = () => {
         printRef={printRef}
         selectedDiscount={selectedDiscount}
         buyer={buyer}
+        handleShowModal={handleShowModal}
+        handleCloseModal={handleCloseModal}
       ></ModalConfirmInfo>
 
       <PrintComponent ref={printRef} />

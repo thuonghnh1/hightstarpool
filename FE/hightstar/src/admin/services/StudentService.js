@@ -14,6 +14,18 @@ const getStudents = async () => {
   }
 };
 
+const getStudentsByUserId = async (userId) => {
+  try {
+    const response = await axiosInstance.get(
+      `${API_URL}/students-by-user/${userId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách học viên của người dùng:", error);
+    throw error;
+  }
+};
+
 // Hàm lấy một học viên theo ID
 const getStudentById = async (id) => {
   try {
@@ -78,6 +90,7 @@ const deleteStudent = async (id) => {
 // Gán tất cả các hàm vào một object trước khi export
 const studentService = {
   getStudents,
+  getStudentsByUserId,
   getStudentById,
   createStudent,
   updateStudent,

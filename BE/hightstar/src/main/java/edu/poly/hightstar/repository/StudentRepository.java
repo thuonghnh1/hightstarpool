@@ -21,4 +21,5 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
             ")")
     List<Student> findStudentsNotEnrolledInAnyClass();
 
+    List<Student> findByUserUserId(Long userId);
 }

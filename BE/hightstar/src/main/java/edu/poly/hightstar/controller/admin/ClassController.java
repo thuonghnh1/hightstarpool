@@ -48,8 +48,14 @@ public class ClassController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    @GetMapping("/available-classes/{courseId}")
-    public ResponseEntity<List<ClassDTO>> getAvailableClassesForCourse(@PathVariable Long courseId) {
+    @GetMapping("/available-classes-for-course")
+    public ResponseEntity<List<ClassDTO>> getAvailableClassesForCourse(@RequestParam Long courseId,
+            @RequestParam(required = false) Long studentId) {
+        if (studentId != null) {
+            List<ClassDTO> classes = classService.getAvailableClassesForCourseAndStudent(courseId, studentId);
+            return new ResponseEntity<>(classes, HttpStatus.OK);
+
+        }
         List<ClassDTO> classes = classService.getAvailableClassesForCourse(courseId);
         return new ResponseEntity<>(classes, HttpStatus.OK);
     }

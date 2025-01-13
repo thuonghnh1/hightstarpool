@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback, useContext } from "react";
 import { NavLink } from "react-router-dom";
 import ProductService from "../../../site/services/ProductService";
-import { ToastContainer, toast } from "react-toastify";
 import { CartContext } from "../../../contexts/CartContext";
 import "react-toastify/dist/ReactToastify.css";
 import debounce from "lodash.debounce";
@@ -23,32 +22,32 @@ const ClothingCard = ({
   onAddToCart,
   productId,
 }) => {
-  const [selectedSize, setSelectedSize] = useState(sizes[0] || "");
-  const [quantity, setQuantity] = useState(1);
+  // const [selectedSize, setSelectedSize] = useState(sizes[0] || "");
+  // const [quantity, setQuantity] = useState(1);
   const discountedPrice = unitPrice - (unitPrice * discount) / 100;
 
-  const handleAddToCart = () => {
-    if (!selectedSize) {
-      toast.error("Vui lòng chọn size trước khi thêm vào giỏ.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      return;
-    }
+  // const handleAddToCart = () => {
+  //   if (!selectedSize) {
+  //     toast.error("Vui lòng chọn size trước khi thêm vào giỏ.", {
+  //       position: "top-right",
+  //       autoClose: 3000,
+  //     });
+  //     return;
+  //   }
 
-    const item = {
-      productId,
-      title,
-      description,
-      unitPrice: discountedPrice,
-      selectedSize,
-      quantity,
-      image: image || "",
-      stock,
-    };
+  //   const item = {
+  //     productId,
+  //     title,
+  //     description,
+  //     unitPrice: discountedPrice,
+  //     selectedSize,
+  //     quantity,
+  //     image: image || "",
+  //     stock,
+  //   };
 
-    onAddToCart(item);
-  };
+  //   onAddToCart(item);
+  // };
 
   return (
     <div className="col">
@@ -243,7 +242,6 @@ const Product = () => {
 
   return (
     <>
-      <ToastContainer />
       {error ? (
         <div className="alert alert-danger" role="alert">
           {error}

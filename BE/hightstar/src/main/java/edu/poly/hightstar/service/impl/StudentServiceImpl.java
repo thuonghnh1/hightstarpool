@@ -49,6 +49,19 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional
+    public List<StudentDTO> getStudentsByUserId(Long userId) {
+        List<Student> students = studentRepository.findByUserUserId(userId);
+        List<StudentDTO> studentDTOs = students.stream().map(student -> {
+            StudentDTO studentDTO = new StudentDTO();
+            BeanUtils.copyProperties(student, studentDTO);
+            studentDTO.setUserId(student.getUser().getUserId());
+            return studentDTO;
+        }).collect(Collectors.toList());
+        return studentDTOs;
+    }
+
+    @Override
+    @Transactional
     public StudentDTO createStudent(StudentDTO studentDTO) {
         Student student = new Student();
         BeanUtils.copyProperties(studentDTO, student);

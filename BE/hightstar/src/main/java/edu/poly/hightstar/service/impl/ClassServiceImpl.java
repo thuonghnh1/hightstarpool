@@ -222,6 +222,52 @@ public class ClassServiceImpl implements ClassService {
 
     @Override
     @Transactional
+    public List<ClassDTO> getAvailableClassesForCourseAndStudent(Long courseId, Long studentId) {
+        // Lấy ngày hiện tại
+        LocalDate today = LocalDate.now();
+        System.out.println("Today: " + today);
+
+        // Lấy danh sách các lớp mà học viên đã đăng ký
+        List<ClassStudentEnrollment> studentEnrollments = enrollmentRepository.findByStudentStudentId(studentId);
+        System.out.println("Student Enrollments: " + studentEnrollments.size());
+
+        // Lấy ngày kết thúc muộn nhất từ danh sách các lớp đã đăng ký
+        LocalDate latestEndDate = studentEnrollments.stream()
+                .map(enrollment -> enrollment.getClassEntity().getEndDate())
+                .max(LocalDate::compareTo)
+                .orElse(today); // Nếu học viên chưa đăng ký lớp nào, mặc định là ngày hiện tại
+        System.out.println("Latest End Date: " + latestEndDate);
+
+        // Lấy tất cả các lớp học thuộc khóa học chỉ định từ cơ sở dữ liệu
+        List<ClassEntity> courseClasses = classRepository.findAll().stream()
+                .filter(cls -> cls.getCourse().getCourseId().equals(courseId))
+                .collect(Collectors.toList());
+        System.out.println("Classes for Course " + courseId + ": " + courseClasses.size());
+
+        // Lọc ra các lớp mà học viên chưa đăng ký, có ngày bắt đầu hợp lệ
+        List<ClassDTO> availableClasses = courseClasses.stream()
+                .filter(cls -> {
+                    // Kiểm tra lớp chưa được học viên đăng ký
+                    boolean notEnrolled = studentEnrollments.stream()
+                            .noneMatch(enrollment -> enrollment.getClassEntity().getClassId().equals(cls.getClassId()));
+                    System.out.println("Class ID: " + cls.getClassId() + ", Not Enrolled: " + notEnrolled);
+
+                    // Kiểm tra ngày bắt đầu hợp lệ
+                    boolean validStartDate = !cls.getStartDate().isBefore(latestEndDate.plusDays(1))
+                            && cls.getStartDate().isAfter(today);
+                    System.out.println("Class ID: " + cls.getClassId() + ", Valid Start Date: " + validStartDate);
+
+                    return notEnrolled && validStartDate;
+                })
+                .map(this::mapToClassDTO) // Chuyển đổi sang DTO
+                .collect(Collectors.toList());
+
+        System.out.println("Available Classes for Course: " + availableClasses.size());
+        return availableClasses;
+    }
+
+    @Override
+    @Transactional
     public ClassDTO createClass(ClassRequest request) {
         // Kiểm tra và lấy Course
         Course course = courseRepository.findById(request.getCourseId())

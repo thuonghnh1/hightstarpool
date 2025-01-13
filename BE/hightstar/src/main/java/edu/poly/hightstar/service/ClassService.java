@@ -17,6 +17,8 @@ public interface ClassService {
 
     List<ClassDTO> getAvailableClassesForCourse(Long courseId);
 
+    List<ClassDTO> getAvailableClassesForCourseAndStudent(Long courseId, Long studentId);
+
     List<TrainerDTO> getAvailableTrainersForNew(List<Long> selectedTimeSlotIds, LocalDate startDate);
 
     List<TrainerDTO> getAvailableTrainersForUpdate(List<Long> selectedTimeSlotIds, Long classId,

@@ -9,6 +9,8 @@ public interface StudentService {
 
     StudentDTO getStudentById(Long id);
 
+    List<StudentDTO> getStudentsByUserId(Long userId);
+
     StudentDTO createStudent(StudentDTO studentDTO);
 
     StudentDTO updateStudent(Long id, StudentDTO studentDTO);

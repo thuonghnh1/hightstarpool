@@ -31,6 +31,13 @@ public class StudentController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')")
+    @GetMapping("/students-by-user/{userId}")
+    public List<StudentDTO> getStudentsByUser(@PathVariable Long userId) {
+        List<StudentDTO> students = studentService.getStudentsByUserId(userId);
+        return students;
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')")
     @GetMapping("/{id}")
     public StudentDTO getStudentById(@PathVariable Long id) {
         return studentService.getStudentById(id);

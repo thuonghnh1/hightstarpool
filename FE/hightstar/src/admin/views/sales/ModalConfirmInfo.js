@@ -18,6 +18,8 @@ const ModalConfirmInfo = ({
   printRef,
   selectedDiscount,
   buyer,
+  handleShowModal,
+  handleCloseModal,
 }) => {
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -32,21 +34,30 @@ const ModalConfirmInfo = ({
     age: 0,
     note: "",
     classId: "",
+    studentId: "",
   });
+  const [studentOfBuyers, setStudentOfBuyers] = useState({});
   const [createdUser, setCreatedUser] = useState({});
   const [createdStudent, setCreatedStudent] = useState({});
   const [createdEnrollment, setCreatedEnrollment] = useState({});
   const [errorFields, setErrorFields] = useState({});
   const [listClassOption, setListClassOption] = useState([]);
+  const [listStudentOption, setListStudentOption] = useState([]);
+  const [showModalSelectStudent, setShowModalSelectStudent] = useState(false);
+  const [studentSelected, setStudentSelected] = useState({
+    fullName: "",
+    nickname: "",
+    age: "",
+    gender: "",
+    note: "",
+  });
 
   const fetchClassList = useCallback(async () => {
     try {
       const classes = await ClassService.getAvailableClassesForCourse(
-        cartItems[0].id.substring(2)
+        cartItems[0].id.substring(2),
+        formData.studentId
       ); // Lấy danh sách lớp học theo khóa học
-      if (classes.length === 0) {
-        return;
-      }
 
       const dayMapping = {
         MONDAY: "T2",
@@ -105,7 +116,22 @@ const ModalConfirmInfo = ({
     } catch (error) {
       console.error("Lỗi khi lấy danh sách lớp theo khóa học:", error);
     }
-  }, [cartItems]); // Thêm 'cartItems' vào dependency nếu cần
+  }, [cartItems, formData.studentId]); // Thêm 'cartItems' vào dependency nếu cần
+
+  const fetchListStudent = useCallback(async () => {
+    try {
+      const studentList = await StudentService.getStudentsByUserId(buyer.id);
+      setStudentOfBuyers(studentList);
+
+      const studentOptions = studentList.map((student) => ({
+        value: student.id,
+        label: `#${student.id}: ${student.fullName} <${student.nickname}> (${student.age} tuổi)`,
+      }));
+      setListStudentOption(studentOptions);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách học viên của người mua:", error);
+    }
+  }, [buyer]);
 
   useEffect(() => {
     if (buyer && Object.keys(buyer).length !== 0) {
@@ -116,11 +142,22 @@ const ModalConfirmInfo = ({
         email: buyer.email,
       }));
       setCurrentStep(2);
+      fetchListStudent(); // Lấy danh sách học viên của người mua
     }
     if (cartItems.length > 0) {
       fetchClassList(); // Lấy danh sách lớp học
     }
-  }, [buyer, fetchClassList, cartItems]);
+  }, [buyer, fetchClassList, cartItems, fetchListStudent]);
+
+  const handleShowModalSelectStudent = () => {
+    setShowModalSelectStudent(true);
+    handleCloseModal("modalConfirmInfo");
+  };
+  const handleCloseModalSelectStudent = () => {
+    console.log(formData);
+    setShowModalSelectStudent(false);
+    handleShowModal("modalConfirmInfo");
+  };
 
   // Hàm kiểm tra từng trường hợp lỗi
   const validateField = (key, value) => {
@@ -217,7 +254,7 @@ const ModalConfirmInfo = ({
     }
 
     if (currentStep === 3) {
-      if (!formData.classId || formData.classId.trim() === "") {
+      if (!formData.classId || formData.classId === "") {
         newErrors.classId = "Vui lòng chọn lớp học muốn đăng ký.";
       }
     }
@@ -268,8 +305,8 @@ const ModalConfirmInfo = ({
         ...invoiceData,
         order: {
           ...invoiceData.order,
-          status: "PENDING",
-          userId: Object.keys(buyer).length !== 0 ? buyer.id : buyerData.id,
+          status: "COMPLETED",
+          userId: buyerData.id,
         },
       });
 
@@ -279,7 +316,7 @@ const ModalConfirmInfo = ({
           order: {
             ...invoiceData.order,
             orderCode: orderResponse.id,
-            userId: Object.keys(buyer).length !== 0 ? buyer.id : buyerData.id,
+            userId: buyerData.id,
           },
         };
 
@@ -356,20 +393,26 @@ const ModalConfirmInfo = ({
       if (currentStep === 2) {
         try {
           setLoading(true);
-          if (Object.keys(buyer).length === 0) {
-            const createdStudent = await StudentService.createStudent({
-              ...payload.studentInfo,
-              userId: createdUser.id,
-            });
-            setCreatedStudent(createdStudent);
-          } else {
-            const createdStudent = await StudentService.createStudent({
-              ...payload.studentInfo,
-              userId: buyer.id,
-            });
-            setCreatedStudent(createdStudent);
+          if (!studentSelected.id) {
+            // Nếu không chọn học viên có sẵn
+            if (Object.keys(buyer).length === 0) {
+              const createdStudent = await StudentService.createStudent({
+                ...payload.studentInfo,
+                userId: createdUser.id,
+              });
+              setCreatedStudent(createdStudent);
+            } else {
+              const createdStudent = await StudentService.createStudent({
+                ...payload.studentInfo,
+                userId: buyer.id,
+              });
+              setCreatedStudent(createdStudent);
+            }
+            toast.success("Tạo học viên mới thành công!");
+            if (cartItems.length > 0) {
+              fetchClassList(); // Lấy danh sách lớp học
+            }
           }
-          toast.success("Tạo học viên mới thành công!");
           setLoading(false);
         } catch (error) {
           setLoading(false);
@@ -383,21 +426,20 @@ const ModalConfirmInfo = ({
           // Gọi API
           setLoading(true);
           const createdEnrollment = await EnrollmentService.createEnrollment({
-            studentId: createdStudent.id,
+            studentId: createdStudent.id || studentSelected.id,
             classId: payload.classId,
           }); // Thêm học viên vào lớp học tương ứng
           setCreatedEnrollment(createdEnrollment);
-          processInvoice(createdUser); // in hóa đơn
+          processInvoice(createdUser.id ? createdUser : buyer); // in hóa đơn
           clearForm();
           onHide();
         } catch (error) {
           console.error("Lỗi khi xác nhận đăng ký: ", error);
-          toast.error("Đã xảy ra lỗi xác nhận đăng ký!");
         } finally {
           setLoading(false);
         }
       }
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(currentStep < 3 ? currentStep + 1 : currentStep);
     }
   };
 
@@ -523,6 +565,7 @@ const ModalConfirmInfo = ({
               handleInputChange("studentFullName", e.target.value)
             }
             isInvalid={!!errorFields.studentFullName}
+            disabled={studentSelected.id}
             required
           />
           <Form.Control.Feedback type="invalid">
@@ -543,6 +586,7 @@ const ModalConfirmInfo = ({
             maxLength={50}
             onChange={(e) => handleInputChange("nickname", e.target.value)}
             isInvalid={!!errorFields.nickname}
+            disabled={studentSelected.id}
           />
           <Form.Control.Feedback type="invalid">
             {errorFields.nickname}
@@ -565,6 +609,7 @@ const ModalConfirmInfo = ({
             value={formData.age}
             onChange={(e) => handleInputChange("age", e.target.value)}
             isInvalid={!!errorFields.age}
+            disabled={studentSelected.id}
             required
           />
           <Form.Control.Feedback type="invalid">
@@ -589,6 +634,7 @@ const ModalConfirmInfo = ({
               onChange={() => handleInputChange("studentGender", true)}
               inline
               isInvalid={!!errorFields.studentGender}
+              disabled={studentSelected.id && formData.studentGender === false}
             />
             <Form.Check
               type="radio"
@@ -599,6 +645,7 @@ const ModalConfirmInfo = ({
               onChange={() => handleInputChange("studentGender", false)}
               inline
               isInvalid={!!errorFields.studentGender}
+              disabled={studentSelected.id && formData.studentGender === true}
             />
           </div>
           {errorFields.studentGender && (
@@ -622,12 +669,53 @@ const ModalConfirmInfo = ({
             maxLength={200}
             onChange={(e) => handleInputChange("note", e.target.value)}
             isInvalid={!!errorFields.note}
+            disabled={studentSelected.id}
           />
           <Form.Control.Feedback type="invalid">
             {errorFields.note}
           </Form.Control.Feedback>
         </Form.Group>
       </div>
+      {Object.keys(buyer).length !== 0 && (
+        <>
+          <div className="d-flex justify-content-between">
+            {studentSelected.id && (
+              <div
+                className="text-start text-decoration-underline link-primary"
+                style={{ cursor: "pointer" }}
+                onClick={() => {
+                  setStudentSelected({
+                    fullName: "",
+                    nickname: "",
+                    age: 0,
+                    gender: true,
+                    note: "",
+                    id: "",
+                  });
+                  setFormData((prevData) => ({
+                    ...prevData,
+                    studentFullName: "",
+                    studentGender: "",
+                    nickname: "",
+                    age: 0,
+                    note: "",
+                    studentId: "",
+                  }));
+                }}
+              >
+                Làm mới?
+              </div>
+            )}
+            <div
+              className="ms-auto text-decoration-underline link-primary"
+              style={{ cursor: "pointer" }}
+              onClick={handleShowModalSelectStudent}
+            >
+              Chọn học viên có sẵn?
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 
@@ -697,185 +785,277 @@ const ModalConfirmInfo = ({
   );
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered>
-      <Modal.Header className="border-0 p-4" closeButton>
-        <Modal.Title className="d-flex align-items-center w-100 text-uppercase fw-bold fs-5">
-          <div
-            className="me-auto"
-            onClick={() =>
-              setCurrentStep(currentStep > 1 ? currentStep - 1 : currentStep)
-            }
-            style={{ left: "35px" }}
-          >
-            <i
-              className={`bi bi-arrow-left fs-3 text-muted ${
-                currentStep === 1 && "opacity-50"
-              }`}
-            ></i>
+    <>
+      <Modal show={show} onHide={onHide} size="lg" centered>
+        <Modal.Header className="border-0 p-4" closeButton>
+          <Modal.Title className="d-flex align-items-center w-100 text-uppercase fw-bold fs-5">
+            <div
+              className="me-auto"
+              onClick={() =>
+                setCurrentStep(currentStep > 1 ? currentStep - 1 : currentStep)
+              }
+              style={{ left: "35px" }}
+            >
+              <i
+                className={`bi bi-arrow-left fs-3 text-muted ${
+                  currentStep === 1 && "opacity-50"
+                }`}
+              ></i>
+            </div>
+            <div className="modal__title me-auto">
+              {currentStep === 1
+                ? "Điền thông tin người mua"
+                : currentStep === 2
+                ? "Điền thông tin học viên"
+                : "Xác nhận đăng ký"}
+            </div>
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="py-3 px-4">
+          <div className="row mb-3">{renderFormStep()}</div>
+          <div className="w-100 text-center">
+            <Button
+              variant="success"
+              className="mx-auto w-50 my-3 px-5 py-1 mx-2 fw-bold text-uppercase text-nowrap"
+              onClick={handleContinue}
+              disabled={loading}
+            >
+              {loading
+                ? "Đang xử lý..."
+                : currentStep === 3
+                ? "Xác Nhận"
+                : "Tiếp theo"}
+            </Button>
           </div>
-          <div className="modal__title me-auto">
-            {currentStep === 1
-              ? "Điền thông tin người mua"
-              : currentStep === 2
-              ? "Điền thông tin học viên"
-              : "Xác nhận đăng ký"}
+        </Modal.Body>
+        <Modal.Footer className="border-0 d-flex justify-content-center">
+          <div className="d-flex flex-column align-items-center w-100 pb-4">
+            {/* Thanh tiến trình */}
+            <div
+              className="d-flex align-items-center w-100 position-relative"
+              style={{ height: "30px" }}
+            >
+              {/* Bước 1 */}
+              <div
+                className="d-flex flex-column align-items-center position-relative"
+                style={{ flex: 1 }}
+              >
+                <div
+                  className={`rounded-circle border border-3 ${
+                    currentStep >= 1
+                      ? "bg-success text-white"
+                      : "bg-white text-success"
+                  }`}
+                  style={{
+                    width: "30px",
+                    height: "30px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: "1",
+                  }}
+                >
+                  1
+                </div>
+                <div
+                  className={`border-top border-3 position-absolute ${
+                    currentStep >= 2 ? "border-success" : "border-muted"
+                  }`}
+                  style={{
+                    top: "50%",
+                    left: "50%",
+                    width: "100%",
+                    height: "2px",
+                    zIndex: "0",
+                  }}
+                ></div>
+              </div>
+
+              {/* Bước 2 */}
+              <div
+                className="d-flex flex-column align-items-center position-relative"
+                style={{ flex: 1 }}
+              >
+                <div
+                  className={`rounded-circle border border-3 ${
+                    currentStep >= 2
+                      ? "bg-success text-white"
+                      : "bg-white text-success"
+                  }`}
+                  style={{
+                    width: "30px",
+                    height: "30px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: "1",
+                  }}
+                >
+                  2
+                </div>
+                <div
+                  className={`border-top border-3 position-absolute ${
+                    currentStep >= 3 ? "border-success" : "border-muted"
+                  }`}
+                  style={{
+                    top: "50%",
+                    left: "50%",
+                    width: "100%",
+                    height: "2px",
+                    zIndex: "0",
+                  }}
+                ></div>
+              </div>
+
+              {/* Bước 3 */}
+              <div
+                className="d-flex flex-column align-items-center position-relative"
+                style={{ flex: 1 }}
+              >
+                <div
+                  className={`rounded-circle border border-3 ${
+                    currentStep >= 3
+                      ? "bg-success text-white"
+                      : "bg-white text-success"
+                  }`}
+                  style={{
+                    width: "30px",
+                    height: "30px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: "1",
+                  }}
+                >
+                  3
+                </div>
+              </div>
+            </div>
+
+            {/* Phần chữ bên dưới */}
+            <div className="d-flex justify-content-between w-100 mt-1">
+              <div className="text-center" style={{ flex: 1 }}>
+                <small
+                  className={`${
+                    currentStep >= 1 ? "text-success" : "text-muted"
+                  } fw-bold`}
+                >
+                  THÔNG TIN NGƯỜI MUA
+                </small>
+              </div>
+              <div className="text-center" style={{ flex: 1 }}>
+                <small
+                  className={`${
+                    currentStep >= 2 ? "text-success" : "text-muted"
+                  } fw-bold`}
+                >
+                  THÔNG TIN HỌC VIÊN
+                </small>
+              </div>
+              <div className="text-center" style={{ flex: 1 }}>
+                <small
+                  className={`${
+                    currentStep >= 3 ? "text-success" : "text-muted"
+                  } fw-bold`}
+                >
+                  XÁC NHẬN ĐĂNG KÝ
+                </small>
+              </div>
+            </div>
           </div>
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body className="py-3 px-4">
-        <div className="row mb-3">{renderFormStep()}</div>
-        <div className="w-100 text-center">
+        </Modal.Footer>
+      </Modal>
+
+      {/* Modal chọn học viên */}
+      <Modal
+        show={showModalSelectStudent}
+        onHide={handleCloseModalSelectStudent}
+        aria-labelledby="contained-modal-title-vcenter"
+        size={"lg"}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title className="text-uppercase">
+            Chọn học viên có sẵn
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="row">
+            <div className="col-md-12 mb-3">
+              <Form.Group controlId="formStudentId">
+                <Form.Label>
+                  Học viên <span className="text-danger">(*)</span>
+                </Form.Label>
+                <Select
+                  options={listStudentOption}
+                  value={listStudentOption.find(
+                    (option) => option.value === formData.studentId
+                  )}
+                  onChange={(selectedOption) => {
+                    handleInputChange(
+                      "studentId",
+                      selectedOption ? selectedOption.value : ""
+                    );
+                    if (selectedOption) {
+                      setStudentSelected(
+                        studentOfBuyers.find(
+                          (student) => student.id === selectedOption.value
+                        )
+                      );
+                    } else {
+                      setStudentSelected({
+                        fullName: "",
+                        nickname: "",
+                        age: 0,
+                        gender: true,
+                        note: "",
+                        id: "",
+                      });
+                    }
+                  }}
+                  placeholder="Chọn học viên"
+                  isClearable // Cho phép xóa chọn lựa
+                  isSearchable // Bật tính năng tìm kiếm
+                />
+                {errorFields.studentId && (
+                  <div className="invalid-feedback d-block">
+                    {errorFields.studentId}
+                  </div>
+                )}
+              </Form.Group>
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
           <Button
-            variant="success"
-            className="mx-auto w-50 my-3 px-5 py-1 mx-2 fw-bold text-uppercase text-nowrap"
-            onClick={handleContinue}
+            variant="primary"
             disabled={loading}
+            onClick={() => {
+              setFormData((prevData) => ({
+                ...prevData,
+                studentFullName: studentSelected.fullName || "",
+                studentGender: studentSelected.gender,
+                nickname: studentSelected.nickname || "",
+                age: studentSelected.age || 0,
+                note: studentSelected.note || "",
+                studentId: studentSelected.id || "",
+              }));
+              handleCloseModalSelectStudent();
+            }}
           >
-            {loading
-              ? "Đang xử lý..."
-              : currentStep === 3
-              ? "Xác Nhận"
-              : "Tiếp theo"}
+            {loading ? (
+              <span
+                className="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+            ) : (
+              "Xong"
+            )}
           </Button>
-        </div>
-      </Modal.Body>
-      <Modal.Footer className="border-0 d-flex justify-content-center">
-        <div className="d-flex flex-column align-items-center w-100 pb-4">
-          {/* Thanh tiến trình */}
-          <div
-            className="d-flex align-items-center w-100 position-relative"
-            style={{ height: "30px" }}
-          >
-            {/* Bước 1 */}
-            <div
-              className="d-flex flex-column align-items-center position-relative"
-              style={{ flex: 1 }}
-            >
-              <div
-                className={`rounded-circle border border-3 ${
-                  currentStep >= 1
-                    ? "bg-success text-white"
-                    : "bg-white text-success"
-                }`}
-                style={{
-                  width: "30px",
-                  height: "30px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: "1",
-                }}
-              >
-                1
-              </div>
-              <div
-                className={`border-top border-3 position-absolute ${
-                  currentStep >= 2 ? "border-success" : "border-muted"
-                }`}
-                style={{
-                  top: "50%",
-                  left: "50%",
-                  width: "100%",
-                  height: "2px",
-                  zIndex: "0",
-                }}
-              ></div>
-            </div>
-
-            {/* Bước 2 */}
-            <div
-              className="d-flex flex-column align-items-center position-relative"
-              style={{ flex: 1 }}
-            >
-              <div
-                className={`rounded-circle border border-3 ${
-                  currentStep >= 2
-                    ? "bg-success text-white"
-                    : "bg-white text-success"
-                }`}
-                style={{
-                  width: "30px",
-                  height: "30px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: "1",
-                }}
-              >
-                2
-              </div>
-              <div
-                className={`border-top border-3 position-absolute ${
-                  currentStep >= 3 ? "border-success" : "border-muted"
-                }`}
-                style={{
-                  top: "50%",
-                  left: "50%",
-                  width: "100%",
-                  height: "2px",
-                  zIndex: "0",
-                }}
-              ></div>
-            </div>
-
-            {/* Bước 3 */}
-            <div
-              className="d-flex flex-column align-items-center position-relative"
-              style={{ flex: 1 }}
-            >
-              <div
-                className={`rounded-circle border border-3 ${
-                  currentStep >= 3
-                    ? "bg-success text-white"
-                    : "bg-white text-success"
-                }`}
-                style={{
-                  width: "30px",
-                  height: "30px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: "1",
-                }}
-              >
-                3
-              </div>
-            </div>
-          </div>
-
-          {/* Phần chữ bên dưới */}
-          <div className="d-flex justify-content-between w-100 mt-1">
-            <div className="text-center" style={{ flex: 1 }}>
-              <small
-                className={`${
-                  currentStep >= 1 ? "text-success" : "text-muted"
-                } fw-bold`}
-              >
-                THÔNG TIN NGƯỜI MUA
-              </small>
-            </div>
-            <div className="text-center" style={{ flex: 1 }}>
-              <small
-                className={`${
-                  currentStep >= 2 ? "text-success" : "text-muted"
-                } fw-bold`}
-              >
-                THÔNG TIN HỌC VIÊN
-              </small>
-            </div>
-            <div className="text-center" style={{ flex: 1 }}>
-              <small
-                className={`${
-                  currentStep >= 3 ? "text-success" : "text-muted"
-                } fw-bold`}
-              >
-                XÁC NHẬN ĐĂNG KÝ
-              </small>
-            </div>
-          </div>
-        </div>
-      </Modal.Footer>
-    </Modal>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 };
 

@@ -16,7 +16,7 @@ import NotificationService from "../services/NotificationService";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi"; // Import locale tiếng Việt
-import { CartContext } from "../../contexts/CartContext";
+// import { CartContext } from "../../contexts/CartContext";
 
 // Cấu hình Day.js với plugin relativeTime và locale tiếng Việt
 dayjs.extend(relativeTime);
@@ -24,7 +24,7 @@ dayjs.locale("vi"); // Cài đặt ngôn ngữ tiếng Việt
 
 function Header() {
   const { user, updateUser } = useContext(UserContext);
-  const { shoppingCartItems } = useContext(CartContext);
+  // const { shoppingCartItems } = useContext(CartContext);
   const [notifications, setNotifications] = useState([]);
   const [roleNotifications, setRoleNotifications] = useState([]);
   const [showToasts, setShowToasts] = useState([]);
