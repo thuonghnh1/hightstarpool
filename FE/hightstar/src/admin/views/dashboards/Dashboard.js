@@ -20,6 +20,7 @@ import {
 } from "recharts";
 import DashboardService from "../../services/DashboardService";
 import { formatNumber, formatRevenue } from "../../utils/Formatter";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +36,7 @@ function Dashboard() {
   const [recentActivities, setRecentActivities] = useState([]);
   const [topTrainers, setTopTrainers] = useState([]);
   const [error, setError] = useState(null);
+  const navigate = useNavigate(); // Hook để điều hướng
 
   const fetchStatistics = useCallback(async () => {
     try {
@@ -98,7 +100,11 @@ function Dashboard() {
           <Row>
             {/* Tổng số học viên */}
             <Col md={6} className="mb-4">
-              <Card className="text-center shadow-sm">
+              <Card
+                className="text-center shadow-sm"
+                onClick={() => navigate("/admin/student-management")}
+                style={{ cursor: "pointer" }}
+              >
                 <Card.Body className="d-flex p-3">
                   <div className="bg-primary px-3 py-2 rounded-2">
                     <i className="bi bi-people display-6 text-white"></i>
@@ -121,7 +127,11 @@ function Dashboard() {
 
             {/* Tổng vé đã bán */}
             <Col md={6} className="mb-4">
-              <Card className="text-center shadow-sm">
+              <Card
+                className="text-center shadow-sm"
+                onClick={() => navigate("/admin/ticket/ticket-management")}
+                style={{ cursor: "pointer" }}
+              >
                 <Card.Body className="d-flex p-3">
                   <div className="bg-success px-3 py-2 rounded-2">
                     <i className="bi bi-card-checklist display-6 text-white"></i>
@@ -145,7 +155,11 @@ function Dashboard() {
             {/* Tổng doanh thu năm hiện tại */}
             <Col md={6} className="mb-4">
               <Card className="text-center shadow-sm">
-                <Card.Body className="d-flex p-3">
+                <Card.Body
+                  className="d-flex p-3"
+                  onClick={() => navigate("/admin/order-management")}
+                  style={{ cursor: "pointer" }}
+                >
                   <div className="bg-warning px-3 py-2 rounded-2">
                     <i className="bi bi-coin display-6 text-white"></i>
                   </div>
@@ -167,7 +181,11 @@ function Dashboard() {
 
             {/* Tổng số đơn hàng */}
             <Col md={6} className="mb-4">
-              <Card className="text-center shadow-sm">
+              <Card
+                className="text-center shadow-sm"
+                onClick={() => navigate("/admin/order-management")}
+                style={{ cursor: "pointer" }}
+              >
                 <Card.Body className="d-flex p-3">
                   <div className="bg-primary px-3 py-2 rounded-2">
                     <i className="bi bi-cart-check display-6 text-white"></i>
