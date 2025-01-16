@@ -421,7 +421,7 @@ const ClassManagement = () => {
   // _____________END TIMESLOT______________
 
   const modalContent = statusFunction.isViewDetail ? (
-    <ClassDetail classId={formData.id} />
+    <ClassDetail classId={formData.id} maxStudents={formData.maxStudents} />
   ) : (
     <div className="row">
       <div className="col-md-6 mb-3">

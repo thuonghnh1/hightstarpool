@@ -4,10 +4,12 @@ import { Helmet } from "react-helmet-async";
 import ClassService from "../../services/ClassService";
 import ModalAttendanceStudent from "./ModalAttendanceStudent";
 
-const ClassDetail = ({ classId }) => {
+const ClassDetail = ({ classId, maxStudents }) => {
   const [enrollments, setEnrollments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedEnrollment, setSelectedEnrollment] = useState({});
+
+  console.log(maxStudents);
 
   useEffect(() => {
     if (classId) {
@@ -49,34 +51,39 @@ const ClassDetail = ({ classId }) => {
           Chưa có học viên nào tham gia lớp học!
         </p>
       ) : (
-        <Table striped hover>
-          <thead>
-            <tr>
-              <th>Mã vào lớp</th>
-              <th>Mã học viên</th>
-              <th>Tên học viên</th>
-              {/* <th>Số buổi vắng</th> */}
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {enrollments.map((item) => (
-              <tr
-                key={item.enrollmentId}
-                style={{ cursor: "pointer" }}
-                onClick={() => handleShowModal(item.classId, item.studentId)}
-              >
-                <td>{item.enrollmentId}</td>
-                <td>{item.studentId}</td>
-                <td>{item.studentName}</td>
-                {/* <td>{item.status}</td> */}
-                <td className="text-center text-primary text-nowrap">
-                  <i className="bi bi-card-list me-1"></i> Xem chi tiết
-                </td>
+        <>
+          <Table striped hover>
+            <thead>
+              <tr>
+                <th>Mã vào lớp</th>
+                <th>Mã học viên</th>
+                <th>Tên học viên</th>
+                {/* <th>Số buổi vắng</th> */}
+                <th></th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {enrollments.map((item) => (
+                <tr
+                  key={item.enrollmentId}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleShowModal(item.classId, item.studentId)}
+                >
+                  <td>{item.enrollmentId}</td>
+                  <td>{item.studentId}</td>
+                  <td>{item.studentName}</td>
+                  {/* <td>{item.status}</td> */}
+                  <td className="text-center text-primary text-nowrap">
+                    <i className="bi bi-card-list me-1"></i> Xem chi tiết
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          <div className="fw-bold ms-1">
+            Sỉ số: {enrollments.length} / {maxStudents}
+          </div>
+        </>
       )}
 
       {/* Modal hiển thị điểm danh cho enrollment được chọn */}
