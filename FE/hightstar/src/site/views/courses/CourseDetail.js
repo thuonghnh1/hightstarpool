@@ -13,6 +13,7 @@ import SiteService from "../../services/SiteService";
 import { Helmet } from "react-helmet-async";
 import { UserContext } from "../../../contexts/UserContext";
 import Reviews from "../reviews/Reviews";
+import ModalAdvisory from "./ModalAdvisory";
 
 const CourseDetail = () => {
   const { user, loading } = useContext(UserContext);
@@ -22,6 +23,7 @@ const CourseDetail = () => {
   const [loadingPage, setLoadingPage] = useState(false);
   const [avgRating, setAvgRating] = useState(0);
   const [reviews, setReviews] = useState([]);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     // Nếu không có course từ state, lấy dữ liệu từ API
@@ -84,6 +86,10 @@ const CourseDetail = () => {
     }
     return stars;
   };
+
+  const handleOpenModal = () => setShowModal(true);
+
+  const handleCloseModal = () => setShowModal(false);
 
   return (
     <>
@@ -178,7 +184,7 @@ const CourseDetail = () => {
                     <Button
                       variant="primary"
                       className="rounded-1 px-5"
-                      onClick={() => alert("Đăng ký khóa học!")}
+                      onClick={handleOpenModal}
                     >
                       Tư vấn ngay
                     </Button>
@@ -193,6 +199,13 @@ const CourseDetail = () => {
                 itemId={courseId || course.id}
                 setReviews={setReviews}
                 userId={user?.userId || null}
+              />
+
+              <ModalAdvisory
+                courseId={course.id}
+                courseName={course.courseName}
+                show={showModal}
+                onClose={handleCloseModal}
               />
             </Container>
           </div>

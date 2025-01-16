@@ -234,7 +234,6 @@ const StudentManagement = () => {
           toast.success("Xóa thành công!");
         })
         .catch(() => {
-          toast.error("Đã xảy ra lỗi khi xóa.");
         })
         .finally(() => {
           setIsLoading(false);

@@ -235,17 +235,11 @@ function Header() {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu className="m-0">
-                  <Dropdown.Item as={NavLink} to="/myCourse">
-                    Khóa học của tôi
+                  <Dropdown.Item as={NavLink} to="/my-class">
+                    Lớp học đã tham gia
                   </Dropdown.Item>
                   <Dropdown.Item as={NavLink} to="/schedule">
                     Lịch học
-                  </Dropdown.Item>
-                  <Dropdown.Item as={NavLink} to="/studyHistory">
-                    Lịch sử học tập
-                  </Dropdown.Item>
-                  <Dropdown.Item as={NavLink} to="/studyHistory">
-                    Đánh giá & Nhận xét
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>

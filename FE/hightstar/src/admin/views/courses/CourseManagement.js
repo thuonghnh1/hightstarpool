@@ -246,7 +246,6 @@ const handleReset = () => {
       setCourseData(courseData.filter((course) => course.id !== deleteId));
       toast.success("Xóa thành công!");
     } catch (error) {
-      toast.error("Đã xảy ra lỗi khi xóa.");
     } finally {
       setIsLoading(false); // Kết thúc quá trình tải
     }

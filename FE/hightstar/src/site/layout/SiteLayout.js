@@ -15,6 +15,7 @@ import PrivateRoute from "../../common/PrivateRoute";
 import ShoppingCart from "../views/shopping-carts/ShoppingCart";
 import { CartProvider } from "../../contexts/CartContext";
 import BoxContact from "../components/BoxContact";
+import MyClass from "../views/study/MyClass";
 
 const SiteLayout = () => {
   return (
@@ -40,6 +41,22 @@ const SiteLayout = () => {
                   </div>
                   <div className="p-5">
                     <MyProfile />
+                  </div>
+                </div>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/my-class"
+            element={
+              <PrivateRoute roles={["ADMIN", "EMPLOYEE", "TRAINER", "USER"]}>
+                <div className="bg-body-secondary">
+                  <div className="container-fluid bg-primary py-5 hero-header">
+                    <div className="container py-1"></div>
+                  </div>
+                  <div>
+                    <MyClass />
                   </div>
                 </div>
               </PrivateRoute>

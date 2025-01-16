@@ -45,7 +45,7 @@ const PrintComponent = forwardRef((props, ref) => {
       console.log("In thành công!");
     } catch (error) {
       console.error("Lỗi khi in:", error);
-      toast.error("Có lỗi xảy ra khi in!");
+      // toast.error("Có lỗi xảy ra khi in!");
     } finally {
       // Ngắt kết nối QZ Tray
       await disconnectFromQZ();

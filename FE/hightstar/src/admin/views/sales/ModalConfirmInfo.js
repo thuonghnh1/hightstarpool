@@ -8,6 +8,7 @@ import StudentService from "../../services/StudentService";
 import Select from "react-select";
 import ClassService from "../../services/ClassService";
 import EnrollmentService from "../../services/EnrollmentService";
+import SwimmingTicket from "./SwimmingTicket";
 
 const ModalConfirmInfo = ({
   show,
@@ -47,9 +48,10 @@ const ModalConfirmInfo = ({
   const [studentSelected, setStudentSelected] = useState({
     fullName: "",
     nickname: "",
-    age: "",
-    gender: "",
+    age: 0,
+    gender: true,
     note: "",
+    id: "",
   });
 
   const fetchClassList = useCallback(async () => {
@@ -125,7 +127,9 @@ const ModalConfirmInfo = ({
 
       const studentOptions = studentList.map((student) => ({
         value: student.id,
-        label: `#${student.id}: ${student.fullName} <${student.nickname}> (${student.age} tuổi)`,
+        label: `#${student.id}: ${student.fullName} ${
+          student.nickname ? `<${student.nickname}>` : ""
+        } (${student.age} tuổi)`,
       }));
       setListStudentOption(studentOptions);
     } catch (error) {
@@ -154,7 +158,6 @@ const ModalConfirmInfo = ({
     handleCloseModal("modalConfirmInfo");
   };
   const handleCloseModalSelectStudent = () => {
-    console.log(formData);
     setShowModalSelectStudent(false);
     handleShowModal("modalConfirmInfo");
   };
@@ -266,7 +269,6 @@ const ModalConfirmInfo = ({
   const handleInputChange = (key, value) => {
     setFormData({ ...formData, [key]: value });
     validateField(key, value);
-    console.log(formData);
   };
 
   // Hiển thị form theo từng bước
@@ -348,6 +350,25 @@ const ModalConfirmInfo = ({
     }
   };
 
+  const handleTicketLogic = async (createdTicket) => {
+    try {
+      // Render vé bơi
+      const ticketComponent = (
+        <SwimmingTicket
+          ticketData={createdTicket}
+          studentName={formData.studentFullName}
+          courseName={cartItems[0].name}
+        />
+      );
+
+      // In vé bơi
+      await printRef.current.printTicket(ticketComponent);
+    } catch (error) {
+      console.error("Lỗi khi in vé:", error);
+      throw error;
+    }
+  };
+
   // Xử lý khi click bước tiếp theo
   const handleContinue = async () => {
     if (validateStep()) {
@@ -369,6 +390,7 @@ const ModalConfirmInfo = ({
           note: formData.note,
         },
         classId: formData.classId,
+        studentId: formData.studentId,
         invoice: invoiceData, // Hóa đơn từ component cha
       };
 
@@ -426,13 +448,27 @@ const ModalConfirmInfo = ({
           // Gọi API
           setLoading(true);
           const createdEnrollment = await EnrollmentService.createEnrollment({
-            studentId: createdStudent.id || studentSelected.id,
+            studentId: createdStudent.id || formData.studentId,
             classId: payload.classId,
           }); // Thêm học viên vào lớp học tương ứng
           setCreatedEnrollment(createdEnrollment);
-          processInvoice(createdUser.id ? createdUser : buyer); // in hóa đơn
-          clearForm();
-          onHide();
+          if (createdEnrollment.ticket) {
+            try {
+              await handleTicketLogic(createdEnrollment.ticket); // In vé bơi
+            } catch (error) {
+              console.error("Lỗi khi in vé bơi:", error);
+              toast.error("Không thể in vé bơi, vui lòng thử lại sau!");
+            }
+
+            try {
+              await processInvoice(createdUser.id ? createdUser : buyer); // In hóa đơn
+              clearForm();
+              onHide();
+            } catch (error) {
+              console.error("Lỗi khi in hóa đơn:", error);
+              toast.error("Không thể in hóa đơn, vui lòng thử lại sau!");
+            }
+          }
         } catch (error) {
           console.error("Lỗi khi xác nhận đăng ký: ", error);
         } finally {

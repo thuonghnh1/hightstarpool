@@ -58,21 +58,6 @@ public class ClassServiceImpl implements ClassService {
     private final TicketRepository ticketRepository;
 
     @Override
-    public List<StudentEnrollmentDTO> getEnrolledStudentsByClassId(Long classId) {
-        // Lấy danh sách ClassStudentEnrollment từ DB
-        List<ClassStudentEnrollment> enrollments = enrollmentRepository.findByClassEntityClassId(classId);
-
-        // Chuyển sang DTO để trả về
-        return enrollments.stream().map(enrollment -> {
-            StudentEnrollmentDTO dto = new StudentEnrollmentDTO();
-            dto.setStudentId(enrollment.getStudent().getStudentId());
-            dto.setStudentName(enrollment.getStudent().getFullName());
-            dto.setStatus(enrollment.getStatus());
-            return dto;
-        }).collect(Collectors.toList());
-    }
-
-    @Override
     @Transactional
     public List<ClassDTO> getAllClasses() {
         List<ClassEntity> classEntities = classRepository.findAll();
@@ -93,6 +78,43 @@ public class ClassServiceImpl implements ClassService {
                         "Không tìm thấy lớp học với ID " + classId, ErrorCode.CLASS_NOT_FOUND));
 
         return mapToClassDTO(classEntity);
+    }
+
+    @Override
+    public List<StudentEnrollmentDTO> getEnrolledStudentsByClassId(Long classId) {
+        // Lấy danh sách ClassStudentEnrollment từ DB
+        List<ClassStudentEnrollment> enrollments = enrollmentRepository.findByClassEntityClassId(classId);
+
+        // Chuyển sang DTO để trả về
+        return enrollments.stream().map(enrollment -> {
+            StudentEnrollmentDTO dto = new StudentEnrollmentDTO();
+            dto.setStudentId(enrollment.getStudent().getStudentId());
+            dto.setStudentName(enrollment.getStudent().getFullName());
+            dto.setStatus(enrollment.getStatus());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public List<ClassDTO> getEnrolledClassesByStudentId(Long studentId) {
+        // Fetch enrollments by student ID
+        List<ClassStudentEnrollment> enrollments = classStudentEnrollmentRepository.findByStudentStudentId(studentId);
+
+        // Map enrollments to ClassDTO
+        List<ClassDTO> classDTOs = new ArrayList<>();
+        for (ClassStudentEnrollment enrollment : enrollments) {
+            ClassEntity classEntity = enrollment.getClassEntity();
+            ClassDTO classDTO = mapToClassDTO(classEntity);
+            classDTOs.add(classDTO);
+        }
+
+        return classDTOs;
+    }
+
+    @Override
+    public String getCourseNameByEnrollmentId(Long classStudentEnrollmentId) {
+        return classStudentEnrollmentRepository.findCourseNameByEnrollmentId(classStudentEnrollmentId);
     }
 
     @Override
@@ -500,17 +522,17 @@ public class ClassServiceImpl implements ClassService {
                 .findByClassEntityClassId(classEntity.getClassId());
 
         for (ClassStudentEnrollment enrollment : enrollments) {
-            // Tìm tất cả vé liên quan đến đăng ký này
-            List<Ticket> tickets = ticketRepository.findByClassStudentEnrollment(enrollment);
+            // Tìm vé liên quan đến đăng ký này
+            Ticket ticket = ticketRepository.findByClassStudentEnrollment(enrollment)
+                    .orElseThrow(
+                            () -> new AppException("Không tìm thấy vé cho đăng ký này!", ErrorCode.TICKET_NOT_FOUND));
 
-            for (Ticket ticket : tickets) {
-                // Cập nhật ngày bắt đầu và kết thúc của vé
-                ticket.setIssueDate(classEntity.getStartDate().atStartOfDay());
-                ticket.setExpiryDate(classEntity.getEndDate().atStartOfDay());
+            // Cập nhật ngày bắt đầu và kết thúc của vé
+            ticket.setIssueDate(classEntity.getStartDate().atStartOfDay());
+            ticket.setExpiryDate(classEntity.getEndDate().atStartOfDay());
 
-                // Lưu vé đã cập nhật
-                ticketRepository.save(ticket);
-            }
+            // Lưu vé đã cập nhật
+            ticketRepository.save(ticket);
         }
     }
 

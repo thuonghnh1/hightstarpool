@@ -32,7 +32,7 @@ const formatProductData = (data) => {
     name: item.productName,
     type: item.categoryName, // Thay đổi nếu cần
     stock: item.stock,
-    price: item.price,
+    price: item.price - item.price * item.discount,
   }));
 };
 

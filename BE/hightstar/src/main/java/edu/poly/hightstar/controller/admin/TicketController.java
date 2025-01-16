@@ -31,6 +31,14 @@ public class TicketController {
         return ResponseEntity.ok(ticket);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER', 'USER')")
+    @GetMapping("/ticket-by-class-student")
+    public ResponseEntity<TicketDTO> getTicketByClassIdAndStudentId(@RequestParam Long classId,
+            @RequestParam Long studentId) {
+        TicketDTO ticket = ticketService.getTicketByClassIdAndStudentId(classId, studentId);
+        return ResponseEntity.ok(ticket);
+    }
+
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @PostMapping
     public ResponseEntity<TicketDTO> createTicket(@RequestBody TicketDTO ticketDTO) throws Exception {

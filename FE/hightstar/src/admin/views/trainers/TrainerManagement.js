@@ -233,9 +233,7 @@ const TrainerManagement = () => {
           );
           toast.success("Xóa thành công!");
         })
-        .catch(() => {
-          toast.error("Đã xảy ra lỗi khi xóa.");
-        })
+        .catch(() => {})
         .finally(() => {
           setIsLoading(false);
         });

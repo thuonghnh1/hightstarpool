@@ -146,7 +146,7 @@ const TicketCheck = () => {
         id: attendance.id,
         checkIn: attendance.checkInTime || "Chưa vào",
         checkout: attendance.checkOutTime || "Chưa ra",
-        studentId: attendance.studentId,
+        classStudentEnrollmentId: attendance.classStudentEnrollmentId,
         ticketId: attendance.ticketId,
         penalty: attendance.penaltyAmount
           ? `${attendance.penaltyAmount}đ`
@@ -205,10 +205,8 @@ const TicketCheck = () => {
                     <tr>
                       <th>Mã điểm danh</th>
                       <th>Giờ vào</th>
-                      <th>Giờ ra</th>
-                      <th>Mã học viên</th>
+                      <th>Mã vào lớp của học viên</th>
                       <th>Mã vé</th>
-                      <th>Tiền phạt</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -216,12 +214,10 @@ const TicketCheck = () => {
                       <tr key={index}>
                         <td className="text-nowrap">{guest.id}</td>
                         <td className="text-nowrap">{guest.checkIn}</td>
-                        <td className="text-nowrap">{guest.checkout}</td>
                         <td className="text-nowrap">
-                          {guest.studentId || "N/A"}
+                          {guest.classStudentEnrollmentId || "N/A"}
                         </td>
                         <td className="text-nowrap">{guest.ticketId}</td>
-                        <td className="text-nowrap">{guest.penalty}</td>
                       </tr>
                     ))}
                   </tbody>

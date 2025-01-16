@@ -287,7 +287,6 @@ const ClassManagement = () => {
       setClassData(classData.filter((classItem) => classItem.id !== deleteId));
       toast.success("Xóa lớp học thành công!");
     } catch (error) {
-      toast.error("Đã xảy ra lỗi khi xóa lớp học.");
     } finally {
       setIsLoading(false);
     }

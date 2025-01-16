@@ -1,6 +1,6 @@
 import React from "react";
 
-const SwimmingTicket = ({ ticketData, buyerName }) => {
+const SwimmingTicket = ({ ticketData, studentName, courseName }) => {
   if (!ticketData) {
     return <p>Không có dữ liệu vé!</p>;
   }
@@ -13,7 +13,11 @@ const SwimmingTicket = ({ ticketData, buyerName }) => {
       ? "#0056b3" // Xanh đậm cho vé dùng một lần
       : ticketType === "WEEKLY_TICKET"
       ? "#157347" // Xanh lá cho vé tuần
-      : "#ffc107"; // Vàng cho vé tháng
+      : ticketType === "MONTHLY_TICKET"
+      ? "#ffc107" // Vàng cho vé tháng
+      : ticketType === "STUDENT_TICKET"
+      ? "#dc3545"
+      : "#0000"; // Đỏ cho vé học viên, mặc định là màu đen
 
   return (
     <div
@@ -66,17 +70,21 @@ const SwimmingTicket = ({ ticketData, buyerName }) => {
             0987654321
           </span>
         </div>
-        <div style={{ textAlign: "center"}}>
+        <div style={{ textAlign: "center" }}>
           <h3 style={{ margin: "0", fontWeight: "bold", color: "white" }}>
             VÉ BƠI{" "}
             {ticketType === "ONETIME_TICKET"
               ? "DÙNG MỘT LẦN"
               : ticketType === "WEEKLY_TICKET"
               ? "THEO TUẦN"
-              : "THEO THÁNG"}
+              : ticketType === "MONTHLY_TICKET"
+              ? "THEO THÁNG"
+              : "DÀNH CHO HỌC VIÊN"}
           </h3>
           <p style={{ margin: "0", fontSize: "14px", color: "#eee" }}>
-            Dành cho khách bơi tự do - 2024
+            {ticketType === "STUDENT_TICKET"
+              ? `${courseName} - ${new Date().getFullYear()}`
+              : `Dành cho khách bơi tự do - ${new Date().getFullYear()}`}
           </p>
         </div>
 
@@ -90,7 +98,7 @@ const SwimmingTicket = ({ ticketData, buyerName }) => {
           <p style={{ fontSize: "14px", margin: "0" }}>
             <strong>Họ tên:</strong>
             <br />
-            {buyerName || "Không rõ"}
+            {studentName || "Không rõ"}
           </p>
           <p style={{ fontSize: "14px", margin: "0" }}>
             <strong>Ngày hết hạn:</strong>

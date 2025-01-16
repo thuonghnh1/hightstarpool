@@ -1,5 +1,6 @@
 package edu.poly.hightstar.service.impl;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -12,12 +13,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.poly.hightstar.domain.Attendance;
+import edu.poly.hightstar.domain.ClassStudentEnrollment;
 import edu.poly.hightstar.domain.Ticket;
 import edu.poly.hightstar.enums.TicketType;
 import edu.poly.hightstar.model.AttendanceDTO;
 import edu.poly.hightstar.model.QRCodeValidationResponse;
 import edu.poly.hightstar.model.TicketDTO;
 import edu.poly.hightstar.repository.AttendanceRepository;
+import edu.poly.hightstar.repository.ClassStudentEnrollmentRepository;
 import edu.poly.hightstar.repository.TicketRepository;
 import edu.poly.hightstar.service.AttendanceService;
 import edu.poly.hightstar.service.QRCodeValidationService;
@@ -31,6 +34,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final TicketRepository ticketRepository;
     private final QRCodeValidationService qrCodeValidationService;
+    private final ClassStudentEnrollmentRepository classStudentEnrollmentRepository;
 
     @Override
     @Transactional
@@ -285,6 +289,18 @@ public class AttendanceServiceImpl implements AttendanceService {
         Long classStudentEnrollmentId = ticketDTO.getClassStudentEnrollmentId();
         Long ticketId = ticketDTO.getTicketId();
         Date today = getCurrentDateWithoutTime();
+        LocalDate now = LocalDate.now();
+
+        ClassStudentEnrollment classStudentEnrollment = classStudentEnrollmentRepository
+                .findById(ticketDTO.getClassStudentEnrollmentId())
+                .orElseThrow(() -> new AppException("Khóa học sinh viên này không tồn tại!",
+                        ErrorCode.ENROLLMENT_NOT_FOUND));
+
+        // Kiểm tra nếu vé có ngày phát hành sau ngày hiện tại
+        if (classStudentEnrollment.getClassEntity().getStartDate().isAfter(now)) {
+            throw new AppException("Vé này chưa có hiệu lực. Vui lòng kiểm tra lại ngày phát hành!",
+                    ErrorCode.INVALID_OPERATION);
+        }
 
         // Bước 2: Tìm bản ghi điểm danh cho học viên hoặc khách bơi hôm nay
         Attendance attendance;
@@ -312,7 +328,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
                 // Lấy đối tượng Ticket từ repository
                 Ticket ticket = ticketRepository.findById(ticketId)
-                        .orElseThrow(() -> new AppException("Không tìm thấy vé với ID: " + ticketId,
+                        .orElseThrow(() -> new AppException("Không tìm thấy vé với mã: " + ticketId,
                                 ErrorCode.TICKET_NOT_FOUND));
 
                 attendance.setTicket(ticket);
@@ -341,7 +357,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
                 // Lấy đối tượng Ticket từ repository
                 Ticket ticket = ticketRepository.findById(ticketId)
-                        .orElseThrow(() -> new AppException("Không tìm thấy vé với ID: " + ticketId,
+                        .orElseThrow(() -> new AppException("Không tìm thấy vé với mã: " + ticketId,
                                 ErrorCode.TICKET_NOT_FOUND));
 
                 attendance.setTicket(ticket);

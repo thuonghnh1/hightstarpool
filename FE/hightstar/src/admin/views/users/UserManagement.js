@@ -238,9 +238,7 @@ const UserManagement = () => {
           setUserData(userData.filter((user) => user.id !== deleteId));
           toast.success("Xóa thành công!");
         })
-        .catch(() => {
-          toast.error("Đã xảy ra lỗi khi xóa.");
-        })
+        .catch(() => {})
         .finally(() => {
           setIsLoading(false);
         });

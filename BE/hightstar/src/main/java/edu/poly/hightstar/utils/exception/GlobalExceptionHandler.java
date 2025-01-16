@@ -1,5 +1,6 @@
 package edu.poly.hightstar.utils.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -20,6 +21,27 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, status);
     }
 
+    // Xử lý ngoại lệ DataIntegrityViolationException (Lỗi khóa ngoại)
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex,
+            WebRequest request) {
+        // Kiểm tra và xử lý lỗi khóa ngoại
+        if (ex.getMessage() != null && ex.getMessage().contains("foreign key constraint")) {
+            ErrorResponse errorResponse = new ErrorResponse(
+                    HttpStatus.CONFLICT.value(),
+                    "Không thể xóa vì bản ghi này đang liên kết với bảng khác!",
+                    ErrorCode.CONFLICT_ERROR);
+            return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+        }
+
+        // Xử lý các lỗi khác liên quan đến DataIntegrityViolationException
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Lỗi ràng buộc dữ liệu!",
+                ErrorCode.DATABASE_ERROR);
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     // Xử lý ngoại lệ không mong đợi
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex, WebRequest request) {
@@ -34,7 +56,8 @@ public class GlobalExceptionHandler {
     private HttpStatus getStatusByErrorCode(ErrorCode errorCode) {
         return switch (errorCode) {
             case INVALID_LOGIN, UNAUTHORIZED_ACCESS -> HttpStatus.UNAUTHORIZED;
-            case EMAIL_ALREADY_EXISTS, TICKET_IN_USE, PHONE_NUMBER_ALREADY_EXISTS, CONFLICT_ERROR, DUPLICATE_ENTRY, DUPLICATE_TIMESLOT ->
+            case EMAIL_ALREADY_EXISTS, TICKET_IN_USE, PHONE_NUMBER_ALREADY_EXISTS, CONFLICT_ERROR, DUPLICATE_ENTRY,
+                    DUPLICATE_TIMESLOT ->
                 HttpStatus.CONFLICT;
             case USER_NOT_FOUND, RESOURCE_NOT_FOUND, ORDER_NOT_FOUND, PRODUCT_NOT_FOUND, COURSE_NOT_FOUND,
                     STUDENT_NOT_FOUND, TRAINER_NOT_FOUND, DISCOUNT_NOT_FOUND, EMPLOYEE_NOT_FOUND, CATEGORY_NOT_FOUND,

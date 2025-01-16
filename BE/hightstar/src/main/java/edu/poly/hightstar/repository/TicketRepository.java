@@ -1,7 +1,6 @@
 package edu.poly.hightstar.repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -27,10 +26,10 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     // Lấy danh sách vé mới nhất theo ngày phát hành
     Page<Ticket> findAllByOrderByIssueDateDesc(Pageable pageable);
 
-    List<Ticket> findByClassStudentEnrollment(ClassStudentEnrollment enrollment);
-
     @Modifying
     @Transactional
     @Query("DELETE FROM Ticket t WHERE t.classStudentEnrollment.classStudentEnrollmentId = :enrollmentId")
     void deleteByClassStudentEnrollmentId(@Param("enrollmentId") Long enrollmentId);
+
+    Optional<Ticket> findByClassStudentEnrollment(ClassStudentEnrollment enrollment);
 }

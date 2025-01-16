@@ -158,7 +158,7 @@ export default function Home() {
       // Gọi API để gửi thông tin tư vấn.
       try {
         setLoadingPage(true);
-        SiteService.sendInfoRegister(formData);
+        await SiteService.sendInfoRegister(formData);
         handleResetForm();
         toast.success("Chúng tôi sẽ sớm liên hệ tư vấn cho bạn!");
       } finally {

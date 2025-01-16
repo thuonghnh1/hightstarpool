@@ -24,6 +24,10 @@ public interface ClassService {
     List<TrainerDTO> getAvailableTrainersForUpdate(List<Long> selectedTimeSlotIds, Long classId,
             LocalDate startDate);
 
+    String getCourseNameByEnrollmentId(Long classStudentEnrollmentId);
+
+    List<ClassDTO> getEnrolledClassesByStudentId(Long studentId);
+
     ClassDTO createClass(ClassRequest request);
 
     ClassDTO updateClass(Long classId, ClassRequest request);

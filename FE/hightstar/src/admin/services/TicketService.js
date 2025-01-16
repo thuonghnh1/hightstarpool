@@ -14,7 +14,11 @@ const getTickets = async () => {
 
     // So sánh ngày hết hạn và cập nhật trạng thái
     const status =
-      expiryDate < currentDate ? "EXPIRED" : ticket.ticketIsUsed ? "USED" : "ACTIVE";
+      expiryDate < currentDate
+        ? "EXPIRED"
+        : ticket.ticketIsUsed
+        ? "USED"
+        : "ACTIVE";
 
     return {
       ...ticket,
@@ -35,6 +39,21 @@ const getTicketById = async (id) => {
     issueDate: formatDateTimeToDMY(ticket.issueDate),
     expiryDate: formatDateTimeToDMY(ticket.expiryDate),
   };
+};
+
+// Hàm lấy một vé theo ID
+const getTicketByClassIdAndStudentId = async (classId, studentId) => {
+  const response = await axiosInstance.get(
+    `${API_URL}/ticket-by-class-student`,
+    {
+      params: {
+        classId,
+        studentId,
+      },
+    }
+  );
+
+  return response.data;
 };
 
 // Hàm thêm mới vé
@@ -69,6 +88,7 @@ const deleteTicket = async (id) => {
 const TicketService = {
   getTickets,
   getTicketById,
+  getTicketByClassIdAndStudentId,
   createTicket,
   updateTicket,
   deleteTicket,

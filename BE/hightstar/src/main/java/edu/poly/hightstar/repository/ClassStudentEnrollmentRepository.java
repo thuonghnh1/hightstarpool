@@ -1,8 +1,11 @@
 package edu.poly.hightstar.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import edu.poly.hightstar.domain.ClassEntity;
 import edu.poly.hightstar.domain.ClassStudentEnrollment;
@@ -20,5 +23,14 @@ public interface ClassStudentEnrollmentRepository extends JpaRepository<ClassStu
     List<ClassStudentEnrollment> findByStudentStudentId(Long studentId);
 
     boolean existsByStudentStudentIdAndClassEntityClassId(Long studentId, Long classId);
+
+    @Query("SELECT c.courseName " +
+            "FROM ClassStudentEnrollment cse " +
+            "JOIN cse.classEntity ce " +
+            "JOIN ce.course c " +
+            "WHERE cse.id = :classStudentEnrollmentId")
+    String findCourseNameByEnrollmentId(@Param("classStudentEnrollmentId") Long classStudentEnrollmentId);
+
+    Optional<ClassStudentEnrollment> findByClassEntity_ClassIdAndStudent_StudentId(Long classId, Long studentId);
 
 }

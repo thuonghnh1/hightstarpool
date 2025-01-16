@@ -30,7 +30,7 @@ public class StudentController {
                 : ResponseEntity.ok(students);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER', 'USER')")
     @GetMapping("/students-by-user/{userId}")
     public List<StudentDTO> getStudentsByUser(@PathVariable Long userId) {
         List<StudentDTO> students = studentService.getStudentsByUserId(userId);

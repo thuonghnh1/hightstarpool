@@ -17,4 +17,6 @@ public interface TicketService {
     void deleteTicket(Long id);
 
     TicketDTO getTicketByCode(String ticketCode);
+
+    TicketDTO getTicketByClassIdAndStudentId(Long classId, Long studentId);
 }

@@ -23,10 +23,7 @@ public class ClassController {
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     @PostMapping
     public ResponseEntity<ClassDTO> createClass(@RequestBody ClassRequest request) {
-        System.out.println("clc ----------------" + request);
-
         ClassDTO createdClass = classService.createClass(request);
-        System.out.println("clc1 ----------------" + request);
 
         return new ResponseEntity<>(createdClass, HttpStatus.CREATED);
     }
@@ -65,6 +62,21 @@ public class ClassController {
     public ResponseEntity<ClassDTO> getClassById(@PathVariable Long classId) {
         ClassDTO classDTO = classService.getClassById(classId);
         return new ResponseEntity<>(classDTO, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER', 'USER')")
+    @GetMapping("/enrollment/{classStudentEnrollmentId}/course-name")
+    public ResponseEntity<String> getCourseNameByEnrollmentId(
+            @PathVariable Long classStudentEnrollmentId) {
+        String courseName = classService.getCourseNameByEnrollmentId(classStudentEnrollmentId);
+        return ResponseEntity.ok(courseName);
+    }
+    
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER', 'USER')")
+    @GetMapping("/find-by-student/{studentId}")
+    public ResponseEntity<List<ClassDTO>> getEnrolledClassesByStudentId(@PathVariable Long studentId) {
+        List<ClassDTO> enrolledClasses = classService.getEnrolledClassesByStudentId(studentId);
+        return ResponseEntity.ok(enrolledClasses);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")

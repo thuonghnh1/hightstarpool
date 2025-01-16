@@ -98,6 +98,26 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public TicketDTO getTicketByClassIdAndStudentId(Long classId, Long studentId) {
+        // Tìm ClassStudentEnrollment dựa trên classId và studentId
+        ClassStudentEnrollment enrollment = classStudentEnrollmentRepository
+                .findByClassEntity_ClassIdAndStudent_StudentId(classId, studentId)
+                .orElseThrow(() -> new AppException("Không tìm thấy enrollment!", ErrorCode.ENROLLMENT_NOT_FOUND));
+
+        // Tìm vé dựa trên enrollment
+        Ticket ticket = ticketRepository.findByClassStudentEnrollment(enrollment)
+                .orElseThrow(() -> new AppException("Không tìm thấy vé!", ErrorCode.TICKET_NOT_FOUND));
+        TicketDTO ticketDTO = new TicketDTO();
+        BeanUtils.copyProperties(ticket, ticketDTO);
+        if (ticket.getClassStudentEnrollment() != null) {
+            ticketDTO.setClassStudentEnrollmentId(ticket.getClassStudentEnrollment().getClassStudentEnrollmentId());
+        } else {
+            ticketDTO.setClassStudentEnrollmentId(null);
+        }
+        return ticketDTO;
+    }
+
+    @Override
     @Transactional
     public TicketDTO createTicket(TicketDTO ticketDTO) throws WriterException, IOException {
         Ticket ticket = new Ticket();

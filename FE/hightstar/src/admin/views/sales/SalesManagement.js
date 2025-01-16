@@ -22,6 +22,8 @@ import Invoice from "./Invoice";
 import PrintComponent from "../../components/common/PrintComponent";
 import TicketService from "../../services/TicketService";
 import SwimmingTicket from "./SwimmingTicket";
+import ModalCreateQR from "../payments/ModalCreateQR";
+import ModalConfirmMethod from "./ModalConfirmMethod";
 
 const SalesManagement = () => {
   const [activeTab, setActiveTab] = useState("tickets");
@@ -39,12 +41,14 @@ const SalesManagement = () => {
   const [errorFields, setErrorFields] = useState("");
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState("");
   const printRef = useRef();
   // State dùng để quản lý trạng thái hiển thị của các modal
   const [modals, setModals] = useState({
     modalEnterPhone: false,
     modalConfirmInfo: false,
-    modal3: false,
+    modalCreateQR: false,
+    modalConfirmMethod: false,
   });
 
   useEffect(() => {
@@ -80,7 +84,15 @@ const SalesManagement = () => {
       : products;
 
   const handlePaymentClick = () => {
+    handleShowModal("modalConfirmMethod");
     setShowInvoice(true);
+  };
+
+  // Hàm callback khi giao dịch với mã QR hoàn tất
+  const handlePaymentComplete = async (status) => {
+    if (status) {
+      await handleConfirmPayment(status); // Thực hiện in hóa đơn và tạo vé
+    }
   };
 
   const handleCloseOffcanvas = () => setShowInvoice(false);
@@ -230,7 +242,7 @@ const SalesManagement = () => {
     // Dữ liệu cho Order
     const orderData = {
       total: calculateTotalPrice(),
-      paymentMethod: "UNKNOWN", // Mặc định là chưa xác định
+      paymentMethod: selectedMethod || "UNKNOWN", // Mặc định là chưa xác định
       notes,
       status: "COMPLETED",
       shippingAddress: "Tại quầy",
@@ -289,7 +301,6 @@ const SalesManagement = () => {
       acc[ticket.ticketType].push(ticket);
       return acc;
     }, {});
-    console.log(ticketsByType);
 
     // Duyệt qua từng loại vé
     Object.entries(ticketsByType).forEach(([ticketType, tickets]) => {
@@ -341,6 +352,7 @@ const SalesManagement = () => {
 
           // In vé bơi
           await printRef.current.printTicket(ticketComponent);
+          toast.success("In vé bơi thành công!");
         }
       }
 
@@ -351,73 +363,85 @@ const SalesManagement = () => {
     }
   };
 
-  const handleConfirmPayment = async () => {
+  const handleConfirmPayment = async (isPaymentComplete) => {
     const courses = cartItems.filter((item) => item.id.includes("KH"));
     const tickets = cartItems.filter((item) => item.id.includes("VB"));
     const products = cartItems.filter((item) => item.id.includes("SP"));
-
+    // Chuẩn bị dữ liệu hóa đơn
+    const invoice = prepareOrderData(
+      cartItems,
+      buyer,
+      selectedDiscount ? selectedDiscount.value : null
+    );
     try {
-      setIsLoading(true);
-      // Chuẩn bị dữ liệu hóa đơn
-      const invoice = prepareOrderData(
-        cartItems,
-        buyer,
-        selectedDiscount ? selectedDiscount.value : null
-      );
+      if (
+        // courses.length > 0 ||
+        isPaymentComplete === true ||
+        selectedMethod === "CASH"
+      ) {
+        setIsLoading(true);
 
-      // Xử lý vé bơi
-      if (tickets.length > 0) {
-        // Tạo vé bơi và lấy danh sách vé đã tạo
-        const createdTickets = await handleTicketsLogic(tickets);
+        // Xử lý vé bơi
+        if (tickets.length > 0) {
+          // Tạo vé bơi và lấy danh sách vé đã tạo
+          const createdTickets = await handleTicketsLogic(tickets);
 
-        // Cập nhật danh sách ticketId vào orderDetails
-        const updatedOrderDetails = updateOrderDetailsWithTickets(
-          invoice.orderDetails,
-          createdTickets
-        );
+          // Cập nhật danh sách ticketId vào orderDetails
+          const updatedOrderDetails = updateOrderDetailsWithTickets(
+            invoice.orderDetails,
+            createdTickets
+          );
 
-        // Gán lại orderDetails đã cập nhật vào invoice
-        invoice.orderDetails = updatedOrderDetails;
-      }
+          // Gán lại orderDetails đã cập nhật vào invoice
+          invoice.orderDetails = updatedOrderDetails;
+        }
 
-      // Xử lý khóa học
-      if (courses.length > 0) {
-        handleShowModal("modalConfirmInfo");
-        return;
-      }
+        // Xử lý khóa học
+        if (courses.length > 0) {
+          handleShowModal("modalConfirmInfo");
+          return;
+        }
 
-      // Gọi API tạo hóa đơn
-      const orderResponse = await SalesService.createInvoice(invoice);
-      if (orderResponse && orderResponse.id) {
-        const updatedInvoice = {
-          ...invoice,
-          order: {
-            ...invoice.order,
-            orderCode: orderResponse.id,
-          },
-        };
+        // Gọi API tạo hóa đơn
+        const orderResponse = await SalesService.createInvoice(invoice);
+        if (orderResponse && orderResponse.id) {
+          const updatedInvoice = {
+            ...invoice,
+            order: {
+              ...invoice.order,
+              orderCode: orderResponse.id,
+            },
+          };
 
-        setInvoiceData(updatedInvoice);
+          setInvoiceData(updatedInvoice);
 
-        // Render hóa đơn
-        const invoiceComponent = (
-          <Invoice
-            buyer={buyer}
-            cartItems={cartItems}
-            totalPrice={updatedInvoice.order.total}
-            discount={selectedDiscount}
-            date={new Date().toLocaleString()}
-            invoiceCode={updatedInvoice.order.orderCode}
-          />
-        );
+          // Render hóa đơn
+          const invoiceComponent = (
+            <Invoice
+              buyer={buyer}
+              cartItems={cartItems}
+              totalPrice={updatedInvoice.order.total}
+              discount={selectedDiscount}
+              date={new Date().toLocaleString()}
+              invoiceCode={updatedInvoice.order.orderCode}
+            />
+          );
 
-        // In hóa đơn
-        await printRef.current.printInvoice(invoiceComponent);
-        toast.success("Thanh toán thành công!");
-        clearPage();
-        if (products.length > 0) {
-          const data = await SalesService.fetchProducts(); // load lại sản phẩm để lấy số lượng mới
-          setProducts(data);
+          // In hóa đơn
+          await printRef.current.printInvoice(invoiceComponent);
+          toast.success("In hóa đơn thành công!");
+          clearPage();
+
+          if (products.length > 0) {
+            const data = await SalesService.fetchProducts(); // load lại sản phẩm để lấy số lượng mới
+            setProducts(data);
+          }
+        }
+      } else {
+        if (selectedMethod === "") {
+          handleShowModal("modalConfirmMethod");
+        } else if (selectedMethod === "BANK_TRANSFER") {
+          handleShowModal("modalCreateQR");
         }
       }
     } catch (error) {
@@ -849,7 +873,9 @@ const SalesManagement = () => {
         <div className="offcanvas-footer p-3 border-top">
           <button
             className="btn btn-success fw-bold w-100 text-uppercase"
-            onClick={handleConfirmPayment}
+            onClick={(isPaymentComplete) =>
+              handleConfirmPayment(isPaymentComplete)
+            }
             disabled={isLoading}
           >
             {isLoading ? (
@@ -924,6 +950,19 @@ const SalesManagement = () => {
         handleShowModal={handleShowModal}
         handleCloseModal={handleCloseModal}
       ></ModalConfirmInfo>
+
+      <ModalCreateQR
+        amountFromParent={invoiceData?.order?.total || ""}
+        onPaymentComplete={(status) => handlePaymentComplete(status)}
+        show={modals.modalCreateQR}
+        handleClose={() => handleCloseModal("modalCreateQR")}
+      />
+
+      <ModalConfirmMethod
+        show={modals.modalConfirmMethod}
+        handleClose={() => handleCloseModal("modalConfirmMethod")}
+        onSelectMethod={(method) => setSelectedMethod(method)}
+      />
 
       <PrintComponent ref={printRef} />
     </section>

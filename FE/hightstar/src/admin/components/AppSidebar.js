@@ -151,7 +151,7 @@ const AppSidebar = ({ isSidebarOpen }) => {
                 isActive ? "active-link" : "inactive-link"
               }
             >
-              <i className="me-2 bi bi-backpack2"></i> Đăng ký lớp học
+              <i className="me-2 bi bi-backpack2"></i> Đăng ký vào lớp
             </NavLink>
           </li>
         )}
