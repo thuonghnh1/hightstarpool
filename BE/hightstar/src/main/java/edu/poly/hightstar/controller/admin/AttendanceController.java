@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.poly.hightstar.model.AttendanceDTO;
 import edu.poly.hightstar.model.QRCodeValidationRequest;
+import edu.poly.hightstar.model.SessionAttendanceDTO;
 import edu.poly.hightstar.service.AttendanceService;
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +31,13 @@ public class AttendanceController {
     @GetMapping
     public List<AttendanceDTO> getAllAttendances() {
         return attendanceService.getAllAttendances();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER', 'USER')")
+    @GetMapping("/session-attendance-for-student")
+    public List<SessionAttendanceDTO> getSessionAttendanceForStudent(@RequestParam Long classId,
+            @RequestParam Long studentId) {
+        return attendanceService.getSessionAttendanceForStudent(classId, studentId);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")

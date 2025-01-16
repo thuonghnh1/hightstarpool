@@ -3,6 +3,7 @@ package edu.poly.hightstar.service;
 import java.util.List;
 
 import edu.poly.hightstar.model.AttendanceDTO;
+import edu.poly.hightstar.model.SessionAttendanceDTO;
 
 public interface AttendanceService {
     List<AttendanceDTO> getAllAttendances();
@@ -20,4 +21,6 @@ public interface AttendanceService {
     AttendanceDTO updateAttendance(Long id, AttendanceDTO attendanceDTO);
 
     void deleteAttendance(Long id);
+
+    List<SessionAttendanceDTO> getSessionAttendanceForStudent(Long classId, Long studentId);
 }

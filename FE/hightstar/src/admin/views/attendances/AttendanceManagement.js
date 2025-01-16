@@ -66,7 +66,7 @@ const AttendanceManagement = () => {
     { key: "checkInTime", label: "Thời gian vào" },
     { key: "checkOutTime", label: "Thời gian ra" },
     { key: "duration", label: "Thời gian bơi" },
-    { key: "classStudentEnrollmentId", label: "Mã vào lớp của học viên" },
+    { key: "studentId", label: "Mã vào lớp của học viên" },
     { key: "ticketId", label: "Mã vé" },
     { key: "penaltyAmount", label: "Tiền phạt" },
   ];

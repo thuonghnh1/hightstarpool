@@ -15,4 +15,7 @@ public interface ClassSessionRepository extends JpaRepository<ClassSession, Long
     Optional<ClassSession> findByClassEntityClassIdAndSessionDate(Long classId, LocalDate date);
 
     void deleteAllByClassEntity(ClassEntity classEntity);
+
+    // Tìm 1 phiên học theo classId + sessionDate
+    Optional<ClassSession> findByClassEntity_ClassIdAndSessionDate(Long classId, LocalDate sessionDate);
 }

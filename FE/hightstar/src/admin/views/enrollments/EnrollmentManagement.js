@@ -39,6 +39,7 @@ const EnrollmentManagement = () => {
     { key: "id", label: "ID" },
     { key: "classId", label: "Mã lớp học" },
     { key: "courseName", label: "Tên khóa học" },
+    { key: "studentId", label: "Mã học viên" },
     { key: "studentName", label: "Tên học viên" },
     { key: "status", label: "Trạng thái" },
     { key: "timeSlots", label: "Lịch học" },

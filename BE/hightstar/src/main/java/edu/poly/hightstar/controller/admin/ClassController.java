@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import edu.poly.hightstar.model.ClassDTO;
 import edu.poly.hightstar.model.ClassRequest;
+import edu.poly.hightstar.model.StudentEnrollmentDTO;
 import edu.poly.hightstar.model.TrainerDTO;
 import edu.poly.hightstar.service.ClassService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,14 @@ public class ClassController {
         ClassDTO createdClass = classService.createClass(request);
 
         return new ResponseEntity<>(createdClass, HttpStatus.CREATED);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    @GetMapping("/enrollments-by-class/{classId}")
+    public List<StudentEnrollmentDTO> getEnrollmentByClassId(@PathVariable Long classId) {
+        List<StudentEnrollmentDTO> enrollmentDTOs = classService.getEnrolledStudentsByClassId(classId);
+
+        return enrollmentDTOs;
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
@@ -71,7 +80,7 @@ public class ClassController {
         String courseName = classService.getCourseNameByEnrollmentId(classStudentEnrollmentId);
         return ResponseEntity.ok(courseName);
     }
-    
+
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE', 'TRAINER', 'USER')")
     @GetMapping("/find-by-student/{studentId}")
     public ResponseEntity<List<ClassDTO>> getEnrolledClassesByStudentId(@PathVariable Long studentId) {

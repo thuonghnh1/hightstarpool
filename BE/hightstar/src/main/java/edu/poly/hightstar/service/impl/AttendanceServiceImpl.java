@@ -2,9 +2,11 @@ package edu.poly.hightstar.service.impl;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -13,13 +15,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.poly.hightstar.domain.Attendance;
+import edu.poly.hightstar.domain.ClassSession;
 import edu.poly.hightstar.domain.ClassStudentEnrollment;
 import edu.poly.hightstar.domain.Ticket;
 import edu.poly.hightstar.enums.TicketType;
 import edu.poly.hightstar.model.AttendanceDTO;
 import edu.poly.hightstar.model.QRCodeValidationResponse;
+import edu.poly.hightstar.model.SessionAttendanceDTO;
 import edu.poly.hightstar.model.TicketDTO;
 import edu.poly.hightstar.repository.AttendanceRepository;
+import edu.poly.hightstar.repository.ClassSessionRepository;
 import edu.poly.hightstar.repository.ClassStudentEnrollmentRepository;
 import edu.poly.hightstar.repository.TicketRepository;
 import edu.poly.hightstar.service.AttendanceService;
@@ -35,6 +40,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final TicketRepository ticketRepository;
     private final QRCodeValidationService qrCodeValidationService;
     private final ClassStudentEnrollmentRepository classStudentEnrollmentRepository;
+    private final ClassSessionRepository classSessionRepository;
 
     @Override
     @Transactional
@@ -43,10 +49,10 @@ public class AttendanceServiceImpl implements AttendanceService {
             AttendanceDTO dto = new AttendanceDTO();
 
             if (attendance.getTicket() != null && attendance.getTicket().getClassStudentEnrollment() != null) {
-                dto.setClassStudentEnrollmentId(
-                        attendance.getTicket().getClassStudentEnrollment().getClassStudentEnrollmentId());
+                dto.setStudentId(
+                        attendance.getTicket().getClassStudentEnrollment().getStudent().getStudentId());
             } else {
-                dto.setClassStudentEnrollmentId(null);
+                dto.setStudentId(null);
             }
 
             // Set ticketId
@@ -67,10 +73,10 @@ public class AttendanceServiceImpl implements AttendanceService {
             AttendanceDTO dto = new AttendanceDTO();
 
             if (attendance.getTicket() != null && attendance.getTicket().getClassStudentEnrollment() != null) {
-                dto.setClassStudentEnrollmentId(
-                        attendance.getTicket().getClassStudentEnrollment().getClassStudentEnrollmentId());
+                dto.setStudentId(
+                        attendance.getTicket().getClassStudentEnrollment().getStudent().getStudentId());
             } else {
-                dto.setClassStudentEnrollmentId(null);
+                dto.setStudentId(null);
             }
 
             if (attendance.getTicket() != null) {
@@ -94,10 +100,10 @@ public class AttendanceServiceImpl implements AttendanceService {
         BeanUtils.copyProperties(attendance, attendanceDTO, "ticket");
 
         if (attendance.getTicket() != null && attendance.getTicket().getClassStudentEnrollment() != null) {
-            attendanceDTO.setClassStudentEnrollmentId(
-                    attendance.getTicket().getClassStudentEnrollment().getClassStudentEnrollmentId());
+            attendanceDTO.setStudentId(
+                    attendance.getTicket().getClassStudentEnrollment().getStudent().getStudentId());
         } else {
-            attendanceDTO.setClassStudentEnrollmentId(null);
+            attendanceDTO.setStudentId(null);
         }
 
         if (attendance.getTicket() != null) {
@@ -167,12 +173,6 @@ public class AttendanceServiceImpl implements AttendanceService {
             attendance.setTicket(ticket);
         }
 
-        // Log các giá trị quan trọng
-        System.out.println(
-                "Creating attendance with ClassStudentEnrollment ID: " + attendanceDTO.getClassStudentEnrollmentId());
-        System.out.println("Creating attendance with Ticket ID: " + attendanceDTO.getTicketId());
-        System.out.println("Creating attendance with Attendance Date: " + attendanceDTO.getAttendanceDate());
-
         // Lưu xuống DB
         Attendance createdAttendance = attendanceRepository.save(attendance);
 
@@ -181,10 +181,10 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         if (createdAttendance.getTicket() != null
                 && createdAttendance.getTicket().getClassStudentEnrollment() != null) {
-            createdAttendanceDTO.setClassStudentEnrollmentId(
-                    createdAttendance.getTicket().getClassStudentEnrollment().getClassStudentEnrollmentId());
+            createdAttendanceDTO.setStudentId(
+                    createdAttendance.getTicket().getClassStudentEnrollment().getStudent().getStudentId());
         } else {
-            createdAttendanceDTO.setClassStudentEnrollmentId(null);
+            createdAttendanceDTO.setStudentId(null);
         }
         createdAttendanceDTO.setTicketId(
                 createdAttendance.getTicket() != null ? createdAttendance.getTicket().getTicketId() : null);
@@ -256,10 +256,10 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         if (updatedAttendance.getTicket() != null
                 && updatedAttendance.getTicket().getClassStudentEnrollment() != null) {
-            updatedAttendanceDTO.setClassStudentEnrollmentId(
-                    updatedAttendance.getTicket().getClassStudentEnrollment().getClassStudentEnrollmentId());
+            updatedAttendanceDTO.setStudentId(
+                    updatedAttendance.getTicket().getClassStudentEnrollment().getStudent().getStudentId());
         } else {
-            updatedAttendanceDTO.setClassStudentEnrollmentId(null);
+            updatedAttendanceDTO.setStudentId(null);
         }
         updatedAttendanceDTO.setTicketId(
                 updatedAttendance.getTicket() != null ? updatedAttendance.getTicket().getTicketId() : null);
@@ -273,6 +273,60 @@ public class AttendanceServiceImpl implements AttendanceService {
             throw new AppException("Điểm danh này không tồn tại!", ErrorCode.ATTENDANCE_NOT_FOUND);
         }
         attendanceRepository.deleteById(id);
+    }
+
+    // Phương thức lấy danh sách tất cả session của 1 lớp
+    // kèm trạng thái có mặt/vắng mặt của 1 học viên
+    @Override
+    @Transactional
+    public List<SessionAttendanceDTO> getSessionAttendanceForStudent(Long classId, Long studentId) {
+        // 1. Lấy tất cả session của lớp
+        List<ClassSession> sessions = classSessionRepository.findByClassEntityClassId(classId);
+
+        // 2. Lấy tất cả Attendance của học viên này trong lớp
+        List<Attendance> attendanceList = attendanceRepository.findByClassIdAndStudentId(classId, studentId);
+
+        // 3. Gom Attendance vào Map<sessionId, Attendance>
+        Map<Long, Attendance> attendanceMap = attendanceList.stream()
+                .filter(a -> a.getClassSession() != null)
+                .collect(Collectors.toMap(a -> a.getClassSession().getSessionId(), a -> a));
+
+        // Lấy ngày hôm nay
+        LocalDate today = LocalDate.now();
+
+        // 4. Duyệt từng session
+        List<SessionAttendanceDTO> result = new ArrayList<>();
+        for (ClassSession session : sessions) {
+            SessionAttendanceDTO dto = new SessionAttendanceDTO();
+            dto.setSessionId(session.getSessionId());
+            dto.setSessionDate(session.getSessionDate());
+
+            // Kiểm tra sessionDate có ở tương lai hay không
+            if (session.getSessionDate().isAfter(today)) {
+                // Buổi học chưa diễn ra
+                dto.setPresent(null); // chưa học => null
+                dto.setCheckInTime(null);
+                dto.setCheckOutTime(null);
+            } else {
+                // Buổi học đã hoặc đang diễn ra (cùng ngày hoặc quá khứ)
+                Attendance att = attendanceMap.get(session.getSessionId());
+                if (att != null) {
+                    // Đã có attendance => "Có mặt"
+                    dto.setPresent(true);
+                    dto.setCheckInTime(att.getCheckInTime());
+                    dto.setCheckOutTime(att.getCheckOutTime());
+                } else {
+                    // Không có attendance => "Vắng mặt"
+                    dto.setPresent(false);
+                    dto.setCheckInTime(null);
+                    dto.setCheckOutTime(null);
+                }
+            }
+
+            result.add(dto);
+        }
+
+        return result;
     }
 
     @Override
@@ -291,8 +345,6 @@ public class AttendanceServiceImpl implements AttendanceService {
         Date today = getCurrentDateWithoutTime();
         LocalDate now = LocalDate.now();
 
-        System.out.println("------------Test1:" + ticketDTO);
-
         if (classStudentEnrollmentId != null) {
             ClassStudentEnrollment classStudentEnrollment = classStudentEnrollmentRepository
                     .findById(ticketDTO.getClassStudentEnrollmentId())
@@ -309,34 +361,54 @@ public class AttendanceServiceImpl implements AttendanceService {
         // Bước 2: Tìm bản ghi điểm danh cho học viên hoặc khách bơi hôm nay
         Attendance attendance;
         if (classStudentEnrollmentId != null) {
-            // Trường hợp học viên
+            // ------ TÌM HOẶC TẠO Attendance CHO HỌC VIÊN ------
+
+            // Bước 2.1: Tìm attendance hôm nay (chưa check-out) của học viên
             Optional<Attendance> optionalAttendance = attendanceRepository
-                    .findByClassStudentEnrollmentIdAndTicketIdAndAttendanceDate(classStudentEnrollmentId, ticketId,
-                            today);
+                    .findByClassStudentEnrollmentIdAndTicketIdAndAttendanceDate(
+                            classStudentEnrollmentId, ticketId, today);
 
             if (optionalAttendance.isPresent()) {
-                // Nếu đã có bản ghi điểm danh hôm nay
+                // Đã có attendance => check-out
                 attendance = optionalAttendance.get();
                 if (attendance.getCheckOutTime() != null) {
-                    throw new AppException("Vé đã được quét ra.", ErrorCode.INVALID_OPERATION);
+                    throw new AppException("Vé đã được quét ra (Check-out) trước đó.",
+                            ErrorCode.INVALID_OPERATION);
                 }
-                // Thực hiện check-out
-                attendance.setCheckOutTime(LocalTime.now()); // Sử dụng timestamp hiện tại
-                // Tính toán penaltyAmount nếu cần thiết (ví dụ: nếu check-out trễ)
-                // attendance.setPenaltyAmount(calculatePenalty(attendance));
+                attendance.setCheckOutTime(LocalTime.now());
+
             } else {
-                // Nếu chưa có bản ghi điểm danh hôm nay, thực hiện check-in
+                // ------ CHƯA CÓ => TẠO MỚI (Check-in) ------
                 attendance = new Attendance();
                 attendance.setAttendanceDate(today);
-                attendance.setCheckInTime(LocalTime.now()); // Sử dụng timestamp hiện tại
+                attendance.setCheckInTime(LocalTime.now());
 
-                // Lấy đối tượng Ticket từ repository
+                // Lấy Ticket
                 Ticket ticket = ticketRepository.findById(ticketId)
                         .orElseThrow(() -> new AppException("Không tìm thấy vé với mã: " + ticketId,
                                 ErrorCode.TICKET_NOT_FOUND));
-
                 attendance.setTicket(ticket);
-                attendance.setPenaltyAmount(0.0); // Khởi tạo penalty
+                attendance.setPenaltyAmount(0.0);
+
+                // --------------- TÌM PHIÊN HỌC HÔM NAY ----------------
+                // Lấy classId từ enrollment
+                ClassStudentEnrollment enrollment = classStudentEnrollmentRepository
+                        .findById(classStudentEnrollmentId)
+                        .orElseThrow(
+                                () -> new AppException("Không tìm thấy enrollmentId", ErrorCode.ENROLLMENT_NOT_FOUND));
+
+                Long classId = enrollment.getClassEntity().getClassId();
+                // Tìm session của lớp hôm nay
+                Optional<ClassSession> sessionOpt = classSessionRepository
+                        .findByClassEntity_ClassIdAndSessionDate(classId, now);
+
+                if (sessionOpt.isPresent()) {
+                    attendance.setClassSession(sessionOpt.get());
+                } else {
+                    // Nếu không có session hôm nay:
+                    throw new AppException("Hôm nay lớp không có buổi học!",
+                            ErrorCode.INVALID_OPERATION);
+                }
             }
         } else {
             // Trường hợp người bơi bình thường (classStudentEnrollmentId null)
@@ -379,10 +451,10 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         if (updatedAttendance.getTicket() != null
                 && updatedAttendance.getTicket().getClassStudentEnrollment() != null) {
-            attendanceDTO.setClassStudentEnrollmentId(
-                    updatedAttendance.getTicket().getClassStudentEnrollment().getClassStudentEnrollmentId());
+            attendanceDTO.setStudentId(
+                    updatedAttendance.getTicket().getClassStudentEnrollment().getStudent().getStudentId());
         } else {
-            attendanceDTO.setClassStudentEnrollmentId(null);
+            attendanceDTO.setStudentId(null);
         }
 
         attendanceDTO.setTicketId(

@@ -238,9 +238,9 @@ function Header() {
                   <Dropdown.Item as={NavLink} to="/my-class">
                     Lớp học đã tham gia
                   </Dropdown.Item>
-                  <Dropdown.Item as={NavLink} to="/schedule">
+                  {/* <Dropdown.Item as={NavLink} to="/schedule">
                     Lịch học
-                  </Dropdown.Item>
+                  </Dropdown.Item> */}
                 </Dropdown.Menu>
               </Dropdown>
               <NavLink to="/Contact" className="nav-item nav-link">

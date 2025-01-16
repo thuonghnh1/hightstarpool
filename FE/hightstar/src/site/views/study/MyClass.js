@@ -5,6 +5,7 @@ import StudentService from "../../../admin/services/StudentService";
 import ClassService from "../../../admin/services/ClassService";
 import ClassModal from "./ClassModal";
 import { formatDateToDMY } from "../../../admin/utils/FormatDate";
+import ModalAttendanceStudent from "../../../admin/views/class/ModalAttendanceStudent";
 
 const MyClass = () => {
   const { user } = useContext(UserContext);
@@ -12,7 +13,10 @@ const MyClass = () => {
   const [enrolledClasses, setEnrolledClasses] = useState({});
   const [activeTab, setActiveTab] = useState(null);
   const [selectedClass, setSelectedClass] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState({
+    modalDetail: false,
+    modalAttendance: false,
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -50,13 +54,23 @@ const MyClass = () => {
     setActiveTab(key);
   };
 
-  const handleRowClick = (classDetails) => {
+  const handleViewDetail = (classDetails) => {
     setSelectedClass(classDetails);
-    setShowModal(true);
+    setShowModal({ ...showModal, modalDetail: true });
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
+  const handleViewAttendance = (classDetails) => {
+    setSelectedClass(classDetails);
+    setShowModal({ ...showModal, modalAttendance: true });
+  };
+
+  const handleCloseModalDetail = () => {
+    setShowModal({ ...showModal, modalDetail: false });
+    setSelectedClass(null);
+  };
+
+  const handleCloseModalAttendance = () => {
+    setShowModal({ ...showModal, modalAttendance: false });
     setSelectedClass(null);
   };
 
@@ -131,16 +145,12 @@ const MyClass = () => {
                         <th className="text-nowrap">Ngày kết thúc</th>
                         <th className="text-nowrap">Trạng thái</th>
                         <th></th>
+                        <th></th>
                       </tr>
                     </thead>
                     <tbody>
                       {enrolledClasses[student.id].map((cls, index) => (
-                        <tr
-                          key={cls.id}
-                          onClick={() => handleRowClick(cls)}
-                          className="table-row-hover"
-                          style={{ cursor: "pointer" }}
-                        >
+                        <tr key={cls.id} className="table-row-hover">
                           <td className="text-nowrap">{index + 1}</td>
                           <td className="text-nowrap">{cls.courseName}</td>
                           <td className="text-nowrap">{cls.trainerName}</td>
@@ -153,9 +163,21 @@ const MyClass = () => {
                           <td className="text-nowrap">
                             {renderRowCustom(cls.status)}
                           </td>
-                          <td className="text-center text-primary text-nowrap">
+                          <td
+                            className="text-center text-primary text-nowrap"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => handleViewDetail(cls)}
+                          >
                             <i className="bi bi-card-list me-1"></i> Xem chi
                             tiết
+                          </td>
+                          <td
+                            className="text-center text-success text-nowrap"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => handleViewAttendance(cls)}
+                          >
+                            <i class="bi bi-check-square me-1"></i> Xem điểm
+                            danh
                           </td>
                         </tr>
                       ))}
@@ -175,14 +197,21 @@ const MyClass = () => {
       )}
 
       <ClassModal
-        show={showModal}
-        onHide={handleCloseModal}
+        show={showModal.modalDetail}
+        onHide={handleCloseModalDetail}
         classDetails={selectedClass}
         studentId={activeTab}
         studentName={
           students.find((student) => String(student.id) === String(activeTab))
             ?.fullName || "Không xác định"
         }
+      />
+
+      <ModalAttendanceStudent
+        classId={selectedClass?.id}
+        studentId={activeTab}
+        show={showModal.modalAttendance}
+        handleClose={handleCloseModalAttendance}
       />
     </div>
   );

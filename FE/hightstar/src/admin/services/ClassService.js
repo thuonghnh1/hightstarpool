@@ -62,12 +62,29 @@ const getCourseNameByEnrollmentId = async (classStudentEnrollmentId) => {
 // Lấy tất cả lớp đã đăng ký của học viên
 const getEnrolledClassesByStudent = async (studentId) => {
   try {
-    const response = await axiosInstance.get(`${API_URL}/find-by-student/${studentId}`);
+    const response = await axiosInstance.get(
+      `${API_URL}/find-by-student/${studentId}`
+    );
     return response.data;
   } catch (error) {
     handleError(
       error,
       `Lỗi khi lấy danh sách lớp đã đăng ký của học viên với ID: ${studentId}`
+    );
+  }
+};
+
+// Lấy tất cả bản đăng ký của 1 lớp học cụ thể
+const getEnrollmentsByClassId = async (classId) => {
+  try {
+    const response = await axiosInstance.get(
+      `${API_URL}/enrollments-by-class/${classId}`
+    );
+    return response.data;
+  } catch (error) {
+    handleError(
+      error,
+      `Lỗi khi lấy danh sách bản đăng ký của lớp học với ID: ${classId}`
     );
   }
 };
@@ -155,6 +172,7 @@ const ClassService = {
   getClassById,
   getCourseNameByEnrollmentId,
   getEnrolledClassesByStudent,
+  getEnrollmentsByClassId,
   getAvailableClassesForCourse,
   createClass,
   updateClass,

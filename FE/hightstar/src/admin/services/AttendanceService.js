@@ -37,6 +37,25 @@ const getAttendancesWithoutCheckOut = async () => {
   }
 };
 
+// Hàm lấy danh sách điểm danh của học viên ở các buổi học trong 1 lớp học
+const getSessionAttendanceForStudent = async (classId, studentId) => {
+  try {
+    const response = await axiosInstance.get(
+      `${API_URL}/session-attendance-for-student`,
+      {
+        params: {
+          classId,
+          studentId,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(`Lỗi khi lấy danh sách điểm danh`, error);
+    throw error;
+  }
+};
+
 // Hàm lấy một điểm danh theo ID
 const getAttendanceById = async (id) => {
   try {
@@ -99,6 +118,7 @@ const scanQRCode = async (ticketCode) => {
 const AttendanceService = {
   getAttendances,
   getAttendancesWithoutCheckOut,
+  getSessionAttendanceForStudent,
   getAttendanceById,
   createAttendance,
   updateAttendance,

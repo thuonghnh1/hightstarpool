@@ -9,6 +9,7 @@ import Select from "react-select"; // thư viện tạo select có hỗ trợ se
 import { formatDateToDMY, formatDateToISO } from "../../utils/FormatDate";
 import CourseService from "../../services/CourseService";
 import TimeSlotService from "../../services/TimeSlotService";
+import ClassDetail from "./ClassDetail";
 
 const ClassManagement = () => {
   // State lưu data từ API
@@ -32,7 +33,7 @@ const ClassManagement = () => {
     btnAdd: true,
     btnEdit: true,
     btnDelete: true,
-    btnDetail: false,
+    btnDetail: true,
     btnSetting: false,
   };
 
@@ -235,6 +236,13 @@ const ClassManagement = () => {
     setErrorFields({});
   };
 
+  const handleViewDetail = async (item) => {
+    updateStatus({ isAdd: false, isEditing: false, isViewDetail: true });
+    setFormData({
+      ...item,
+    });
+  };
+
   const handleSaveItem = async () => {
     if (!validateForm()) return false;
 
@@ -316,7 +324,7 @@ const ClassManagement = () => {
 
       // Call API
       const trainers = await ClassService.getAvailableTrainers(
-        formData.timeSlots,
+        formData.timeSlots.map((timeSlot) => timeSlot.id),
         classId,
         formData.startDate
       );
@@ -341,12 +349,15 @@ const ClassManagement = () => {
 
   // Gọi fetchAvailableTrainers mỗi khi timeSlots thay đổi
   useEffect(() => {
-    fetchAvailableTrainers();
+    if (!statusFunction.isViewDetail) {
+      fetchAvailableTrainers();
+    }
   }, [
     formData.timeSlots,
     areAllTimeSlotsSelected,
     fetchAvailableTrainers,
     formData.startDate,
+    statusFunction.isViewDetail,
   ]);
 
   // Hàm xử lý thay đổi số buổi học
@@ -409,7 +420,9 @@ const ClassManagement = () => {
 
   // _____________END TIMESLOT______________
 
-  const modalContent = (
+  const modalContent = statusFunction.isViewDetail ? (
+    <ClassDetail classId={formData.id} />
+  ) : (
     <div className="row">
       <div className="col-md-6 mb-3">
         <Form.Group controlId="formCourse">
@@ -570,6 +583,7 @@ const ClassManagement = () => {
             onEdit={handleEdit}
             handleSaveItem={handleSaveItem}
             onDelete={handleDelete}
+            onViewDetail={handleViewDetail}
             isLoading={isLoading}
             statusFunction={statusFunction}
             onResetStatus={handleResetStatus}

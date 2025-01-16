@@ -88,8 +88,11 @@ public class ClassServiceImpl implements ClassService {
         // Chuyển sang DTO để trả về
         return enrollments.stream().map(enrollment -> {
             StudentEnrollmentDTO dto = new StudentEnrollmentDTO();
+            dto.setEnrollmentId(enrollment.getClassStudentEnrollmentId());
             dto.setStudentId(enrollment.getStudent().getStudentId());
             dto.setStudentName(enrollment.getStudent().getFullName());
+            dto.setClassId(enrollment.getClassEntity().getClassId());
+            dto.setCourseName(enrollment.getClassEntity().getCourse().getCourseName());
             dto.setStatus(enrollment.getStatus());
             return dto;
         }).collect(Collectors.toList());

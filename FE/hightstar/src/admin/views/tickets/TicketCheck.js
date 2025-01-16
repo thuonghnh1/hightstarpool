@@ -56,10 +56,14 @@ const TicketCheck = () => {
 
       if (existingAttendance) {
         if (existingAttendance.checkout === "Chưa ra") {
-          message = `Cập nhật giờ ra thành công cho khách với mã vé ${response.ticketId} và tiền phạt 0đ`;
+          message = `Cập nhật giờ ra thành công cho ${
+            response.studentId !== null ? "học viên" : "khách"
+          } với mã vé ${response.ticketId}.`;
         }
       } else {
-        message = `Cập nhật giờ vào thành công cho khách với mã vé ${response.ticketId}`;
+        message = `Cập nhật giờ vào thành công cho ${
+          response.studentId !== null ? "học viên" : "khách"
+        } với mã vé ${response.ticketId}`;
       }
 
       // const currentTime = new Date().toLocaleTimeString("vi-VN", {
