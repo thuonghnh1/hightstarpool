@@ -74,13 +74,18 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public LoginResponse loginUser(LoginDTO loginDTO, HttpServletResponse response) {
         Optional<User> userOptional = userRepository.findByUsername(loginDTO.getUsername());
+        User user;
+        if (userOptional.isPresent()) {
+            user = userOptional.get();
+        } else {
+            throw new AppException("Thông tin đăng nhập không chính xác!", ErrorCode.INVALID_LOGIN);
+        }
         if (userOptional.isEmpty()
                 || !passwordEncoder.matches(loginDTO.getPassword(), userOptional.get().getPassword())) {
             System.out.println(loginDTO.getPassword() + "--" + userOptional.get().getPassword());
             throw new AppException("Thông tin đăng nhập không chính xác!", ErrorCode.INVALID_LOGIN);
         }
 
-        User user = userOptional.get();
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new AppException("Tài khoản của bạn đang bị khóa!", ErrorCode.ACCOUNT_LOCKED);
         }
