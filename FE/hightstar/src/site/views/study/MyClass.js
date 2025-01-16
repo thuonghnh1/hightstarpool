@@ -64,9 +64,9 @@ const MyClass = () => {
     let statusClass = "";
     let statusText = "";
     switch (statusData) {
-      case "ACTIVE":
+      case "COMPLETED":
         statusClass = "text-bg-success";
-        statusText = "Hoạt động";
+        statusText = "Hoàn Thành";
         break;
       case "EXPIRED":
         statusClass = "text-bg-secondary";

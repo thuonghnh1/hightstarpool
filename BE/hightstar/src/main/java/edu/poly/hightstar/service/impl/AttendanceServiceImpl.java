@@ -291,15 +291,19 @@ public class AttendanceServiceImpl implements AttendanceService {
         Date today = getCurrentDateWithoutTime();
         LocalDate now = LocalDate.now();
 
-        ClassStudentEnrollment classStudentEnrollment = classStudentEnrollmentRepository
-                .findById(ticketDTO.getClassStudentEnrollmentId())
-                .orElseThrow(() -> new AppException("Khóa học sinh viên này không tồn tại!",
-                        ErrorCode.ENROLLMENT_NOT_FOUND));
+        System.out.println("------------Test1:" + ticketDTO);
 
-        // Kiểm tra nếu vé có ngày phát hành sau ngày hiện tại
-        if (classStudentEnrollment.getClassEntity().getStartDate().isAfter(now)) {
-            throw new AppException("Vé này chưa có hiệu lực. Vui lòng kiểm tra lại ngày phát hành!",
-                    ErrorCode.INVALID_OPERATION);
+        if (classStudentEnrollmentId != null) {
+            ClassStudentEnrollment classStudentEnrollment = classStudentEnrollmentRepository
+                    .findById(ticketDTO.getClassStudentEnrollmentId())
+                    .orElseThrow(() -> new AppException("Khóa học sinh viên này không tồn tại!",
+                            ErrorCode.ENROLLMENT_NOT_FOUND));
+
+            // Kiểm tra nếu vé có ngày phát hành sau ngày hiện tại
+            if (classStudentEnrollment.getClassEntity().getStartDate().isAfter(now)) {
+                throw new AppException("Vé này chưa có hiệu lực. Vui lòng kiểm tra lại ngày phát hành!",
+                        ErrorCode.INVALID_OPERATION);
+            }
         }
 
         // Bước 2: Tìm bản ghi điểm danh cho học viên hoặc khách bơi hôm nay

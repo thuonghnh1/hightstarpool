@@ -42,7 +42,7 @@ const TicketManagement = () => {
   const [listStudentOption, setListStudentOption] = useState([]);
   const [showModalTicketPrice, setShowModalTicketPrice] = useState(false);
   const button = {
-    btnAdd: true,
+    btnAdd: false,
     btnEdit: true,
     btnDelete: true,
     btnDetail: false,
