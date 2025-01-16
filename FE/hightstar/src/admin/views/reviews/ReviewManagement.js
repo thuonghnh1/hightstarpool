@@ -22,7 +22,7 @@ const ReviewManagement = () => {
   const button = {
     btnAdd: false,
     btnEdit: false,
-    btnDelete: true,
+    btnDelete: false,
     btnDetail: false,
     btnSetting: false,
   };

@@ -118,8 +118,8 @@ const ModalCreateQR = ({
 
     setIsVerifying(true);
     try {
-        // const verifyResponse = await verifyOtp(transactionId, otp);
-      const verifyResponse = true;
+        const verifyResponse = await verifyOtp(transactionId, otp);
+    //   const verifyResponse = true;
 
       if (verifyResponse === true) {
         toast.success("Thanh toán thành công!");
@@ -233,6 +233,7 @@ const ModalCreateQR = ({
                       disabled
                     />
                   </Form.Group>
+                  <div></div>
                 </Form>
               </Card.Body>
             </Card>

@@ -305,13 +305,12 @@ const ProductManagement = () => {
 
     setIsLoading(true);
     try {
-      await ProductService.deleteDiscount(deleteId); // Thực hiện xóa
+      await ProductService.deleteProduct(deleteId); // Thực hiện xóa
       setProductData((prevData) =>
         prevData.filter((product) => product.id !== deleteId)
       );
       toast.success("Xóa thành công!");
     } catch (error) {
-      toast.error("Đã xảy ra lỗi khi xóa.");
     } finally {
       setIsLoading(false); // Đảm bảo tắt loading trong mọi trường hợp
     }
